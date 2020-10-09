@@ -1,0 +1,373 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots Test/Node Empty Node 1`] = `
+<div
+  style={
+    Object {
+      "backgroundColor": "red",
+      "left": 0,
+      "position": "relative",
+      "top": 0,
+      "width": "100%",
+    }
+  }
+>
+  <div
+    style={
+      Object {
+        "left": 0,
+        "position": "absolute",
+        "top": 0,
+        "width": 200,
+      }
+    }
+  >
+    <div
+      onMouseDown={[Function]}
+      style={
+        Object {
+          "MozUserSelect": "none",
+          "backgroundColor": "rgba(48, 141, 97, 0.75)",
+          "borderRadius": "10px 10px 0px 0px",
+          "color": "white",
+          "cursor": "grab",
+          "height": "20px",
+          "position": "relative",
+          "width": 200,
+        }
+      }
+    >
+      <p
+        style={
+          Object {
+            "overflow": "hidden",
+            "paddingLeft": "10px",
+          }
+        }
+      >
+        default_node
+      </p>
+    </div>
+    <div
+      onMouseDown={[Function]}
+      style={
+        Object {
+          "backgroundColor": "rgba(63, 63, 63, 0.75)",
+          "borderRadius": "0px 0px 10px 10px",
+          "cursor": "ew-resize",
+          "height": "10px",
+          "position": "relative",
+          "width": "200px",
+        }
+      }
+    />
+  </div>
+</div>
+`;
+
+exports[`Storyshots Test/Node Full Node 1`] = `
+<div
+  style={
+    Object {
+      "backgroundColor": "red",
+      "left": 0,
+      "position": "relative",
+      "top": 0,
+      "width": "100%",
+    }
+  }
+>
+  <div
+    style={
+      Object {
+        "left": 0,
+        "position": "absolute",
+        "top": 0,
+        "width": 300,
+      }
+    }
+  >
+    <div
+      onMouseDown={[Function]}
+      style={
+        Object {
+          "MozUserSelect": "none",
+          "backgroundColor": "rgba(48, 141, 97, 0.75)",
+          "borderRadius": "10px 10px 0px 0px",
+          "color": "white",
+          "cursor": "grab",
+          "height": "20px",
+          "position": "relative",
+          "width": 300,
+        }
+      }
+    >
+      <p
+        style={
+          Object {
+            "overflow": "hidden",
+            "paddingLeft": "10px",
+          }
+        }
+      >
+        full_node
+      </p>
+    </div>
+    <div
+      style={
+        Object {
+          "MozUserSelect": "none",
+          "backgroundColor": "rgba(63, 63, 63, 0.75)",
+          "color": "white",
+          "paddingLeft": 14,
+          "paddingRight": 14,
+          "position": "relative",
+          "userSelect": "none",
+        }
+      }
+    >
+      <div
+        onMouseDown={[Function]}
+        onMouseLeave={[Function]}
+        onMouseOver={[Function]}
+        style={
+          Object {
+            "backgroundColor": "rgba(199, 199, 41, 1)",
+            "borderRadius": "10px 10px 10px 10px",
+            "cursor": "grab",
+            "height": 14,
+            "left": -7,
+            "position": "absolute",
+            "top": "calc(50% - 7px)",
+            "width": 14,
+          }
+        }
+      />
+      <div
+        style={
+          Object {
+            "overflow": "hidden",
+          }
+        }
+      >
+        <div
+          style={
+            Object {
+              "textAlign": "left",
+            }
+          }
+        >
+          x
+        </div>
+      </div>
+    </div>
+    <div
+      style={
+        Object {
+          "MozUserSelect": "none",
+          "backgroundColor": "rgba(63, 63, 63, 0.75)",
+          "color": "white",
+          "paddingLeft": 14,
+          "paddingRight": 14,
+          "position": "relative",
+          "userSelect": "none",
+        }
+      }
+    >
+      <div
+        onMouseDown={[Function]}
+        onMouseLeave={[Function]}
+        onMouseOver={[Function]}
+        style={
+          Object {
+            "backgroundColor": "rgba(199, 199, 41, 1)",
+            "borderRadius": "10px 10px 10px 10px",
+            "cursor": "grab",
+            "height": 14,
+            "left": -7,
+            "position": "absolute",
+            "top": "calc(50% - 7px)",
+            "width": 14,
+          }
+        }
+      />
+      <div
+        style={
+          Object {
+            "overflow": "hidden",
+          }
+        }
+      >
+        <input
+          style={
+            Object {
+              "backgroundColor": "#585858",
+              "border": 0,
+              "color": "white",
+              "outline": "none",
+              "width": "100%",
+            }
+          }
+        />
+      </div>
+    </div>
+    <div
+      style={
+        Object {
+          "MozUserSelect": "none",
+          "backgroundColor": "rgba(63, 63, 63, 0.75)",
+          "color": "white",
+          "paddingLeft": 14,
+          "paddingRight": 14,
+          "position": "relative",
+          "userSelect": "none",
+        }
+      }
+    >
+      <div
+        onMouseDown={[Function]}
+        onMouseLeave={[Function]}
+        onMouseOver={[Function]}
+        style={
+          Object {
+            "backgroundColor": "rgba(199, 199, 41, 1)",
+            "borderRadius": "10px 10px 10px 10px",
+            "cursor": "grab",
+            "height": 14,
+            "left": -7,
+            "position": "absolute",
+            "top": "calc(50% - 7px)",
+            "width": 14,
+          }
+        }
+      />
+      <div
+        style={
+          Object {
+            "overflow": "hidden",
+          }
+        }
+      >
+        <div
+          style={
+            Object {
+              "textAlign": "left",
+            }
+          }
+        >
+          z
+        </div>
+      </div>
+    </div>
+    <div
+      style={
+        Object {
+          "MozUserSelect": "none",
+          "backgroundColor": "rgba(63, 63, 63, 0.75)",
+          "color": "white",
+          "paddingLeft": 14,
+          "paddingRight": 14,
+          "position": "relative",
+          "userSelect": "none",
+        }
+      }
+    >
+      <div
+        onMouseDown={[Function]}
+        onMouseLeave={[Function]}
+        onMouseOver={[Function]}
+        style={
+          Object {
+            "backgroundColor": "rgba(199, 199, 41, 1)",
+            "borderRadius": "10px 10px 10px 10px",
+            "cursor": "grab",
+            "height": 14,
+            "left": 293,
+            "position": "absolute",
+            "top": "calc(50% - 7px)",
+            "width": 14,
+          }
+        }
+      />
+      <div
+        style={
+          Object {
+            "overflow": "hidden",
+          }
+        }
+      >
+        <div
+          style={
+            Object {
+              "textAlign": "right",
+            }
+          }
+        >
+          sum
+        </div>
+      </div>
+    </div>
+    <div
+      style={
+        Object {
+          "MozUserSelect": "none",
+          "backgroundColor": "rgba(63, 63, 63, 0.75)",
+          "color": "white",
+          "paddingLeft": 14,
+          "paddingRight": 14,
+          "position": "relative",
+          "userSelect": "none",
+        }
+      }
+    >
+      <div
+        onMouseDown={[Function]}
+        onMouseLeave={[Function]}
+        onMouseOver={[Function]}
+        style={
+          Object {
+            "backgroundColor": "rgba(199, 199, 41, 1)",
+            "borderRadius": "10px 10px 10px 10px",
+            "cursor": "grab",
+            "height": 14,
+            "left": 293,
+            "position": "absolute",
+            "top": "calc(50% - 7px)",
+            "width": 14,
+          }
+        }
+      />
+      <div
+        style={
+          Object {
+            "overflow": "hidden",
+          }
+        }
+      >
+        <div
+          style={
+            Object {
+              "textAlign": "right",
+            }
+          }
+        >
+          product
+        </div>
+      </div>
+    </div>
+    <div
+      onMouseDown={[Function]}
+      style={
+        Object {
+          "backgroundColor": "rgba(63, 63, 63, 0.75)",
+          "borderRadius": "0px 0px 10px 10px",
+          "cursor": "ew-resize",
+          "height": "10px",
+          "position": "relative",
+          "width": "300px",
+        }
+      }
+    />
+  </div>
+</div>
+`;

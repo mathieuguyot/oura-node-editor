@@ -1,0 +1,56 @@
+{
+  "name": "ostep",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "jest --silent",
+    "eject": "react-scripts eject",
+    "storybook": "start-storybook -p 6006 -s public",
+    "build-storybook": "build-storybook -s public"
+  },
+  "dependencies": {
+    "@types/lodash": "^4.14.161",
+    "@types/node": "14.11.8",
+    "@types/react": "16.9.51",
+    "@types/react-dom": "16.9.8",
+    "babel-loader": "^8.1.0",
+    "lodash": "^4.17.20",
+    "react": "^16.11.0",
+    "react-dom": "^16.11.0",
+    "react-scripts": "3.4.3",
+    "typescript": "^4.0.3"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.11.6",
+    "@storybook/addon-actions": "^6.0.26",
+    "@storybook/addon-essentials": "^6.0.26",
+    "@storybook/addon-links": "^6.0.26",
+    "@storybook/addon-storyshots": "^6.0.26",
+    "@storybook/addons": "^6.0.26",
+    "@storybook/node-logger": "^6.0.26",
+    "@storybook/preset-create-react-app": "^3.1.4",
+    "@storybook/react": "^6.0.26",
+    "@storybook/theming": "^6.0.26",
+    "jest": "^26.5.2",
+    "react-is": "^16.13.1",
+    "react-test-renderer": "^16.13.1",
+    "ts-jest": "^26.4.1"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
