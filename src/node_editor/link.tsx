@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { LinkModel } from './model';
 import * as _ from 'lodash';
+import { default_styles } from './default_styles';
 
 type LinkProps = {
     link: LinkModel,
@@ -14,20 +15,18 @@ class Link extends Component<LinkProps, {}> {
 
     render() {
         const {link} = this.props;
-        console.log("[RENDER LINK]");
-        console.log(this.props);
         if(link.inputPinPosition && link.outputPinPosition) {
             let x1 = link.inputPinPosition.x;
             let y1 = link.inputPinPosition.y;
             let x2 = link.outputPinPosition.x;
             let y2 = link.outputPinPosition.y;
             return (
-                <line x1={x1} y1={y1} x2={x2} y2={y2} style={{stroke:"rgba(170, 170, 170, 0.75)", strokeWidth: 5}} />
+                <line x1={x1} y1={y1} x2={x2} y2={y2} 
+                    style={default_styles.dark.link} />
             );
         }
         return null;
     }
-
 }
 
 export default Link;

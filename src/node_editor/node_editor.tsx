@@ -18,6 +18,7 @@ type NodeEditorState = {
     inputLinkNidCandidate?: number;
     inputLinkIdCandidate?: number;
     zoom: number,
+    selectedNodeId?: number;
 }
 
 function dump_node_creator(): {[nId: string] : NodeModel;} {
@@ -67,6 +68,8 @@ class NodeEditor extends Component<{}, NodeEditorState>  {
         this.onConnectorMouseUp = this.onConnectorMouseUp.bind(this);
         this.onMouseOverConnector = this.onMouseOverConnector.bind(this);
         this.onMouseLeavesConnector = this.onMouseLeavesConnector.bind(this);
+
+        this.onUnselection = this.onUnselection.bind(this);
     }
 
     shouldComponentUpdate() {
@@ -109,7 +112,8 @@ class NodeEditor extends Component<{}, NodeEditorState>  {
 
     onNodeMoveStart(nId: number) {
         this.setState({
-            isNodeBeingMoved: true
+            isNodeBeingMoved: true,
+            selectedNodeId: nId
         });
     }
 
@@ -180,7 +184,8 @@ class NodeEditor extends Component<{}, NodeEditorState>  {
             this.setState({
                 draggedLink: draggedLink,
                 isDraggedLinkInput: isDraggedLinkInput,
-                links: newLinks
+                links: newLinks,
+                selectedNodeId: undefined
             });
         } else {
             let draggedLink: LinkModel = {inputNodeId: -1, inputPinId: -1, inputPinPosition: _.cloneDeep(draggedPinPosition), 
@@ -188,7 +193,8 @@ class NodeEditor extends Component<{}, NodeEditorState>  {
             let isDraggedLinkInput = false;
             this.setState({
                 draggedLink: draggedLink,
-                isDraggedLinkInput: isDraggedLinkInput
+                isDraggedLinkInput: isDraggedLinkInput,
+                selectedNodeId: undefined
             });
         }
     }
@@ -357,6 +363,12 @@ class NodeEditor extends Component<{}, NodeEditorState>  {
         }
     }
 
+    onUnselection() {
+        this.setState({
+            selectedNodeId: undefined
+        });
+    }
+
     render() {
         const { nodes, links, draggedLink } = this.state;
         let svgDraggedLink;
@@ -376,7 +388,7 @@ class NodeEditor extends Component<{}, NodeEditorState>  {
             style={{position:"relative", top:"0", left:"0", width:"100%", height:"100%", overflow: "hidden",
                 backgroundColor: "#232323", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='"+ grid +"' height='" + grid + "' viewBox='0 0 100 100'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='black' fill-opacity='0.4'%3E%3Cpath opacity='.5' d='M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z'/%3E%3Cpath d='M6 5V0H5v5H0v1h5v94h1V6h94V5H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")"}}
             >
-            <PanZoom zoom={this.state.zoom}>
+            <PanZoom zoom={this.state.zoom} onUnselection={this.onUnselection}>
                     <svg style={{position:"absolute", top:"-1", left:"-1", width:"1", height:"1", overflow:"visible"}}>
                         {svgLinks}
                         {svgDraggedLink}
@@ -386,7 +398,9 @@ class NodeEditor extends Component<{}, NodeEditorState>  {
                             <Node
                                 key={key}
                                 ref={this.nodesRefs[key]}
+
                                 node={this.state.nodes[key]}
+                                isNodeSelected={this.state.nodes[key].nId === this.state.selectedNodeId}
 
                                 getZoom={this.getZoom}
 

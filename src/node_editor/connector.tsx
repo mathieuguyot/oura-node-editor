@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { ConnectorModel, ConnectorType, XYPosition } from './model';
 import * as _ from 'lodash'
 import { createConnectorComponent } from "./connector_content";
+import CSS from 'csstype';
+import { default_styles } from './default_styles';
 
 type ConnectorProps = {
     nodeId: number,
@@ -24,6 +26,8 @@ class Connector extends Component<ConnectorProps, {}>  {
     private pageX: number = 0;
     private pageY: number = 0;
 
+    private pinPxRadius: number = 7;
+
     constructor(props: ConnectorProps) {
         super(props);
 
@@ -44,7 +48,7 @@ class Connector extends Component<ConnectorProps, {}>  {
         if(pin && parent) {
             const widthOffset = this.props.connectorModel.connectorType === ConnectorType.Output ? this.props.width : 0;
             const x = this.props.nodeX + widthOffset;
-            const y = this.props.nodeY + parent.offsetTop + (parent.offsetHeight / 2);
+            const y = this.props.nodeY + parent.offsetTop + parent.offsetHeight / 2;
             return {x: x, y: y};
         }
         return null;
@@ -95,28 +99,23 @@ class Connector extends Component<ConnectorProps, {}>  {
     }
 
     render() {
-        const pinPxRadius = 7;
-        const pinLeftPos  = this.props.connectorModel.connectorType === ConnectorType.Input ? -pinPxRadius : this.props.width - pinPxRadius;
+        const pinLeftPos  = this.props.connectorModel.connectorType === ConnectorType.Input ? -this.pinPxRadius : this.props.width - this.pinPxRadius;
+        
+        const connector_style: CSS.Properties  = {
+            position:"absolute",
+            width: (this.pinPxRadius * 2) + "px",
+            height: (this.pinPxRadius * 2) + "px",
+            left: pinLeftPos + "px",
+            top: "calc(50% - " + this.pinPxRadius + "px)",
+        };
+
         return (
             <div style={{
-                color: "white",
-                backgroundColor: "rgba(63, 63, 63, 0.75)",
-                userSelect: "none",
-                MozUserSelect: "none",
                 position: "relative",
-                paddingLeft: pinPxRadius * 2,
-                paddingRight: pinPxRadius * 2
+                paddingLeft: this.pinPxRadius * 2,
+                paddingRight: this.pinPxRadius * 2
                 }}>
-                    <div style={{
-                        width: pinPxRadius * 2,
-                        height: pinPxRadius * 2,
-                        left: pinLeftPos,
-                        top: "calc(50% - " + pinPxRadius + "px)",
-                        backgroundColor: "rgba(199, 199, 41, 1)",
-                        position: "absolute",
-                        borderRadius:"10px 10px 10px 10px",
-                        cursor: "grab",
-                        }}
+                    <div style={{...connector_style, ...default_styles.dark.connector}}
                         ref={this.connectorPinRef}
                         onMouseDown={this.onMouseDown}
                         onMouseOver={this.onMouseOverConnector}

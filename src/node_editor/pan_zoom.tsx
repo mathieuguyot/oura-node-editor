@@ -16,6 +16,7 @@ export interface PanZoomInputState {
 
 export interface PanZoomInputProps {
     zoom: number;
+    onUnselection: () => void;
 }
 
 export default class PanZoom extends React.Component<PanZoomInputProps, PanZoomInputState> {
@@ -45,6 +46,7 @@ export default class PanZoom extends React.Component<PanZoomInputProps, PanZoomI
         {
             return;
         }
+        this.props.onUnselection();
         window.addEventListener('mousemove', this.onMouseMove);
         window.addEventListener('mouseup', this.onMouseUp);
         const { matrixData } = this.state;
