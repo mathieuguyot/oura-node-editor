@@ -1,6 +1,8 @@
 import React from 'react';
+
 import { ConnectorType } from '../model';
 import { ConnectorContentProps } from './common';
+
 import StringConnectorContent from './string';
 
 export function createConnectorComponent(props: ConnectorContentProps)

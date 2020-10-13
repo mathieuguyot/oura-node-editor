@@ -8,4 +8,4 @@ export type ConnectorContentProps = {
     connectorModel: ConnectorModel,
 
     getZoom: () => number,
-}
+};

@@ -1,9 +1,9 @@
 import React, { Component, RefObject } from 'react';
 import {NodeModel, ConnectorType, ConnectorModel, XYPosition, LinkModel} from './model';
 import {Node} from './node';
-import Link from './link';
 import PanZoom from './pan_zoom';
 import * as _ from 'lodash';
+import { createLinkComponent } from './links';
 
 type NodeEditorState = {
     nodes: {[nId: string] : NodeModel;}
@@ -373,13 +373,13 @@ class NodeEditor extends Component<{}, NodeEditorState>  {
         const { nodes, links, draggedLink } = this.state;
         let svgDraggedLink;
         if(draggedLink) {
-            svgDraggedLink = <Link link={draggedLink}/>
+            svgDraggedLink = createLinkComponent({link: draggedLink});
         }
 
         let svgLinks: JSX.Element[] = [];
         let index = 1;
         for (let link of links) {
-            svgLinks.push(<Link key={index} link={link}/>);
+            svgLinks.push(createLinkComponent({link: link, key: index}));
             index++;
         }
         const grid = String(300 * this.state.zoom);

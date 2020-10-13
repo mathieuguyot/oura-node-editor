@@ -10,6 +10,7 @@ export interface LinkModel {
     outputPinId: number;
     inputPinPosition ?: XYPosition;
     outputPinPosition ?: XYPosition;
+    linkType?: string;
 }
 
 export interface NodeModel {
