@@ -1,12 +1,12 @@
-import React from 'react';
-import { Story, Meta } from '@storybook/react/types-6-0';
-import '../index.css';
+import React from "react";
+import { Story, Meta } from "@storybook/react/types-6-0";
+import "../index.css";
 
-import { Node, NodeProps } from '../node_editor/node';
-import { ConnectorModel, XYPosition, ConnectorType } from '../node_editor/model';
+import { Node, NodeProps } from "../node_editor/node";
+import { ConnectorType } from "../node_editor/model";
 
 export default {
-    title: 'Test/Node',
+    title: "Test/Node",
     component: Node,
 } as Meta;
 
@@ -21,18 +21,14 @@ const default_props : NodeProps = {
     },
     isNodeSelected: false,
 
-    getZoom: () => {return 1},
+    getZoom: () => {return 1;},
 
-    onNodeMoveStart: (nId: number) => {},
-    onNodeMove: (nId: number, offsetX: number, offsetY: number, width: number) => {},
-    onNodeMoveEnd: (nId: number) => {},
-
-    onConnectorDragStart: (nId: number, connectorModel: ConnectorModel, draggedPinPosition: XYPosition) => {},
-    onConnectorMouseMove: (draggedPinNewPosition: XYPosition) => {},
-    onConnectorMouseUp: () => {},
-    onMouseOverConnector: (nId: number, connectorModel: ConnectorModel, pinPosition: XYPosition) => {},
-    onMouseLeavesConnector: (mousePosition: XYPosition) => {},
-}
+    onNodeMoveStart: () => null,
+    onNodeMove: () => null,
+    onNodeMoveEnd: () => null,
+    onCreateLink: () => null,
+    onUpdatePreviewLink: () => null
+};
 
 const Template: Story<NodeProps> = (args) => <div style={{position: "relative", backgroundColor:"red", top: 0, left: 0, width: "100%"}}>
     <Node {...args} />

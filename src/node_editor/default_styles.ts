@@ -1,4 +1,4 @@
-import CSS from 'csstype';
+import CSS from "csstype";
 
 export const default_styles : {[nId: string] : {[nId: string] : CSS.Properties;};} = {
     dark: {

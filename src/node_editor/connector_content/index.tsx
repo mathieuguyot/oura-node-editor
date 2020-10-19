@@ -1,11 +1,11 @@
-import React from 'react';
+import React from "react";
 
-import { ConnectorType } from '../model';
-import { ConnectorContentProps } from './common';
+import { ConnectorType } from "../model";
+import { ConnectorContentProps } from "./common";
 
-import StringConnectorContent from './string';
+import StringConnectorContent from "./string";
 
-export function createConnectorComponent(props: ConnectorContentProps)
+export function createConnectorComponent(props: ConnectorContentProps) : JSX.Element
 {
     if(props.connectorModel.contentType === "string")
     {

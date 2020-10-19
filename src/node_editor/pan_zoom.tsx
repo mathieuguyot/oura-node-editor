@@ -1,5 +1,5 @@
 import * as React from "react";
-import * as _ from 'lodash';
+import * as _ from "lodash";
 
 export interface IDragData {
     x: number;
@@ -31,12 +31,12 @@ export default class PanZoom extends React.Component<PanZoomInputProps, PanZoomI
         };
     };
     // Used to set cursor while moving.
-    private panWrapper: any;
+    private panWrapper: HTMLDivElement | null = null;
     // Used to set transform for pan.
-    private panContainer: any;
+    private panContainer: HTMLDivElement | null = null;
     public state = this.getInitialState();
 
-    shouldComponentUpdate(nextProps: PanZoomInputProps, nextState: PanZoomInputState) {
+    shouldComponentUpdate(nextProps: PanZoomInputProps, nextState: PanZoomInputState) : boolean {
         return !_.isEqual(this.props, nextProps) || !_.isEqual(this.state, nextState); 
     }
 
@@ -47,8 +47,8 @@ export default class PanZoom extends React.Component<PanZoomInputProps, PanZoomI
             return;
         }
         this.props.onUnselection();
-        window.addEventListener('mousemove', this.onMouseMove);
-        window.addEventListener('mouseup', this.onMouseUp);
+        window.addEventListener("mousemove", this.onMouseMove);
+        window.addEventListener("mouseup", this.onMouseUp);
         const { matrixData } = this.state;
         const offsetX = matrixData[4];
         const offsetY = matrixData[5];
@@ -67,13 +67,14 @@ export default class PanZoom extends React.Component<PanZoomInputProps, PanZoomI
         }
     };
 
-    static getDerivedStateFromProps(props: PanZoomInputProps, state: PanZoomInputState) {
+    static getDerivedStateFromProps(props: PanZoomInputProps, state: PanZoomInputState) : PanZoomInputState | null {
         const { matrixData } = state;
         if (matrixData[0] !== props.zoom) {
             const newMatrixData = _.cloneDeep(state.matrixData);
             newMatrixData[0] = props.zoom || newMatrixData[0];
             newMatrixData[3] = props.zoom || newMatrixData[3];
             return {
+                ...state,
                 matrixData: newMatrixData,
             };
         }
@@ -81,8 +82,8 @@ export default class PanZoom extends React.Component<PanZoomInputProps, PanZoomI
     }
 
     private onMouseUp = () => {
-        window.removeEventListener('mousemove', this.onMouseMove);
-        window.removeEventListener('mouseup', this.onMouseUp);
+        window.removeEventListener("mousemove", this.onMouseMove);
+        window.removeEventListener("mouseup", this.onMouseUp);
         this.setState({
             dragging: false,
         });
@@ -101,7 +102,7 @@ export default class PanZoom extends React.Component<PanZoomInputProps, PanZoomI
         return matrixData;
     };
 
-    public onMouseMove = (e: MouseEvent) => {
+    public onMouseMove = (e: MouseEvent) : void => {
         if (this.state.dragging) {
             const matrixData = this.getNewMatrixData(e.pageX, e.pageY);
             this.setState({
@@ -113,7 +114,7 @@ export default class PanZoom extends React.Component<PanZoomInputProps, PanZoomI
         }
     };
 
-    public render() {
+    render() : JSX.Element {
         return (
             <div
                 style={{

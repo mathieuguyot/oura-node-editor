@@ -8,8 +8,8 @@ export interface LinkModel {
     inputPinId: number;
     ouputNodeId: number;
     outputPinId: number;
-    inputPinPosition ?: XYPosition;
-    outputPinPosition ?: XYPosition;
+    inputPinPosition : XYPosition | null;
+    outputPinPosition : XYPosition | null;
     linkType?: string;
 }
 

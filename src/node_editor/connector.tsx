@@ -1,9 +1,10 @@
-import React, { Component } from 'react';
-import { ConnectorModel, ConnectorType, XYPosition } from './model';
-import * as _ from 'lodash'
+import React, { Component } from "react";
+import * as _ from "lodash";
+import { ConnectorModel, ConnectorType, XYPosition } from "./model";
 import { createConnectorComponent } from "./connector_content";
-import CSS from 'csstype';
-import { default_styles } from './default_styles';
+import CSS from "csstype";
+import { default_styles } from "./default_styles";
+import DragWrapper from "./drag_wrapper";
 
 type ConnectorProps = {
     nodeId: number,
@@ -14,31 +15,22 @@ type ConnectorProps = {
 
     getZoom: () => number,
 
-    onConnectorDragStart: (connectorModel: ConnectorModel, pinPosition: XYPosition) => void,
-    onConnectorMouseMove: (mousePosition: XYPosition) => void,
-    onConnectorMouseUp: () => void,
-    onMouseOverConnector: (connectorModel: ConnectorModel, pinPosition: XYPosition) => void,
-    onMouseLeavesConnector: (mousePosition: XYPosition) => void
+    onCreateLink: (inputNodeId: number, inputConnectorId: number, outputNodeId: number, outputConnectorId: number) => void,
+    onUpdatePreviewLink: (inputPosition: XYPosition | null, outputPosition: XYPosition | null) => void
 }
 
-class Connector extends Component<ConnectorProps, {}>  {
+class Connector extends Component<ConnectorProps>  {
+    private dragWrapper: DragWrapper = new DragWrapper();
     private connectorPinRef = React.createRef<HTMLDivElement>();
-    private pageX: number = 0;
-    private pageY: number = 0;
-
-    private pinPxRadius: number = 7;
+    private pinPxRadius = 7;
 
     constructor(props: ConnectorProps) {
         super(props);
 
         this.onMouseDown = this.onMouseDown.bind(this);
-        this.onMouseMove = this.onMouseMove.bind(this);
-        this.onMouseUp = this.onMouseUp.bind(this);
-        this.onMouseOverConnector = this.onMouseOverConnector.bind(this);
-        this.onMouseLeavesConnector = this.onMouseLeavesConnector.bind(this);
     }
 
-    shouldComponentUpdate(nextProps: ConnectorProps) {
+    shouldComponentUpdate(nextProps: ConnectorProps) : boolean {
         return !_.isEqual(this.props, nextProps);
     }
 
@@ -54,51 +46,27 @@ class Connector extends Component<ConnectorProps, {}>  {
         return null;
     }
 
-    onMouseDown(event : React.MouseEvent) {
-        event.stopPropagation();
-        const pin = this.connectorPinRef.current;
+    onMouseDown(event : React.MouseEvent) : void {
         const pinPosition = this.getConnectorPinPosition();
         const zoom = this.props.getZoom();
-        if(pinPosition && pin) {
-            window.addEventListener("mousemove", this.onMouseMove);
-            window.addEventListener("mouseup", this.onMouseUp);
-            this.pageX = event.pageX / zoom;
-            this.pageY = event.pageY / zoom;
-            this.props.onConnectorDragStart(this.props.connectorModel, pinPosition);
-        }
-    }
-
-    onMouseMove(event: MouseEvent) {
-        const pin = this.connectorPinRef.current;
-        const zoom = this.props.getZoom();
-        if(pin) {
-            let deltaX = event.pageX / zoom - this.pageX;
-            let deltaY = event.pageY / zoom - this.pageY;
-            this.pageX = event.pageX / zoom;
-            this.pageY = event.pageY / zoom;
-            this.props.onConnectorMouseMove({x: deltaX, y: deltaY});
-        }
-    }
-
-    onMouseUp() {
-        window.removeEventListener("mousemove", this.onMouseMove);
-        window.removeEventListener("mouseup", this.onMouseUp);
-        this.props.onConnectorMouseUp();
-    }
-
-    onMouseOverConnector() {
-        const pinPosition = this.getConnectorPinPosition();
         if(pinPosition) {
-            this.props.onMouseOverConnector(this.props.connectorModel, pinPosition);
+            this.dragWrapper.onMouseDown(event, pinPosition, zoom,
+                (initialPos: XYPosition, finalPos: XYPosition) => {
+                    this.props.onUpdatePreviewLink(initialPos, finalPos);
+                },
+                (initialPos: XYPosition, finalPos: XYPosition, targetClassName: string) => {
+                    const connectorRegex = /node-(.+)-connector-(.+)-(input|output)/;
+                    const tag = targetClassName.match(connectorRegex);
+                    if(tag !== null)
+                    {
+                        this.props.onCreateLink(this.props.nodeId, this.props.connectorModel.id, +tag[1], +tag[2]);
+                    }
+                    this.props.onUpdatePreviewLink(null, null);
+                });
         }
     }
 
-    onMouseLeavesConnector(event: React.MouseEvent) {
-        const mousePosition = {x: event.pageX, y: event.pageY};
-        this.props.onMouseLeavesConnector(mousePosition);
-    }
-
-    render() {
+    render() : JSX.Element {
         const pinLeftPos  = this.props.connectorModel.connectorType === ConnectorType.Input ? -this.pinPxRadius : this.props.width - this.pinPxRadius;
         
         const connector_style: CSS.Properties  = {
@@ -114,16 +82,16 @@ class Connector extends Component<ConnectorProps, {}>  {
                 position: "relative",
                 paddingLeft: this.pinPxRadius * 2,
                 paddingRight: this.pinPxRadius * 2
-                }}>
-                    <div style={{...connector_style, ...default_styles.dark.connector}}
-                        ref={this.connectorPinRef}
-                        onMouseDown={this.onMouseDown}
-                        onMouseOver={this.onMouseOverConnector}
-                        onMouseLeave={this.onMouseLeavesConnector}
-                    />
-                    <div style={{overflow: "hidden"}}>
-                        {createConnectorComponent(this.props)}
-                    </div>
+            }}>
+                <div
+                    className={"node-" + this.props.nodeId + "-connector-" + this.props.connectorModel.id + "-input"} 
+                    style={{...connector_style, ...default_styles.dark.connector}}
+                    ref={this.connectorPinRef}
+                    onMouseDown={this.onMouseDown}
+                />
+                <div style={{overflow: "hidden"}}>
+                    {createConnectorComponent(this.props)}
+                </div>
             </div>
         );
     }

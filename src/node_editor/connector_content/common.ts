@@ -1,4 +1,4 @@
-import { ConnectorModel} from '../model';
+import { ConnectorModel} from "../model";
 
 export type ConnectorContentProps = {
     nodeId: number,

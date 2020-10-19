@@ -1,4 +1,4 @@
-import { LinkModel } from '../model';
+import { LinkModel } from "../model";
 
 export type LinkProps = {
     link: LinkModel,

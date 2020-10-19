@@ -1,9 +1,9 @@
-import React, { Component } from 'react';
-import * as _ from 'lodash';
+import React, { Component } from "react";
+import * as _ from "lodash";
 
-import { XYPosition } from '../model';
-import { LinkProps } from './common';
-import { default_styles } from '../default_styles';
+import { XYPosition } from "../model";
+import { LinkProps } from "./common";
+import { default_styles } from "../default_styles";
 
 const getCenter = (source: XYPosition, target: XYPosition): XYPosition => {
     const offsetX = Math.abs(target.x - source.x) / 2;
@@ -13,13 +13,13 @@ const getCenter = (source: XYPosition, target: XYPosition): XYPosition => {
     return {x: xCenter, y: yCenter};
 };
 
-export default class BezierLink extends Component<LinkProps, {}> {
+export default class BezierLink extends Component<LinkProps> {
 
-    shouldComponentUpdate(nextProps: LinkProps) {
+    shouldComponentUpdate(nextProps: LinkProps) : boolean {
         return !_.isEqual(this.props, nextProps);
     }
 
-    render() {
+    render() : JSX.Element | null {
         const {link} = this.props;
         if(link.inputPinPosition && link.outputPinPosition) {
             const sourceX = link.inputPinPosition.x;
@@ -28,7 +28,7 @@ export default class BezierLink extends Component<LinkProps, {}> {
             const targetY = link.outputPinPosition.y;
             const center = getCenter(link.inputPinPosition, link.outputPinPosition);
             
-            let path = `M${sourceX},${sourceY} C${center.x},${sourceY} ${center.x},${targetY} ${targetX},${targetY}`;
+            const path = `M${sourceX},${sourceY} C${center.x},${sourceY} ${center.x},${targetY} ${targetX},${targetY}`;
 
             return (
                 <path d={path} style={default_styles.dark.link} />
@@ -36,4 +36,4 @@ export default class BezierLink extends Component<LinkProps, {}> {
         }
         return null;
     }
-};
+}
