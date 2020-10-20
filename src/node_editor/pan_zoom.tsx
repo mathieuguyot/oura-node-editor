@@ -20,33 +20,32 @@ export interface PanZoomInputProps {
 }
 
 export default class PanZoom extends React.Component<PanZoomInputProps, PanZoomInputState> {
-    private getInitialState = () => {
-        const { zoom } = this.props;
-        return {
-            dragData: {dx: 0, dy:0, x:0, y: 0},
-            dragging: false,
-            matrixData: [
-                zoom, 0, 0, zoom, 0, 0,
-            ],
-        };
-    };
     // Used to set cursor while moving.
     private panWrapper: HTMLDivElement | null = null;
     // Used to set transform for pan.
     private panContainer: HTMLDivElement | null = null;
-    public state = this.getInitialState();
 
-    shouldComponentUpdate(nextProps: PanZoomInputProps, nextState: PanZoomInputState) : boolean {
-        return !_.isEqual(this.props, nextProps) || !_.isEqual(this.state, nextState); 
+    constructor(props: PanZoomInputProps) {
+        super(props);
+        const { zoom } = this.props;
+        this.state = {
+            dragData: { dx: 0, dy: 0, x: 0, y: 0 },
+            dragging: false,
+            matrixData: [zoom, 0, 0, zoom, 0, 0]
+        };
+    }
+
+    shouldComponentUpdate(nextProps: PanZoomInputProps, nextState: PanZoomInputState): boolean {
+        return !_.isEqual(this.props, nextProps) || !_.isEqual(this.state, nextState);
     }
 
     private onMouseDown = (e: React.MouseEvent<EventTarget>) => {
         const targetClassName = (e.target as Element).className;
-        if(targetClassName !== "panWrapper" && targetClassName !== "panContainer")
-        {
+        if (targetClassName !== "panWrapper" && targetClassName !== "panContainer") {
             return;
         }
-        this.props.onUnselection();
+        const { onUnselection } = this.props;
+        onUnselection();
         window.addEventListener("mousemove", this.onMouseMove);
         window.addEventListener("mouseup", this.onMouseUp);
         const { matrixData } = this.state;
@@ -56,18 +55,21 @@ export default class PanZoom extends React.Component<PanZoomInputProps, PanZoomI
             dx: offsetX,
             dy: offsetY,
             x: e.pageX,
-            y: e.pageY,
+            y: e.pageY
         };
         this.setState({
             dragData: newDragData,
-            dragging: true,
+            dragging: true
         });
         if (this.panWrapper) {
             this.panWrapper.style.cursor = "move";
         }
     };
 
-    static getDerivedStateFromProps(props: PanZoomInputProps, state: PanZoomInputState) : PanZoomInputState | null {
+    static getDerivedStateFromProps(
+        props: PanZoomInputProps,
+        state: PanZoomInputState
+    ): PanZoomInputState | null {
         const { matrixData } = state;
         if (matrixData[0] !== props.zoom) {
             const newMatrixData = _.cloneDeep(state.matrixData);
@@ -75,7 +77,7 @@ export default class PanZoom extends React.Component<PanZoomInputProps, PanZoomI
             newMatrixData[3] = props.zoom || newMatrixData[3];
             return {
                 ...state,
-                matrixData: newMatrixData,
+                matrixData: newMatrixData
             };
         }
         return null;
@@ -85,7 +87,7 @@ export default class PanZoom extends React.Component<PanZoomInputProps, PanZoomI
         window.removeEventListener("mousemove", this.onMouseMove);
         window.removeEventListener("mouseup", this.onMouseUp);
         this.setState({
-            dragging: false,
+            dragging: false
         });
         if (this.panWrapper) {
             this.panWrapper.style.cursor = "";
@@ -93,50 +95,55 @@ export default class PanZoom extends React.Component<PanZoomInputProps, PanZoomI
     };
 
     private getNewMatrixData = (x: number, y: number): number[] => {
-        const dragData = _.cloneDeep(this.state.dragData);
-        const matrixData = _.cloneDeep(this.state.matrixData);
+        const { dragData, matrixData } = this.state;
+        const newMatrixData = _.cloneDeep(matrixData);
         const deltaX = dragData.x - x;
         const deltaY = dragData.y - y;
-        matrixData[4] = dragData.dx - deltaX;
-        matrixData[5] = dragData.dy - deltaY;
-        return matrixData;
+        newMatrixData[4] = dragData.dx - deltaX;
+        newMatrixData[5] = dragData.dy - deltaY;
+        return newMatrixData;
     };
 
-    public onMouseMove = (e: MouseEvent) : void => {
-        if (this.state.dragging) {
-            const matrixData = this.getNewMatrixData(e.pageX, e.pageY);
+    public onMouseMove = (e: MouseEvent): void => {
+        const { dragging } = this.state;
+        if (dragging) {
+            const newMatrixData = this.getNewMatrixData(e.pageX, e.pageY);
             this.setState({
-                matrixData,
+                matrixData: newMatrixData
             });
             if (this.panContainer) {
-                this.panContainer.style.transform = `matrix(${this.state.matrixData.toString()})`;
+                this.panContainer.style.transform = `matrix(${newMatrixData.toString()})`;
             }
         }
     };
 
-    render() : JSX.Element {
+    render(): JSX.Element {
+        const { matrixData } = this.state;
+        const { children } = this.props;
         return (
             <div
                 style={{
                     height: "100%",
-                    width: "100%",
+                    width: "100%"
                 }}
-                ref={(ref) => this.panWrapper = ref}
+                ref={(ref) => {
+                    this.panWrapper = ref;
+                }}
                 onMouseDown={this.onMouseDown}
-                className="panWrapper"
-            >
+                className="panWrapper">
                 <div
                     className="panContainer"
-                    ref={(ref) => this.panContainer = ref}
+                    ref={(ref) => {
+                        this.panContainer = ref;
+                    }}
                     style={{
                         height: "100%",
                         width: "100%",
-                        transform: `matrix(${this.state.matrixData.toString()})`,
-                        userSelect: "none",
-                    }}
-                >
-                    {this.props.children}
-                </div>  
+                        transform: `matrix(${matrixData.toString()})`,
+                        userSelect: "none"
+                    }}>
+                    {children}
+                </div>
             </div>
         );
     }

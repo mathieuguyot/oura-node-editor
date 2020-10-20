@@ -6,10 +6,10 @@ export interface XYPosition {
 export interface LinkModel {
     inputNodeId: number;
     inputPinId: number;
-    ouputNodeId: number;
+    outputNodeId: number;
     outputPinId: number;
-    inputPinPosition : XYPosition | null;
-    outputPinPosition : XYPosition | null;
+    inputPinPosition: XYPosition | null;
+    outputPinPosition: XYPosition | null;
     linkType?: string;
 }
 

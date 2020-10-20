@@ -5,15 +5,25 @@ import { ConnectorContentProps } from "./common";
 
 import StringConnectorContent from "./string";
 
-export function createConnectorComponent(props: ConnectorContentProps) : JSX.Element
-{
-    if(props.connectorModel.contentType === "string")
-    {
-        return <StringConnectorContent {...props}/>;
+export default function createConnectorComponent(props: ConnectorContentProps): JSX.Element {
+    const { nodeId, nodeX, nodeY, width, connectorModel, getZoom } = props;
+    if (connectorModel.contentType === "string") {
+        return (
+            <StringConnectorContent
+                nodeId={nodeId}
+                nodeX={nodeX}
+                nodeY={nodeY}
+                width={width}
+                connectorModel={connectorModel}
+                getZoom={getZoom}
+            />
+        );
     }
     // Defaut return connector name
-    const ct = props.connectorModel.connectorType;
-    return <div style={{textAlign: ct === ConnectorType.Output ? "right" : "left"}}>
-        {props.connectorModel.name}
-    </div>;
+    const ct = connectorModel.connectorType;
+    return (
+        <div style={{ textAlign: ct === ConnectorType.Output ? "right" : "left" }}>
+            {connectorModel.name}
+        </div>
+    );
 }

@@ -1,51 +1,35 @@
 {
-    "env": {
-        "browser": true,
-        "es2021": true,
-        "node": true
-    },
-    "extends": [
-        "eslint:recommended",
-        "plugin:react/recommended",
-        "plugin:@typescript-eslint/recommended"
-    ],
+    "extends": ["airbnb", "prettier", "plugin:react/recommended", "plugin:@typescript-eslint/recommended"],
+    "plugins": ["prettier"],
     "parser": "@typescript-eslint/parser",
-    "parserOptions": {
-        "ecmaFeatures": {
-            "jsx": true
-        },
-        "ecmaVersion": 12,
-        "sourceType": "module"
-    },
-    "plugins": [
-        "react",
-        "@typescript-eslint"
-    ],
     "settings": {
         "react": {
             "version": "detect"
         }
     },
+    "parserOptions": {
+        "ecmaFeatures": {
+            "jsx": true
+        },
+        "ecmaVersion": 12,
+        "sourceType": "module",
+        "project": "./tsconfig.json"
+    },
     "rules": {
-        "indent": [
-            "error",
-            4
-        ],
-        "linebreak-style": [
-            "error",
-            "unix"
-        ],
-        "quotes": [
-            "error",
-            "double"
-        ],
-        "semi": [
-            "error",
-            "always"
-        ],
-        "eol-last": [
-            "error",
-            "always"
-        ]
+      "prettier/prettier": ["error"],
+      "no-shadow": "off", // Stack overflow : 63961803
+      "@typescript-eslint/no-shadow": ["error"], // Stack overflow : 63961803
+      "jsx-a11y/no-static-element-interactions": "off", // TODO: Maybe to remove this rule, check role thing later
+      "react/jsx-filename-extension": ["error", { "extensions": [".tsx"] }],
+      "no-use-before-define": "off", // Buggy with typescript enums
+      "no-param-reassign": ["error", { "props": true, "ignorePropertyModificationsForRegex": ["draft*"] }],
+      // Disabling some annoying import rules
+      "import/no-unresolved": "off",
+      "import/extensions": "off",
+      // Disabling styling rule, handled by prettier
+      "react/jsx-closing-bracket-location": "off",
+      "lines-between-class-members": "off",
+      "react/jsx-indent": ["error", 4],
+      "react/jsx-indent-props": ["error", 4]
     }
 }

@@ -6,11 +6,20 @@ import NodeEditor from "../node_editor/node_editor";
 
 export default {
     title: "Playground/Node Editor",
-    component: NodeEditor,
+    component: NodeEditor
 } as Meta;
 
-const Template: Story = (args) => <div style={{position: "relative", top: 0, left: 0, width: "100%", height: "95vh"}}>
-    <NodeEditor {...args} />
-</div>;
+const Template: Story = () => (
+    <div
+        style={{
+            position: "relative",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "95vh"
+        }}>
+        <NodeEditor />
+    </div>
+);
 
 export const RandomNodeEditor = Template.bind({});
