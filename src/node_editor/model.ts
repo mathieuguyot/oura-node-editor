@@ -4,17 +4,27 @@ export interface XYPosition {
 }
 
 export interface LinkModel {
-    inputNodeId: number;
-    inputPinId: number;
-    outputNodeId: number;
-    outputPinId: number;
-    inputPinPosition: XYPosition | null;
-    outputPinPosition: XYPosition | null;
+    inputNodeId: string;
+    inputPinId: string;
+    inputPinType: PinType;
+    outputNodeId: string;
+    outputPinId: string;
+    outputPinType: PinType;
     linkType?: string;
 }
 
+export function getLinkId(link: LinkModel): string {
+    return `${link.inputNodeId}.${link.inputPinId}->${link.outputNodeId}${link.outputPinId}__${link.linkType}`;
+}
+
+export interface LinkPositionModel {
+    linkId: string;
+    inputPinPosition: XYPosition;
+    outputPinPosition: XYPosition;
+}
+
 export interface NodeModel {
-    nId: number;
+    id: string;
     name: string;
     x: number;
     y: number;
@@ -22,14 +32,21 @@ export interface NodeModel {
     connectors: ConnectorModel[];
 }
 
-export enum ConnectorType {
-    Input,
-    Output
+export enum PinType {
+    LEFT,
+    RIGHT
+}
+
+export enum PinLayout {
+    NO_PINS,
+    LEFT_PIN,
+    RIGHT_PIN,
+    BOTH_PINS
 }
 
 export interface ConnectorModel {
-    id: number;
+    id: string;
     name: string;
-    connectorType: ConnectorType;
+    pinLayout: PinLayout;
     contentType?: string;
 }

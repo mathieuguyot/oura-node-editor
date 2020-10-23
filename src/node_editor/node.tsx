@@ -2,7 +2,7 @@ import React, { Component, RefObject } from "react";
 import * as _ from "lodash";
 import CSS from "csstype";
 
-import { NodeModel, XYPosition } from "./model";
+import { LinkModel, NodeModel, PinType, XYPosition } from "./model";
 import Connector from "./connector";
 import defaultStyles from "./default_styles";
 import DragWrapper from "./drag_wrapper";
@@ -13,16 +13,11 @@ export type NodeProps = {
 
     getZoom: () => number;
 
-    onNodeMoveStart: (nId: number) => void;
-    onNodeMove: (nId: number, offsetX: number, offsetY: number, width: number) => void;
-    onNodeMoveEnd: (nId: number) => void;
+    onNodeMoveStart: (nodeId: string) => void;
+    onNodeMove: (nodeId: string, offsetX: number, offsetY: number, width: number) => void;
+    onNodeMoveEnd: (nodeId: string) => void;
 
-    onCreateLink: (
-        inputNodeId: number,
-        inputConnectorId: number,
-        outputNodeId: number,
-        outputConnectorId: number
-    ) => void;
+    onCreateLink: (link: LinkModel) => void;
     onUpdatePreviewLink: (
         inputPosition: XYPosition | null,
         outputPosition: XYPosition | null
@@ -45,36 +40,36 @@ export class Node extends Component<NodeProps> {
     }
 
     shouldComponentUpdate(nextProps: NodeProps): boolean {
-        return !_.isEqual(this.props, nextProps);
+        const { node, isNodeSelected } = this.props;
+        return isNodeSelected !== nextProps.isNodeSelected || !_.isEqual(node, nextProps.node);
     }
 
     onMouseDown(part: NodePart, event: React.MouseEvent): void {
         const { node, getZoom, onNodeMoveStart, onNodeMove, onNodeMoveEnd } = this.props;
         const zoom = getZoom();
         const initialPos = { x: event.pageX / zoom, y: event.pageY / zoom };
-        onNodeMoveStart(node.nId);
-        this.dragWrapper.onMouseDown(
-            event,
-            initialPos,
-            zoom,
-            (iPos: XYPosition, finalPos: XYPosition, offsetPos: XYPosition) => {
-                if (part === NodePart.Header || part === NodePart.Core) {
-                    onNodeMove(node.nId, offsetPos.x, offsetPos.y, 0);
-                } else {
-                    onNodeMove(node.nId, 0, 0, offsetPos.x);
-                }
-            },
-            () => {
-                onNodeMoveEnd(node.nId);
+        onNodeMoveStart(node.id);
+
+        const onMouseMoveCb = (iPos: XYPosition, finalPos: XYPosition, offsetPos: XYPosition) => {
+            if (part === NodePart.Header || part === NodePart.Core) {
+                onNodeMove(node.id, offsetPos.x, offsetPos.y, 0);
+            } else {
+                onNodeMove(node.id, 0, 0, offsetPos.x);
             }
-        );
+        };
+
+        const onMouseUpCb = () => {
+            onNodeMoveEnd(node.id);
+        };
+
+        this.dragWrapper.onMouseDown(event, initialPos, getZoom, onMouseMoveCb, onMouseUpCb);
     }
 
-    getConnectorPinPosition(id: number): XYPosition | null {
-        if (id in this.connectorRefs) {
-            const pin = this.connectorRefs[id].current;
+    getConnectorPinPosition(connectorId: string, pinType: PinType): XYPosition | null {
+        if (connectorId in this.connectorRefs) {
+            const pin = this.connectorRefs[connectorId].current;
             if (pin) {
-                return pin.getConnectorPinPosition();
+                return pin.getConnectorPinPosition(pinType);
             }
         }
         return null;
@@ -126,12 +121,9 @@ export class Node extends Component<NodeProps> {
                     {node.connectors.map((connector) => (
                         <Connector
                             getZoom={getZoom}
-                            nodeId={node.nId}
-                            nodeX={node.x}
-                            nodeY={node.y}
+                            node={node}
                             key={connector.id}
-                            connectorModel={connector}
-                            width={node.width}
+                            connector={connector}
                             ref={this.connectorRefs[connector.id]}
                             onCreateLink={onCreateLink}
                             onUpdatePreviewLink={onUpdatePreviewLink}

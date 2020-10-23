@@ -1,29 +1,14 @@
 import React from "react";
 
-import { ConnectorType } from "../model";
 import { ConnectorContentProps } from "./common";
-
+import DefaultConnectorContent from "./default";
 import StringConnectorContent from "./string";
 
 export default function createConnectorComponent(props: ConnectorContentProps): JSX.Element {
-    const { nodeId, nodeX, nodeY, width, connectorModel, getZoom } = props;
-    if (connectorModel.contentType === "string") {
-        return (
-            <StringConnectorContent
-                nodeId={nodeId}
-                nodeX={nodeX}
-                nodeY={nodeY}
-                width={width}
-                connectorModel={connectorModel}
-                getZoom={getZoom}
-            />
-        );
+    const { node, connector, getZoom } = props;
+    if (connector.contentType === "string") {
+        return <StringConnectorContent node={node} connector={connector} getZoom={getZoom} />;
     }
     // Defaut return connector name
-    const ct = connectorModel.connectorType;
-    return (
-        <div style={{ textAlign: ct === ConnectorType.Output ? "right" : "left" }}>
-            {connectorModel.name}
-        </div>
-    );
+    return <DefaultConnectorContent node={node} connector={connector} getZoom={getZoom} />;
 }

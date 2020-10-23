@@ -18,19 +18,16 @@ export default class BezierLink extends Component<LinkProps> {
         return !_.isEqual(this.props, nextProps);
     }
 
-    render(): JSX.Element | null {
-        const { link } = this.props;
-        if (link.inputPinPosition && link.outputPinPosition) {
-            const sourceX = link.inputPinPosition.x;
-            const sourceY = link.inputPinPosition.y;
-            const targetX = link.outputPinPosition.x;
-            const targetY = link.outputPinPosition.y;
-            const center = getCenter(link.inputPinPosition, link.outputPinPosition);
+    render(): JSX.Element {
+        const { linkPosition } = this.props;
+        const sourceX = linkPosition.inputPinPosition.x;
+        const sourceY = linkPosition.inputPinPosition.y;
+        const targetX = linkPosition.outputPinPosition.x;
+        const targetY = linkPosition.outputPinPosition.y;
+        const center = getCenter(linkPosition.inputPinPosition, linkPosition.outputPinPosition);
 
-            const path = `M${sourceX},${sourceY} C${center.x},${sourceY} ${center.x},${targetY} ${targetX},${targetY}`;
+        const path = `M${sourceX},${sourceY} C${center.x},${sourceY} ${center.x},${targetY} ${targetX},${targetY}`;
 
-            return <path d={path} style={defaultStyles.dark.link} />;
-        }
-        return null;
+        return <path d={path} style={defaultStyles.dark.link} />;
     }
 }

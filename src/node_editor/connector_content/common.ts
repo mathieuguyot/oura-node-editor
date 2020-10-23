@@ -1,11 +1,8 @@
-import { ConnectorModel } from "../model";
+import { ConnectorModel, NodeModel } from "../model";
 
 export type ConnectorContentProps = {
-    nodeId: number;
-    nodeX: number;
-    nodeY: number;
-    width: number;
-    connectorModel: ConnectorModel;
+    node: NodeModel;
+    connector: ConnectorModel;
 
     getZoom: () => number;
 };

@@ -1,6 +1,7 @@
-import { LinkModel } from "../model";
+import { LinkPositionModel } from "../model";
 
 export type LinkProps = {
-    link: LinkModel;
+    linkPosition: LinkPositionModel;
+    linkType?: string;
     key?: string | number;
 };

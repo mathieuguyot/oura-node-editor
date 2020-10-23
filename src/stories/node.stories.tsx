@@ -4,7 +4,7 @@ import { Story, Meta } from "@storybook/react/types-6-0";
 import "../index.css";
 
 import { Node, NodeProps } from "../node_editor/node";
-import { ConnectorType } from "../node_editor/model";
+import { PinLayout } from "../node_editor/model";
 
 export default {
     title: "Test/Node",
@@ -14,7 +14,7 @@ export default {
 const defaultProps: NodeProps = {
     node: {
         name: "default_node",
-        nId: 0,
+        id: "0",
         x: 0,
         y: 0,
         connectors: [],
@@ -53,20 +53,15 @@ export const BasicUnselectedNode = Template.bind({});
 BasicUnselectedNode.args = { ...defaultProps };
 BasicUnselectedNode.args.node = {
     name: "full_node",
-    nId: 0,
+    id: "0",
     x: 0,
     y: 0,
     connectors: [
-        { id: 0, name: "x", connectorType: ConnectorType.Input },
-        {
-            id: 1,
-            name: "y",
-            connectorType: ConnectorType.Input,
-            contentType: "string"
-        },
-        { id: 2, name: "z", connectorType: ConnectorType.Input },
-        { id: 4, name: "sum", connectorType: ConnectorType.Output },
-        { id: 5, name: "product", connectorType: ConnectorType.Output }
+        { id: "0", name: "x", pinLayout: PinLayout.LEFT_PIN },
+        { id: "1", name: "y", pinLayout: PinLayout.LEFT_PIN, contentType: "string" },
+        { id: "2", name: "z", pinLayout: PinLayout.LEFT_PIN },
+        { id: "4", name: "sum", pinLayout: PinLayout.RIGHT_PIN },
+        { id: "5", name: "product", pinLayout: PinLayout.RIGHT_PIN }
     ],
     width: 300
 };

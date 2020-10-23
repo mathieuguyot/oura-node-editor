@@ -1,51 +1,36 @@
 import React, { Component, RefObject } from "react";
 import produce from "immer";
 
-import { NodeModel, ConnectorType, XYPosition, LinkModel } from "./model";
+import { NodeModel, XYPosition, LinkModel, LinkPositionModel, getLinkId } from "./model";
 import { Node } from "./node";
 import PanZoom from "./pan_zoom";
 import createLinkComponent from "./links";
 
-type NodeEditorState = {
-    nodes: { [nId: string]: NodeModel };
+type NodeEditorProps = {
+    nodes: { [id: string]: NodeModel };
     links: Array<LinkModel>;
-    isNodeBeingMoved: boolean;
-    draggedLink?: LinkModel;
-    zoom: number;
-    selectedNodeId?: number;
+
+    onNodeMove(id: string, newX: number, newY: number, newWidth: number): void;
+    onCreateLink(link: LinkModel): void;
 };
 
-function createRandomNodeModel(): { [nId: string]: NodeModel } {
-    const nodes: { [nId: string]: NodeModel } = {};
-    for (let index = 0; index < 1000; index += 1) {
-        nodes[index.toString()] = {
-            nId: index,
-            name: `node_${index}`,
-            width: Math.floor(Math.random() * 300) + 200,
-            x: Math.floor(Math.random() * 5000),
-            y: Math.floor(Math.random() * 5000),
-            connectors: [
-                { id: 0, name: "x", connectorType: ConnectorType.Input },
-                { id: 1, name: "y", connectorType: ConnectorType.Input, contentType: "string" },
-                { id: 2, name: "z", connectorType: ConnectorType.Input },
-                { id: 4, name: "sum", connectorType: ConnectorType.Output },
-                { id: 5, name: "product", connectorType: ConnectorType.Output }
-            ]
-        };
-    }
-    return nodes;
-}
+type NodeEditorState = {
+    linksPositions: { [linkId: string]: LinkPositionModel };
+    isNodeBeingMoved: boolean;
+    draggedLink?: LinkPositionModel;
+    zoom: number;
+    selectedNodeId?: string;
+};
 
-class NodeEditor extends Component<unknown, NodeEditorState> {
+class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
     private nodesRefs: { [nodeId: string]: RefObject<Node> } = {};
 
-    constructor(props: unknown) {
+    constructor(props: NodeEditorProps) {
         super(props);
         this.state = {
             zoom: 1,
             isNodeBeingMoved: false,
-            nodes: createRandomNodeModel(),
-            links: []
+            linksPositions: {}
         };
 
         this.createReferences();
@@ -58,83 +43,95 @@ class NodeEditor extends Component<unknown, NodeEditorState> {
 
         this.onUnselection = this.onUnselection.bind(this);
 
-        this.onCreateLink = this.onCreateLink.bind(this);
         this.onUpdatePreviewLink = this.onUpdatePreviewLink.bind(this);
+
+        this.onCreateLink = this.onCreateLink.bind(this);
     }
 
     componentDidMount(): void {
-        const { links } = this.state;
-        const newLinks = produce(links, (draft) => {
-            draft.forEach((draftLink) => {
-                if (!draftLink.inputPinPosition && !draftLink.outputPinPosition) {
-                    const inputNode = this.nodesRefs[draftLink.inputNodeId].current;
-                    const outputNode = this.nodesRefs[draftLink.outputNodeId].current;
-                    if (inputNode && outputNode) {
-                        const inputPinPosition = inputNode.getConnectorPinPosition(
-                            draftLink.inputPinId
-                        );
-                        const outputPinPosition = outputNode.getConnectorPinPosition(
-                            draftLink.outputPinId
-                        );
-                        if (inputPinPosition && outputPinPosition) {
-                            draftLink.inputPinPosition = inputPinPosition;
-                            draftLink.outputPinPosition = outputPinPosition;
-                        }
+        const { links } = this.props;
+        const { linksPositions } = this.state;
+        const newLinksPositions = produce(linksPositions, (draft) => {
+            links.forEach((link) => {
+                const linkId = getLinkId(link);
+                const inputNodeRef = this.nodesRefs[link.inputNodeId].current;
+                const outputNodeRef = this.nodesRefs[link.outputNodeId].current;
+                if (inputNodeRef && outputNodeRef) {
+                    const inputPinPosition = inputNodeRef.getConnectorPinPosition(
+                        link.inputPinId,
+                        link.inputPinType
+                    );
+                    const outputPinPosition = outputNodeRef.getConnectorPinPosition(
+                        link.outputPinId,
+                        link.outputPinType
+                    );
+                    if (inputPinPosition && outputPinPosition) {
+                        draft[linkId] = { linkId, inputPinPosition, outputPinPosition };
                     }
                 }
             });
         });
         this.setState({
-            links: newLinks
+            linksPositions: newLinksPositions
         });
     }
 
-    onNodeMoveStart(nId: number): void {
+    componentDidUpdate(): void {
+        const { links } = this.props;
+        const { linksPositions } = this.state;
+        let updatedIsNeeded = false;
+        const newLinksPositions = produce(linksPositions, (draft) => {
+            links.forEach((link) => {
+                const linkId = getLinkId(link);
+                const inputNodeRef = this.nodesRefs[link.inputNodeId].current;
+                const outputNodeRef = this.nodesRefs[link.outputNodeId].current;
+                if (inputNodeRef && outputNodeRef) {
+                    const inputPinPosition = inputNodeRef.getConnectorPinPosition(
+                        link.inputPinId,
+                        link.inputPinType
+                    );
+                    const outputPinPosition = outputNodeRef.getConnectorPinPosition(
+                        link.outputPinId,
+                        link.outputPinType
+                    );
+                    if (inputPinPosition && outputPinPosition) {
+                        if (
+                            !(linkId in draft) ||
+                            draft[linkId].inputPinPosition.x !== inputPinPosition.x ||
+                            draft[linkId].inputPinPosition.y !== inputPinPosition.y ||
+                            draft[linkId].outputPinPosition.x !== outputPinPosition.x ||
+                            draft[linkId].outputPinPosition.y !== outputPinPosition.y
+                        ) {
+                            draft[linkId] = { linkId, inputPinPosition, outputPinPosition };
+                            updatedIsNeeded = true;
+                        }
+                    }
+                }
+            });
+        });
+        if (updatedIsNeeded) {
+            // eslint-disable-next-line react/no-did-update-set-state
+            this.setState({
+                linksPositions: newLinksPositions
+            });
+        }
+    }
+
+    onNodeMoveStart(nodeId: string): void {
         this.setState({
             isNodeBeingMoved: true,
-            selectedNodeId: nId
+            selectedNodeId: nodeId
         });
     }
 
-    onNodeMove(nId: number, offsetX: number, offsetY: number, offsetWidth: number): void {
-        const { nodes } = this.state;
-        const newNodes = produce(nodes, (draft) => {
-            const newWidth = nodes[nId].width + offsetWidth;
-            draft[nId] = {
-                ...draft[nId],
-                x: draft[nId].x + offsetX,
-                y: draft[nId].y + offsetY,
-                width: newWidth > 100 ? newWidth : 100
-            };
-        });
+    onNodeMove(id: string, offsetX: number, offsetY: number, offsetWidth: number): void {
+        const { onNodeMove, nodes } = this.props;
 
-        this.setState({
-            nodes: newNodes
-        });
+        const newX = nodes[id].x + offsetX;
+        const newY = nodes[id].y + offsetY;
+        const newWidth = nodes[id].width + offsetWidth;
 
-        const { links } = this.state;
-        const newLinks = produce(links, (draft) => {
-            draft.forEach((draftLink) => {
-                const node = this.nodesRefs[nId].current;
-                if (node) {
-                    if (draftLink.inputNodeId === nId && draftLink.inputPinPosition) {
-                        const position = node.getConnectorPinPosition(draftLink.inputPinId);
-                        if (position) {
-                            draftLink.inputPinPosition = { x: position.x, y: position.y };
-                        }
-                    }
-                    if (draftLink.outputNodeId === nId && draftLink.outputPinPosition) {
-                        const position = node.getConnectorPinPosition(draftLink.outputPinId);
-                        if (position) {
-                            draftLink.outputPinPosition = { x: position.x, y: position.y };
-                        }
-                    }
-                }
-            });
-        });
-        this.setState({
-            links: newLinks
-        });
+        onNodeMove(id, newX, newY, newWidth > 100 ? newWidth : 100);
     }
 
     onNodeMoveEnd(): void {
@@ -159,51 +156,28 @@ class NodeEditor extends Component<unknown, NodeEditorState> {
         });
     }
 
-    onCreateLink(
-        inputNodeId: number,
-        inputConnectorId: number,
-        outputNodeId: number,
-        outputConnectorId: number
+    onUpdatePreviewLink(
+        inputPinPosition: XYPosition | null,
+        outputPinPosition: XYPosition | null
     ): void {
-        const inputConnectorRef = this.nodesRefs[inputNodeId].current;
-        const outputConnectorRef = this.nodesRefs[outputNodeId].current;
-        if (inputConnectorRef && outputConnectorRef) {
-            this.setState(
-                produce((draft) => {
-                    draft.links.push({
-                        inputNodeId,
-                        outputNodeId,
-                        inputPinId: inputConnectorId,
-                        outputPinId: outputConnectorId,
-                        inputPinPosition: inputConnectorRef.getConnectorPinPosition(
-                            inputConnectorId
-                        ),
-                        outputPinPosition: outputConnectorRef.getConnectorPinPosition(
-                            outputConnectorId
-                        )
-                    });
-                })
-            );
-        }
-    }
-
-    onUpdatePreviewLink(inputPosition: XYPosition | null, outputPosition: XYPosition | null): void {
-        if (inputPosition === null || outputPosition === null) {
+        if (inputPinPosition === null || outputPinPosition === null) {
             this.setState({
                 draggedLink: undefined
             });
         } else {
             this.setState({
                 draggedLink: {
-                    inputNodeId: -1,
-                    outputNodeId: -1,
-                    inputPinId: -1,
-                    outputPinId: -1,
-                    inputPinPosition: inputPosition,
-                    outputPinPosition: outputPosition
+                    linkId: "preview",
+                    inputPinPosition,
+                    outputPinPosition
                 }
             });
         }
+    }
+
+    onCreateLink(link: LinkModel): void {
+        const { onCreateLink } = this.props;
+        onCreateLink(link);
     }
 
     getZoom(): number {
@@ -212,7 +186,7 @@ class NodeEditor extends Component<unknown, NodeEditorState> {
     }
 
     createReferences(): void {
-        const { nodes } = this.state;
+        const { nodes } = this.props;
         this.nodesRefs = {};
         Object.keys(nodes).forEach((key) => {
             this.nodesRefs[key] = React.createRef<Node>();
@@ -220,15 +194,26 @@ class NodeEditor extends Component<unknown, NodeEditorState> {
     }
 
     render(): JSX.Element {
-        const { nodes, links, draggedLink, zoom, selectedNodeId } = this.state;
+        const { nodes, links } = this.props;
+        const { draggedLink, zoom, selectedNodeId, linksPositions } = this.state;
         let svgDraggedLink;
         if (draggedLink) {
-            svgDraggedLink = createLinkComponent({ link: draggedLink });
+            svgDraggedLink = createLinkComponent({ linkType: "bezier", linkPosition: draggedLink });
         }
 
         const svgLinks: JSX.Element[] = [];
-        links.forEach((link, index) => {
-            svgLinks.push(createLinkComponent({ link, key: index }));
+        links.forEach((link) => {
+            const linkId = getLinkId(link);
+            const linkPosition = linksPositions[linkId];
+            if (linkPosition) {
+                svgLinks.push(
+                    createLinkComponent({
+                        linkType: link.linkType,
+                        key: linkId,
+                        linkPosition
+                    })
+                );
+            }
         });
         const grid = String(300 * zoom);
         return (
@@ -262,7 +247,7 @@ class NodeEditor extends Component<unknown, NodeEditorState> {
                             key={key}
                             ref={this.nodesRefs[key]}
                             node={nodes[key]}
-                            isNodeSelected={nodes[key].nId === selectedNodeId}
+                            isNodeSelected={nodes[key].id === selectedNodeId}
                             getZoom={this.getZoom}
                             onNodeMoveStart={this.onNodeMoveStart}
                             onNodeMove={this.onNodeMove}
