@@ -37,7 +37,11 @@ class Connector extends Component<ConnectorProps> {
                 onUpdatePreviewLink(initialPos, finalPos);
             };
 
-            const onMouseUpCb = (targetClassName: string) => {
+            const onMouseUpCb = (
+                initialPos: XYPosition,
+                finalPos: XYPosition,
+                targetClassName: string
+            ) => {
                 const connectorRegex = /node-(.+)-connector-(.+)-(left|right)/;
                 const tag = targetClassName.match(connectorRegex);
                 if (tag !== null) {

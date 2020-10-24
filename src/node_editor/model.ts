@@ -3,6 +3,10 @@ export interface XYPosition {
     y: number;
 }
 
+export function arePositionEquals(rPos: XYPosition, lPos: XYPosition): boolean {
+    return rPos.x === lPos.x && rPos.y === lPos.y;
+}
+
 export interface LinkModel {
     inputNodeId: string;
     inputPinId: string;

@@ -2,7 +2,7 @@ import React, { Component, RefObject } from "react";
 import * as _ from "lodash";
 import CSS from "csstype";
 
-import { LinkModel, NodeModel, PinType, XYPosition } from "./model";
+import { LinkModel, NodeModel, PinType, XYPosition, arePositionEquals } from "./model";
 import Connector from "./connector";
 import defaultStyles from "./default_styles";
 import DragWrapper from "./drag_wrapper";
@@ -13,9 +13,9 @@ export type NodeProps = {
 
     getZoom: () => number;
 
-    onNodeMoveStart: (nodeId: string) => void;
-    onNodeMove: (nodeId: string, offsetX: number, offsetY: number, width: number) => void;
-    onNodeMoveEnd: (nodeId: string) => void;
+    onNodeMoveStart: (id: string) => void;
+    onNodeMove: (offsetX: number, offsetY: number, offsetWidth: number) => void;
+    onNodeMoveEnd: (id: string, wasNodeMoved: boolean) => void;
 
     onCreateLink: (link: LinkModel) => void;
     onUpdatePreviewLink: (
@@ -46,22 +46,22 @@ export class Node extends Component<NodeProps> {
 
     onMouseDown(part: NodePart, event: React.MouseEvent): void {
         const { node, getZoom, onNodeMoveStart, onNodeMove, onNodeMoveEnd } = this.props;
-        const zoom = getZoom();
-        const initialPos = { x: event.pageX / zoom, y: event.pageY / zoom };
         onNodeMoveStart(node.id);
 
         const onMouseMoveCb = (iPos: XYPosition, finalPos: XYPosition, offsetPos: XYPosition) => {
             if (part === NodePart.Header || part === NodePart.Core) {
-                onNodeMove(node.id, offsetPos.x, offsetPos.y, 0);
+                onNodeMove(offsetPos.x, offsetPos.y, 0);
             } else {
-                onNodeMove(node.id, 0, 0, offsetPos.x);
+                onNodeMove(0, 0, offsetPos.x);
             }
         };
 
-        const onMouseUpCb = () => {
-            onNodeMoveEnd(node.id);
+        const onMouseUpCb = (initialPos: XYPosition, finalPos: XYPosition) => {
+            onNodeMoveEnd(node.id, !arePositionEquals(initialPos, finalPos));
         };
 
+        const zoom = getZoom();
+        const initialPos = { x: event.pageX / zoom, y: event.pageY / zoom };
         this.dragWrapper.onMouseDown(event, initialPos, getZoom, onMouseMoveCb, onMouseUpCb);
     }
 

@@ -5,7 +5,7 @@ import { NodeEditor, NodeModel, LinkModel, PinLayout } from "../../node_editor";
 
 function createRandomNodeModel(): { [nId: string]: NodeModel } {
     const nodes: { [nId: string]: NodeModel } = {};
-    for (let index = 0; index < 1000; index += 1) {
+    for (let index = 0; index < 100; index += 1) {
         nodes[index.toString()] = {
             id: index.toString(),
             name: `node_${index}`,
@@ -17,8 +17,8 @@ function createRandomNodeModel(): { [nId: string]: NodeModel } {
                 { id: "1", name: "y", pinLayout: PinLayout.LEFT_PIN, contentType: "string" },
                 { id: "2", name: "z", pinLayout: PinLayout.LEFT_PIN },
                 { id: "4", name: "sum", pinLayout: PinLayout.RIGHT_PIN },
-                { id: "5", name: "product", pinLayout: PinLayout.RIGHT_PIN },
-                { id: "6", name: "nothing", pinLayout: PinLayout.NO_PINS },
+                { id: "5", name: "abcdefghijklmnopqrstuv", pinLayout: PinLayout.RIGHT_PIN },
+                { id: "6", name: "abcdefghijklmnopqrstuv", pinLayout: PinLayout.NO_PINS },
                 { id: "7", name: "flow", pinLayout: PinLayout.BOTH_PINS }
             ]
         };
@@ -30,21 +30,27 @@ const OuraCanvasApp = (): JSX.Element => {
     const [nodes, setNodes] = React.useState(createRandomNodeModel());
     const [links, setLinks] = React.useState<LinkModel[]>([]);
 
-    const onNodeMove = (id: string, newX: number, newY: number, newWidth: number) => {
-        const newNodes = produce(nodes, (draft) => {
-            draft[id].x = newX;
-            draft[id].y = newY;
-            draft[id].width = newWidth;
-        });
-        setNodes(newNodes);
-    };
+    const onNodeMove = React.useCallback(
+        (id: string, newX: number, newY: number, newWidth: number) => {
+            const newNodes = produce(nodes, (draft) => {
+                draft[id].x = newX;
+                draft[id].y = newY;
+                draft[id].width = newWidth;
+            });
+            setNodes(newNodes);
+        },
+        [nodes]
+    );
 
-    const onCreateLink = (link: LinkModel) => {
-        const newLinks = produce(links, (draft) => {
-            draft.push(link);
-        });
-        setLinks(newLinks);
-    };
+    const onCreateLink = React.useCallback(
+        (link: LinkModel) => {
+            const newLinks = produce(links, (draft) => {
+                draft.push(link);
+            });
+            setLinks(newLinks);
+        },
+        [links]
+    );
 
     return (
         <div style={{ width: "100%", height: "100vh" }}>
