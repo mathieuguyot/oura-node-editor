@@ -11,6 +11,7 @@ class StringConnectorContent extends Component<ConnectorContentProps> {
     render(): JSX.Element {
         return (
             <input
+                tabIndex={-1}
                 style={{
                     width: "100%",
                     backgroundColor: "#585858",

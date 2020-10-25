@@ -1,4 +1,4 @@
-import { XYPosition } from "./model";
+import { XYPosition } from "../model";
 
 type MouseMoveCb = (
     initialPos: XYPosition,

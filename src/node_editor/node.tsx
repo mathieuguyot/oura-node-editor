@@ -5,7 +5,7 @@ import CSS from "csstype";
 import { LinkModel, NodeModel, PinType, XYPosition, arePositionEquals } from "./model";
 import Connector from "./connector";
 import defaultStyles from "./default_styles";
-import DragWrapper from "./drag_wrapper";
+import { DragWrapper } from "./events_wrappers";
 
 export type NodeProps = {
     node: NodeModel;

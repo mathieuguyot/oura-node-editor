@@ -5,7 +5,7 @@ import CSS from "csstype";
 import { ConnectorModel, PinLayout, XYPosition, NodeModel, LinkModel, PinType } from "./model";
 import createConnectorComponent from "./connector_content";
 import defaultStyles from "./default_styles";
-import DragWrapper from "./drag_wrapper";
+import { DragWrapper } from "./events_wrappers";
 
 type ConnectorProps = {
     node: NodeModel;
