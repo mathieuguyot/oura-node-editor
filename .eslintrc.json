@@ -12,10 +12,10 @@
             "jsx": true
         },
         "ecmaVersion": 12,
-        "sourceType": "module",
-        "project": "./tsconfig.json"
+        "sourceType": "module"
     },
     "rules": {
+      "import/no-extraneous-dependencies": "off",
       "prettier/prettier": ["error"],
       "no-shadow": "off", // Stack overflow : 63961803
       "@typescript-eslint/no-shadow": ["error"], // Stack overflow : 63961803

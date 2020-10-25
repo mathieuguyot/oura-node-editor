@@ -18,7 +18,7 @@ export interface LinkModel {
 }
 
 export function getLinkId(link: LinkModel): string {
-    return `${link.inputNodeId}.${link.inputPinId}->${link.outputNodeId}${link.outputPinId}__${link.linkType}`;
+    return `${link.inputNodeId}.${link.inputPinId}->${link.outputNodeId}.${link.outputPinId}__${link.linkType}`;
 }
 
 export interface LinkPositionModel {

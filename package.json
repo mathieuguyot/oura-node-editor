@@ -10,7 +10,8 @@
         "storybook": "start-storybook -p 6006 -s public",
         "build-storybook": "build-storybook -s public",
         "lint": "eslint ./src/ --ext .js,.jsx,.ts,.tsx",
-        "prettify": "prettier --write 'src/**/*.(ts|tsx)'"
+        "prettify": "prettier --write 'src/**/*.(ts|tsx)'",
+        "cypress": "cypress open"
     },
     "dependencies": {
         "@types/lodash": "^4.14.162",
@@ -39,6 +40,8 @@
         "@storybook/theming": "^6.0.26",
         "@typescript-eslint/eslint-plugin": "^4.5.0",
         "@typescript-eslint/parser": "^4.5.0",
+        "cypress": "^5.4.0",
+        "cypress-react-unit-test": "^4.16.5",
         "eslint": "^7.11.0",
         "eslint-config-airbnb-typescript": "^12.0.0",
         "eslint-config-prettier": "^6.13.0",
