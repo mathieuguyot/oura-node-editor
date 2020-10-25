@@ -9,9 +9,10 @@
         "eject": "react-scripts eject",
         "storybook": "start-storybook -p 6006 -s public",
         "build-storybook": "build-storybook -s public",
-        "lint": "eslint ./src/ --ext .js,.jsx,.ts,.tsx",
+        "lint": "eslint ./src/ ./test/ --ext .js,.jsx,.ts,.tsx",
         "prettify": "prettier --write 'src/**/*.(ts|tsx)'",
-        "cypress": "cypress open"
+        "cypress": "cypress open",
+        "pre-commit": "npm run prettify && npm run lint && npm run test && cypress run"
     },
     "dependencies": {
         "@types/lodash": "^4.14.162",

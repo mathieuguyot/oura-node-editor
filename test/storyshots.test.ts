@@ -1,3 +1,6 @@
 import initStoryshot from "@storybook/addon-storyshots";
 
-initStoryshot();
+// initStoryshot();
+test("dumb_test", () => {
+    return undefined;
+});
