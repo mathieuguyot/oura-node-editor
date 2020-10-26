@@ -19,16 +19,17 @@ enableMapSet();
 type NodeEditorProps = {
     nodes: { [id: string]: NodeModel };
     links: LinkModel[];
+    zoom: number;
 
     onNodeMove(id: string, offsetX: number, offsetY: number, offsetWidth: number): void;
     onCreateLink(link: LinkModel): void;
+    setZoom(zoom: number): void;
 };
 
 type NodeEditorState = {
     linksPositions: { [linkId: string]: LinkPositionModel };
     isNodeBeingMoved: boolean;
     draggedLink?: LinkPositionModel;
-    zoom: number;
     selectedNodesIds: Set<string>;
 };
 
@@ -39,7 +40,6 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
     constructor(props: NodeEditorProps) {
         super(props);
         this.state = {
-            zoom: 1,
             isNodeBeingMoved: false,
             linksPositions: {},
             selectedNodesIds: new Set()
@@ -170,12 +170,11 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
     }
 
     onWheelZoom(event: React.WheelEvent): void {
-        const { isNodeBeingMoved, draggedLink, zoom } = this.state;
+        const { zoom, setZoom } = this.props;
+        const { isNodeBeingMoved, draggedLink } = this.state;
         if (!isNodeBeingMoved && !draggedLink) {
             const newZoom = event.deltaY > 0 ? zoom / 1.1 : zoom * 1.1;
-            this.setState({
-                zoom: newZoom
-            });
+            setZoom(newZoom);
         }
     }
 
@@ -204,7 +203,7 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
     }
 
     getZoom(): number {
-        const { zoom } = this.state;
+        const { zoom } = this.props;
         return zoom;
     }
 
@@ -217,8 +216,8 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
     }
 
     render(): JSX.Element {
-        const { nodes, links } = this.props;
-        const { draggedLink, zoom, selectedNodesIds, linksPositions } = this.state;
+        const { nodes, links, zoom } = this.props;
+        const { draggedLink, selectedNodesIds, linksPositions } = this.state;
         let svgDraggedLink;
         if (draggedLink) {
             svgDraggedLink = createLinkComponent({ linkType: "bezier", linkPosition: draggedLink });

@@ -27,6 +27,7 @@ function createRandomNodeModel(): { [nId: string]: NodeModel } {
 }
 
 const OuraCanvasApp = (): JSX.Element => {
+    const [zoom, setZoom] = React.useState(1);
     const [nodes, setNodes] = React.useState(createRandomNodeModel());
     const [links, setLinks] = React.useState<LinkModel[]>([]);
 
@@ -55,6 +56,8 @@ const OuraCanvasApp = (): JSX.Element => {
     return (
         <div style={{ width: "100%", height: "100vh" }}>
             <NodeEditor
+                zoom={zoom}
+                setZoom={setZoom}
                 nodes={nodes}
                 links={links}
                 onNodeMove={onNodeMove}
