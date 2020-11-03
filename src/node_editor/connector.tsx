@@ -12,8 +12,8 @@ type ConnectorProps = {
     connector: ConnectorModel;
 
     getZoom: () => number;
-    onCreateLink: (link: LinkModel) => void;
-    onUpdatePreviewLink: (
+    onCreateLink?: (link: LinkModel) => void;
+    onUpdatePreviewLink?: (
         inputPosition: XYPosition | null,
         outputPosition: XYPosition | null
     ) => void;
@@ -29,10 +29,9 @@ class Connector extends Component<ConnectorProps> {
     }
 
     onMouseDown(pinType: PinType, event: React.MouseEvent): void {
+        const { node, connector, getZoom, onUpdatePreviewLink, onCreateLink } = this.props;
         const pinPosition = this.getConnectorPinPosition(pinType);
-        if (pinPosition) {
-            const { node, connector, getZoom, onUpdatePreviewLink, onCreateLink } = this.props;
-
+        if (pinPosition && onUpdatePreviewLink && onCreateLink) {
             const onMouseMoveCb = (initialPos: XYPosition, finalPos: XYPosition) => {
                 onUpdatePreviewLink(initialPos, finalPos);
             };

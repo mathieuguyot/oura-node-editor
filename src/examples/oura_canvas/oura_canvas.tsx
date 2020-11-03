@@ -2,6 +2,7 @@ import React from "react";
 import { produce } from "immer";
 
 import { NodeEditor, NodeModel, LinkModel, PinLayout } from "../../node_editor";
+import NodePicker from "../../node_picker";
 
 function createRandomNodeModel(): { [nId: string]: NodeModel } {
     const nodes: { [nId: string]: NodeModel } = {};
@@ -63,7 +64,7 @@ const OuraCanvasApp = (): JSX.Element => {
                 onNodeMove={onNodeMove}
                 onCreateLink={onCreateLink}
             />
-            {/* <canvas
+            <div
                 style={{
                     width: 640,
                     height: 480,
@@ -71,8 +72,14 @@ const OuraCanvasApp = (): JSX.Element => {
                     right: 20,
                     bottom: 20,
                     backgroundColor: "white"
-                }}
-            /> */}
+                }}>
+                <NodePicker
+                    nodesSchema={nodes}
+                    onNodeSelection={(id) => {
+                        console.log(id);
+                    }}
+                />
+            </div>
         </div>
     );
 };

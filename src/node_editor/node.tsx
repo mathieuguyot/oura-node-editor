@@ -13,12 +13,12 @@ export type NodeProps = {
 
     getZoom: () => number;
 
-    onNodeMoveStart: (id: string) => void;
-    onNodeMove: (offsetX: number, offsetY: number, offsetWidth: number) => void;
-    onNodeMoveEnd: (id: string, wasNodeMoved: boolean) => void;
+    onNodeMoveStart?: (id: string) => void;
+    onNodeMove?: (offsetX: number, offsetY: number, offsetWidth: number) => void;
+    onNodeMoveEnd?: (id: string, wasNodeMoved: boolean) => void;
 
-    onCreateLink: (link: LinkModel) => void;
-    onUpdatePreviewLink: (
+    onCreateLink?: (link: LinkModel) => void;
+    onUpdatePreviewLink?: (
         inputPosition: XYPosition | null,
         outputPosition: XYPosition | null
     ) => void;
@@ -46,6 +46,9 @@ export class Node extends Component<NodeProps> {
 
     onMouseDown(part: NodePart, event: React.MouseEvent): void {
         const { node, getZoom, onNodeMoveStart, onNodeMove, onNodeMoveEnd } = this.props;
+        if (!onNodeMoveStart || !onNodeMove || !onNodeMoveEnd) {
+            return;
+        }
         onNodeMoveStart(node.id);
 
         const onMouseMoveCb = (iPos: XYPosition, finalPos: XYPosition, offsetPos: XYPosition) => {
@@ -104,7 +107,6 @@ export class Node extends Component<NodeProps> {
             width: `${node.width}px`,
             position: "relative"
         };
-
         const nodeCoreSelectionStyle = isNodeSelected
             ? defaultStyles.dark.nodeSelected
             : defaultStyles.dark.nodeUnselected;
