@@ -1,6 +1,12 @@
+/* eslint-disable no-bitwise */
 export interface XYPosition {
     x: number;
     y: number;
+}
+
+export interface PanZoomModel {
+    zoom: number;
+    topLeftCorner: XYPosition;
 }
 
 export function arePositionEquals(rPos: XYPosition, lPos: XYPosition): boolean {
@@ -17,23 +23,26 @@ export interface LinkModel {
     linkType?: string;
 }
 
-export function getLinkId(link: LinkModel): string {
-    return `${link.inputNodeId}.${link.inputPinId}->${link.outputNodeId}.${link.outputPinId}__${link.linkType}`;
-}
-
 export interface LinkPositionModel {
     linkId: string;
     inputPinPosition: XYPosition;
     outputPinPosition: XYPosition;
 }
 
+export function generateUuid(): string {
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+        const r = (Math.random() * 16) | 0;
+        const v = c === "x" ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+    });
+}
+
 export interface NodeModel {
-    id: string;
     name: string;
     x: number;
     y: number;
     width: number;
-    connectors: ConnectorModel[];
+    connectors: { [cId: string]: ConnectorModel };
 }
 
 export enum PinType {
@@ -49,8 +58,9 @@ export enum PinLayout {
 }
 
 export interface ConnectorModel {
-    id: string;
     name: string;
     pinLayout: PinLayout;
     contentType?: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data: any;
 }

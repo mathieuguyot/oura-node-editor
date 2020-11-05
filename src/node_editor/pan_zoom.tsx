@@ -1,112 +1,76 @@
 import * as React from "react";
-import * as _ from "lodash";
-import { produce } from "immer";
 import { DragWrapper } from "./events_wrappers";
-import { XYPosition } from "./model";
+import { XYPosition, PanZoomModel } from "./model";
 
 export interface PanZoomInputState {
     matrixData: number[];
 }
 
 export interface PanZoomInputProps {
-    getZoom: () => number;
+    panZoomInfo: PanZoomModel;
+    setPanZoomInfo: (panZoomInfo: PanZoomModel) => void;
 }
 
 export default class PanZoom extends React.Component<PanZoomInputProps, PanZoomInputState> {
     // Used to set cursor while moving.
-    private panWrapper: HTMLDivElement | null = null;
-    // Used to set transform for pan.
-    private panContainer: HTMLDivElement | null = null;
+    private panWrapper: React.RefObject<HTMLDivElement> = React.createRef();
     private dragWrapper: DragWrapper = new DragWrapper();
 
-    constructor(props: PanZoomInputProps) {
-        super(props);
-        const { getZoom } = this.props;
-        const zoom = getZoom();
-        this.state = {
-            matrixData: [zoom, 0, 0, zoom, 0, 0]
-        };
-    }
-
-    shouldComponentUpdate(nextProps: PanZoomInputProps, nextState: PanZoomInputState): boolean {
-        return !_.isEqual(this.props, nextProps) || !_.isEqual(this.state, nextState);
-    }
-
     private onMouseDown = (e: React.MouseEvent) => {
-        const { getZoom } = this.props;
+        const getZoom = (): number => {
+            const { panZoomInfo } = this.props;
+            return panZoomInfo.zoom;
+        };
 
         const onMouseMoveCb = (
             initialPos: XYPosition,
             finalPos: XYPosition,
             offSetPos: XYPosition
         ) => {
-            const zoom = getZoom();
-            this.setState(
-                produce((draftState: PanZoomInputState) => {
-                    draftState.matrixData[4] += offSetPos.x * zoom;
-                    draftState.matrixData[5] += offSetPos.y * zoom;
-                    if (this.panContainer) {
-                        this.panContainer.style.transform = `matrix(${draftState.matrixData.toString()})`;
-                    }
-                })
-            );
+            const { panZoomInfo, setPanZoomInfo } = this.props;
+            const newPanZoomInfo = { ...panZoomInfo };
+            newPanZoomInfo.topLeftCorner = {
+                x: panZoomInfo.topLeftCorner.x - offSetPos.x,
+                y: panZoomInfo.topLeftCorner.y - offSetPos.y
+            };
+            setPanZoomInfo(newPanZoomInfo);
         };
 
         const onMouseUpCb = () => {
-            if (this.panWrapper) {
-                this.panWrapper.style.cursor = "";
+            if (this.panWrapper.current) {
+                this.panWrapper.current.style.cursor = "";
             }
         };
 
         const initialPosition: XYPosition = { x: e.pageX, y: e.pageY };
         this.dragWrapper.onMouseDown(e, initialPosition, getZoom, onMouseMoveCb, onMouseUpCb);
-        if (this.panWrapper) {
-            this.panWrapper.style.cursor = "move";
+        if (this.panWrapper.current) {
+            this.panWrapper.current.style.cursor = "move";
         }
     };
 
-    static getDerivedStateFromProps(
-        props: PanZoomInputProps,
-        state: PanZoomInputState
-    ): PanZoomInputState | null {
-        const { matrixData } = state;
-        const zoom = props.getZoom();
-        if (matrixData[0] !== zoom) {
-            const newMatrixData = [...state.matrixData];
-            newMatrixData[0] = zoom;
-            newMatrixData[3] = zoom;
-            return {
-                ...state,
-                matrixData: newMatrixData
-            };
-        }
-        return null;
-    }
-
     render(): JSX.Element {
-        const { matrixData } = this.state;
-        const { children } = this.props;
+        const { children, panZoomInfo } = this.props;
+        const { zoom } = panZoomInfo;
+        const matrixDataTx = -panZoomInfo.topLeftCorner.x * zoom;
+        const matrixDataTy = -panZoomInfo.topLeftCorner.y * zoom;
+        const matrixData = [zoom, 0, 0, zoom, matrixDataTx, matrixDataTy];
         return (
             <div
                 style={{
                     height: "100%",
                     width: "100%"
                 }}
-                ref={(ref) => {
-                    this.panWrapper = ref;
-                }}
+                ref={this.panWrapper}
                 onMouseDown={this.onMouseDown}
                 className="panWrapper">
                 <div
-                    className="panContainer"
-                    ref={(ref) => {
-                        this.panContainer = ref;
-                    }}
                     style={{
                         height: "100%",
                         width: "100%",
                         transform: `matrix(${matrixData.toString()})`,
-                        userSelect: "none"
+                        userSelect: "none",
+                        transformOrigin: "top left"
                     }}>
                     {children}
                 </div>

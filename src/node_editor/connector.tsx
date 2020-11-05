@@ -8,10 +8,13 @@ import defaultStyles from "./default_styles";
 import { DragWrapper } from "./events_wrappers";
 
 type ConnectorProps = {
+    nodeId: string;
+    connectorId: string;
     node: NodeModel;
     connector: ConnectorModel;
 
     getZoom: () => number;
+    onConnectorUpdate: (nodeId: string, connectorId: string, connector: ConnectorModel) => void;
     onCreateLink?: (link: LinkModel) => void;
     onUpdatePreviewLink?: (
         inputPosition: XYPosition | null,
@@ -29,7 +32,7 @@ class Connector extends Component<ConnectorProps> {
     }
 
     onMouseDown(pinType: PinType, event: React.MouseEvent): void {
-        const { node, connector, getZoom, onUpdatePreviewLink, onCreateLink } = this.props;
+        const { nodeId, connectorId, getZoom, onUpdatePreviewLink, onCreateLink } = this.props;
         const pinPosition = this.getConnectorPinPosition(pinType);
         if (pinPosition && onUpdatePreviewLink && onCreateLink) {
             const onMouseMoveCb = (initialPos: XYPosition, finalPos: XYPosition) => {
@@ -45,12 +48,13 @@ class Connector extends Component<ConnectorProps> {
                 const tag = targetClassName.match(connectorRegex);
                 if (tag !== null) {
                     onCreateLink({
-                        inputNodeId: node.id,
-                        inputPinId: connector.id,
+                        inputNodeId: nodeId,
+                        inputPinId: connectorId,
                         inputPinType: pinType === PinType.LEFT ? PinType.LEFT : PinType.RIGHT,
                         outputNodeId: tag[1],
                         outputPinId: tag[2],
-                        outputPinType: tag[3] === "left" ? PinType.LEFT : PinType.RIGHT
+                        outputPinType: tag[3] === "left" ? PinType.LEFT : PinType.RIGHT,
+                        linkType: "bezier"
                     });
                 }
                 onUpdatePreviewLink(null, null);
@@ -79,7 +83,7 @@ class Connector extends Component<ConnectorProps> {
     }
 
     renderPin(pinType: PinType, leftPinPosition: number): JSX.Element {
-        const { connector, node } = this.props;
+        const { connectorId, nodeId } = this.props;
 
         const connectorStyle: CSS.Properties = {
             position: "absolute",
@@ -93,7 +97,7 @@ class Connector extends Component<ConnectorProps> {
 
         return (
             <div
-                className={`node-${node.id}-connector-${connector.id}-${direction}`}
+                className={`node-${nodeId}-connector-${connectorId}-${direction}`}
                 style={{ ...connectorStyle, ...defaultStyles.dark.connector }}
                 onMouseDown={this.onMouseDown.bind(this, pinType)}
             />
@@ -109,7 +113,8 @@ class Connector extends Component<ConnectorProps> {
                 style={{
                     position: "relative",
                     paddingLeft: this.pinPxRadius * 2,
-                    paddingRight: this.pinPxRadius * 2
+                    paddingRight: this.pinPxRadius * 2,
+                    paddingTop: 3
                 }}>
                 {(connector.pinLayout === PinLayout.LEFT_PIN ||
                     connector.pinLayout === PinLayout.BOTH_PINS) &&

@@ -3,22 +3,27 @@ import { mount } from "cypress-react-unit-test";
 import produce from "immer";
 import { NodeEditor, LinkModel, PinLayout } from "../../src/node_editor";
 import "../../src/index.css";
+import { NodeModel, PanZoomModel, generateUuid } from "../../src/node_editor/model";
 
-const SingleNodeNodeEditor = (props: { zoom: number }): JSX.Element => {
-    const [nodes, setNodes] = React.useState({
+const SingleNodeNodeEditor = (props: { initialZoom: number }): JSX.Element => {
+    const { initialZoom } = props;
+    const [panZoomInfo, setPanZoomInfo] = React.useState<PanZoomModel>({
+        zoom: initialZoom,
+        topLeftCorner: { x: 0, y: 0 }
+    });
+    const [nodes, setNodes] = React.useState<{ [id: string]: NodeModel }>({
         node_a: {
-            id: "node_a",
             name: "my tested node",
             width: 200,
             x: 100,
             y: 100,
-            connectors: [
-                { id: "0", name: "x", pinLayout: PinLayout.LEFT_PIN },
-                { id: "1", name: "y", pinLayout: PinLayout.LEFT_PIN }
-            ]
+            connectors: {
+                0: { name: "x", pinLayout: PinLayout.LEFT_PIN, data: {} },
+                1: { name: "y", pinLayout: PinLayout.LEFT_PIN, data: {} }
+            }
         }
     });
-    const [links, setLinks] = React.useState<LinkModel[]>([]);
+    const [links, setLinks] = React.useState<{ [id: string]: LinkModel }>({});
 
     const onNodeMove = React.useCallback(
         (id: string, newX: number, newY: number, newWidth: number) => {
@@ -35,18 +40,18 @@ const SingleNodeNodeEditor = (props: { zoom: number }): JSX.Element => {
     const onCreateLink = React.useCallback(
         (link: LinkModel) => {
             const newLinks = produce(links, (draft) => {
-                draft.push(link);
+                draft[generateUuid()] = link;
             });
             setLinks(newLinks);
         },
         [links]
     );
-    const { zoom } = props;
+
     return (
         <div style={{ width: "100%", height: "100vh" }}>
             <NodeEditor
-                zoom={zoom}
-                setZoom={() => ({})}
+                panZoomInfo={panZoomInfo}
+                setPanZoomInfo={setPanZoomInfo}
                 nodes={nodes}
                 links={links}
                 onNodeMove={onNodeMove}
@@ -61,7 +66,7 @@ const zoomFactors = [0.5, 1, 1.5];
 zoomFactors.forEach((zoom) => {
     describe(`Node component (zoom factor: ${zoom})`, () => {
         beforeEach(() => {
-            mount(<SingleNodeNodeEditor zoom={zoom} />);
+            mount(<SingleNodeNodeEditor initialZoom={zoom} />);
         });
 
         it("can be dragged", () => {
@@ -99,7 +104,7 @@ zoomFactors.forEach((zoom) => {
             const dragX = 300;
             const dragY = 200;
             const node = cy.contains("my tested node").should("exist");
-            const footer = node.parent().parent().children().last();
+            const footer = node.parent().parent().parent().children().last();
             // Save its initial position
             node.then((elem) => {
                 const begginCords = elem[0].getBoundingClientRect();

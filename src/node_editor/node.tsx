@@ -2,21 +2,31 @@ import React, { Component, RefObject } from "react";
 import * as _ from "lodash";
 import CSS from "csstype";
 
-import { LinkModel, NodeModel, PinType, XYPosition, arePositionEquals } from "./model";
+import {
+    LinkModel,
+    NodeModel,
+    PinType,
+    XYPosition,
+    arePositionEquals,
+    ConnectorModel
+} from "./model";
 import Connector from "./connector";
 import defaultStyles from "./default_styles";
 import { DragWrapper } from "./events_wrappers";
 
 export type NodeProps = {
+    nodeId: string;
     node: NodeModel;
     isNodeSelected: boolean;
 
     getZoom: () => number;
 
+    onNodeDeletion?(id: string): void;
     onNodeMoveStart?: (id: string) => void;
     onNodeMove?: (offsetX: number, offsetY: number, offsetWidth: number) => void;
-    onNodeMoveEnd?: (id: string, wasNodeMoved: boolean) => void;
+    onNodeMoveEnd?: (ids: string, wasNodeMoved: boolean) => void;
 
+    onConnectorUpdate: (nodeId: string, connectorId: string, connector: ConnectorModel) => void;
     onCreateLink?: (link: LinkModel) => void;
     onUpdatePreviewLink?: (
         inputPosition: XYPosition | null,
@@ -45,11 +55,11 @@ export class Node extends Component<NodeProps> {
     }
 
     onMouseDown(part: NodePart, event: React.MouseEvent): void {
-        const { node, getZoom, onNodeMoveStart, onNodeMove, onNodeMoveEnd } = this.props;
+        const { nodeId, getZoom, onNodeMoveStart, onNodeMove, onNodeMoveEnd } = this.props;
         if (!onNodeMoveStart || !onNodeMove || !onNodeMoveEnd) {
             return;
         }
-        onNodeMoveStart(node.id);
+        onNodeMoveStart(nodeId);
 
         const onMouseMoveCb = (iPos: XYPosition, finalPos: XYPosition, offsetPos: XYPosition) => {
             if (part === NodePart.Header || part === NodePart.Core) {
@@ -60,7 +70,7 @@ export class Node extends Component<NodeProps> {
         };
 
         const onMouseUpCb = (initialPos: XYPosition, finalPos: XYPosition) => {
-            onNodeMoveEnd(node.id, !arePositionEquals(initialPos, finalPos));
+            onNodeMoveEnd(nodeId, !arePositionEquals(initialPos, finalPos));
         };
 
         const zoom = getZoom();
@@ -81,13 +91,22 @@ export class Node extends Component<NodeProps> {
     createReferences(): void {
         const { node } = this.props;
         this.connectorRefs = {};
-        node.connectors.forEach((connector) => {
-            this.connectorRefs[connector.id] = React.createRef<Connector>();
+        Object.keys(node.connectors).forEach((key) => {
+            this.connectorRefs[key] = React.createRef<Connector>();
         });
     }
 
     render(): JSX.Element {
-        const { node, isNodeSelected, onCreateLink, onUpdatePreviewLink, getZoom } = this.props;
+        const {
+            nodeId,
+            node,
+            isNodeSelected,
+            onCreateLink,
+            onUpdatePreviewLink,
+            getZoom,
+            onNodeDeletion,
+            onConnectorUpdate
+        } = this.props;
 
         const nodeCoreStyle: CSS.Properties = {
             position: "absolute",
@@ -117,20 +136,37 @@ export class Node extends Component<NodeProps> {
                 <div
                     style={{ ...nodeHeaderStyle, ...defaultStyles.dark.nodeHeader }}
                     onMouseDown={this.onMouseDown.bind(this, NodePart.Header)}>
-                    <div style={{ paddingLeft: "10px", overflow: "hidden" }}>{node.name}</div>
+                    <div style={{ paddingLeft: "10px", paddingRight: "10px", overflow: "hidden" }}>
+                        <div style={{ float: "left" }}>{node.name}</div>
+                        <div
+                            style={{ float: "right", cursor: "default" }}
+                            onClick={() => {
+                                if (onNodeDeletion) {
+                                    onNodeDeletion(nodeId);
+                                }
+                            }}>
+                            X
+                        </div>
+                    </div>
                 </div>
                 <div style={defaultStyles.dark.nodeBackground}>
-                    {node.connectors.map((connector) => (
-                        <Connector
-                            getZoom={getZoom}
-                            node={node}
-                            key={connector.id}
-                            connector={connector}
-                            ref={this.connectorRefs[connector.id]}
-                            onCreateLink={onCreateLink}
-                            onUpdatePreviewLink={onUpdatePreviewLink}
-                        />
-                    ))}
+                    {Object.keys(node.connectors).map((key) => {
+                        const connector = node.connectors[key];
+                        return (
+                            <Connector
+                                nodeId={nodeId}
+                                connectorId={key}
+                                getZoom={getZoom}
+                                node={node}
+                                key={key}
+                                connector={connector}
+                                ref={this.connectorRefs[key]}
+                                onCreateLink={onCreateLink}
+                                onUpdatePreviewLink={onUpdatePreviewLink}
+                                onConnectorUpdate={onConnectorUpdate}
+                            />
+                        );
+                    })}
                 </div>
                 <div
                     style={{ ...nodeFooterStyle, ...defaultStyles.dark.nodeFooter }}

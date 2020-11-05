@@ -22,10 +22,10 @@ export default class KeyPressedWrapper {
     }
 
     private onKeyUp(e: KeyboardEvent) {
-        this.keysDown.delete(e.key);
+        this.keysDown.delete(e.key.toLowerCase());
     }
 
     private onKeyDown(e: KeyboardEvent) {
-        this.keysDown.add(e.key);
+        this.keysDown.add(e.key.toLowerCase());
     }
 }

@@ -16,7 +16,15 @@ const NodePrevisualizer = (props: NodePrevisualizerProps): JSX.Element => {
         displayedNode.x = 10;
         displayedNode.width = divDim.width - 20;
         displayedNode.y = 10;
-        nodeElem = node ? <Node getZoom={() => 1} isNodeSelected node={displayedNode} /> : null;
+        nodeElem = node ? (
+            <Node
+                nodeId="0"
+                getZoom={() => 1}
+                isNodeSelected
+                node={displayedNode}
+                onConnectorUpdate={() => null}
+            />
+        ) : null;
     }
 
     return (

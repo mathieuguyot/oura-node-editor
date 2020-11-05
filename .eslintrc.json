@@ -20,6 +20,8 @@
       "no-shadow": "off", // Stack overflow : 63961803
       "@typescript-eslint/no-shadow": ["error"], // Stack overflow : 63961803
       "jsx-a11y/no-static-element-interactions": "off", // TODO: Maybe to remove this rule, check role thing later
+      "jsx-a11y/no-noninteractive-tabindex": "off", // TODO: Same
+      "jsx-a11y/click-events-have-key-events": "off", // TODO: Same
       "react/jsx-filename-extension": ["error", { "extensions": [".tsx"] }],
       "no-use-before-define": "off", // Buggy with typescript enums
       "no-param-reassign": ["error", { "props": true, "ignorePropertyModificationsForRegex": ["draft*"] }],

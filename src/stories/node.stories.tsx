@@ -12,12 +12,12 @@ export default {
 } as Meta;
 
 const defaultProps: NodeProps = {
+    nodeId: "0",
     node: {
         name: "default_node",
-        id: "0",
         x: 0,
         y: 0,
-        connectors: [],
+        connectors: {},
         width: 200
     },
     isNodeSelected: false,
@@ -25,6 +25,8 @@ const defaultProps: NodeProps = {
     getZoom: () => {
         return 1;
     },
+
+    onConnectorUpdate: () => null,
 
     onNodeMoveStart: () => null,
     onNodeMove: () => null,
@@ -53,16 +55,15 @@ export const BasicUnselectedNode = Template.bind({});
 BasicUnselectedNode.args = { ...defaultProps };
 BasicUnselectedNode.args.node = {
     name: "full_node",
-    id: "0",
     x: 0,
     y: 0,
-    connectors: [
-        { id: "0", name: "x", pinLayout: PinLayout.LEFT_PIN },
-        { id: "1", name: "y", pinLayout: PinLayout.LEFT_PIN, contentType: "string" },
-        { id: "2", name: "z", pinLayout: PinLayout.LEFT_PIN },
-        { id: "4", name: "sum", pinLayout: PinLayout.RIGHT_PIN },
-        { id: "5", name: "product", pinLayout: PinLayout.RIGHT_PIN }
-    ],
+    connectors: {
+        0: { name: "x", pinLayout: PinLayout.LEFT_PIN, data: {} },
+        1: { name: "y", pinLayout: PinLayout.LEFT_PIN, contentType: "string", data: {} },
+        2: { name: "z", pinLayout: PinLayout.LEFT_PIN, data: {} },
+        3: { name: "sum", pinLayout: PinLayout.RIGHT_PIN, data: {} },
+        4: { name: "product", pinLayout: PinLayout.RIGHT_PIN, data: {} }
+    },
     width: 300
 };
 

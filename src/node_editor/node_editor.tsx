@@ -6,8 +6,9 @@ import {
     XYPosition,
     LinkModel,
     LinkPositionModel,
-    getLinkId,
-    arePositionEquals
+    arePositionEquals,
+    PanZoomModel,
+    ConnectorModel
 } from "./model";
 import { Node } from "./node";
 import PanZoom from "./pan_zoom";
@@ -18,12 +19,14 @@ enableMapSet();
 
 type NodeEditorProps = {
     nodes: { [id: string]: NodeModel };
-    links: LinkModel[];
-    zoom: number;
+    links: { [id: string]: LinkModel };
+    panZoomInfo: PanZoomModel;
 
     onNodeMove(id: string, offsetX: number, offsetY: number, offsetWidth: number): void;
+    onNodeDeletion?(id: string): void;
     onCreateLink(link: LinkModel): void;
-    setZoom(zoom: number): void;
+    onConnectorUpdate?: (nodeId: string, connectorId: string, connector: ConnectorModel) => void;
+    setPanZoomInfo: (panZoomInfo: PanZoomModel) => void;
 };
 
 type NodeEditorState = {
@@ -45,8 +48,9 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
             selectedNodesIds: new Set()
         };
 
-        this.createReferences();
+        this.createNodeReferences();
 
+        this.onNodeDeletion = this.onNodeDeletion.bind(this);
         this.getZoom = this.getZoom.bind(this);
 
         this.onNodeMoveStart = this.onNodeMoveStart.bind(this);
@@ -54,8 +58,8 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
         this.onNodeMoveEnd = this.onNodeMoveEnd.bind(this);
 
         this.onUpdatePreviewLink = this.onUpdatePreviewLink.bind(this);
-
         this.onCreateLink = this.onCreateLink.bind(this);
+        this.onConnectorUpdate = this.onConnectorUpdate.bind(this);
     }
 
     componentDidMount(): void {
@@ -63,8 +67,8 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
         const { links } = this.props;
         const { linksPositions } = this.state;
         const newLinksPositions = produce(linksPositions, (draft) => {
-            links.forEach((link) => {
-                const linkId = getLinkId(link);
+            Object.keys(links).forEach((key) => {
+                const link = links[key];
                 const inputNodeRef = this.nodesRefs[link.inputNodeId].current;
                 const outputNodeRef = this.nodesRefs[link.outputNodeId].current;
                 if (inputNodeRef && outputNodeRef) {
@@ -77,7 +81,7 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
                         link.outputPinType
                     );
                     if (inputPinPosition && outputPinPosition) {
-                        draft[linkId] = { linkId, inputPinPosition, outputPinPosition };
+                        draft[key] = { linkId: key, inputPinPosition, outputPinPosition };
                     }
                 }
             });
@@ -88,12 +92,13 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
     }
 
     componentDidUpdate(): void {
+        this.createNodeReferences();
         const { links } = this.props;
         const { linksPositions } = this.state;
         let updatedIsNeeded = false;
         const newLinksPositions = produce(linksPositions, (draft) => {
-            links.forEach((link) => {
-                const linkId = getLinkId(link);
+            Object.keys(links).forEach((key) => {
+                const link = links[key];
                 const inputNodeRef = this.nodesRefs[link.inputNodeId].current;
                 const outputNodeRef = this.nodesRefs[link.outputNodeId].current;
                 if (inputNodeRef && outputNodeRef) {
@@ -107,14 +112,20 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
                     );
                     if (inputPinPosition && outputPinPosition) {
                         if (
-                            !(linkId in draft) ||
-                            !arePositionEquals(draft[linkId].inputPinPosition, inputPinPosition) ||
-                            !arePositionEquals(draft[linkId].outputPinPosition, outputPinPosition)
+                            !(key in draft) ||
+                            !arePositionEquals(draft[key].inputPinPosition, inputPinPosition) ||
+                            !arePositionEquals(draft[key].outputPinPosition, outputPinPosition)
                         ) {
-                            draft[linkId] = { linkId, inputPinPosition, outputPinPosition };
+                            draft[key] = { linkId: key, inputPinPosition, outputPinPosition };
                             updatedIsNeeded = true;
                         }
                     }
+                }
+            });
+            Object.keys(linksPositions).forEach((key) => {
+                if (!(key in links)) {
+                    delete draft[key];
+                    updatedIsNeeded = true;
                 }
             });
         });
@@ -135,7 +146,7 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
             produce((draftState: NodeEditorState) => {
                 draftState.isNodeBeingMoved = true;
                 if (
-                    !this.keyPressedWrapper.isKeyDown("Shift") &&
+                    !this.keyPressedWrapper.isKeyDown("shift") &&
                     !draftState.selectedNodesIds.has(id)
                 ) {
                     draftState.selectedNodesIds.clear();
@@ -161,7 +172,7 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
         this.setState(
             produce((draftState: NodeEditorState) => {
                 draftState.isNodeBeingMoved = false;
-                if (!wasNodeMoved && !this.keyPressedWrapper.isKeyDown("Shift")) {
+                if (!wasNodeMoved && !this.keyPressedWrapper.isKeyDown("shift")) {
                     draftState.selectedNodesIds.clear();
                     draftState.selectedNodesIds.add(id);
                 }
@@ -170,11 +181,13 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
     }
 
     onWheelZoom(event: React.WheelEvent): void {
-        const { zoom, setZoom } = this.props;
+        const { panZoomInfo, setPanZoomInfo } = this.props;
         const { isNodeBeingMoved, draggedLink } = this.state;
         if (!isNodeBeingMoved && !draggedLink) {
-            const newZoom = event.deltaY > 0 ? zoom / 1.1 : zoom * 1.1;
-            setZoom(newZoom);
+            const newPanZoomInfo = { ...panZoomInfo };
+            newPanZoomInfo.zoom =
+                event.deltaY > 0 ? panZoomInfo.zoom / 1.1 : panZoomInfo.zoom * 1.1;
+            setPanZoomInfo(newPanZoomInfo);
         }
     }
 
@@ -199,24 +212,42 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
 
     onCreateLink(link: LinkModel): void {
         const { onCreateLink } = this.props;
+        if (link.inputPinType === link.outputPinType || link.inputNodeId === link.outputNodeId) {
+            return;
+        }
         onCreateLink(link);
     }
 
-    getZoom(): number {
-        const { zoom } = this.props;
-        return zoom;
+    onNodeDeletion(id: string): void {
+        const { onNodeDeletion } = this.props;
+        if (onNodeDeletion) {
+            onNodeDeletion(id);
+        }
     }
 
-    createReferences(): void {
+    onConnectorUpdate(nodeId: string, connectorId: string, connector: ConnectorModel): void {
+        const { onConnectorUpdate } = this.props;
+        if (onConnectorUpdate) {
+            onConnectorUpdate(nodeId, connectorId, connector);
+        }
+    }
+
+    getZoom(): number {
+        const { panZoomInfo } = this.props;
+        return panZoomInfo.zoom;
+    }
+
+    createNodeReferences(): void {
         const { nodes } = this.props;
-        this.nodesRefs = {};
         Object.keys(nodes).forEach((key) => {
-            this.nodesRefs[key] = React.createRef<Node>();
+            if (!(key in this.nodesRefs)) {
+                this.nodesRefs[key] = React.createRef<Node>();
+            }
         });
     }
 
     render(): JSX.Element {
-        const { nodes, links, zoom } = this.props;
+        const { nodes, links, panZoomInfo, setPanZoomInfo } = this.props;
         const { draggedLink, selectedNodesIds, linksPositions } = this.state;
         let svgDraggedLink;
         if (draggedLink) {
@@ -224,20 +255,19 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
         }
 
         const svgLinks: JSX.Element[] = [];
-        links.forEach((link) => {
-            const linkId = getLinkId(link);
-            const linkPosition = linksPositions[linkId];
+        Object.keys(links).forEach((key) => {
+            const linkPosition = linksPositions[key];
             if (linkPosition) {
                 svgLinks.push(
                     createLinkComponent({
-                        linkType: link.linkType,
-                        key: linkId,
+                        linkType: links[key].linkType,
+                        key,
                         linkPosition
                     })
                 );
             }
         });
-        const grid = String(300 * zoom);
+        const grid = String(300 * panZoomInfo.zoom);
         return (
             <div
                 onWheel={this.onWheelZoom.bind(this)}
@@ -251,7 +281,7 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
                     backgroundColor: "#232323",
                     backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${grid}' height='${grid}' viewBox='0 0 100 100'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='black' fill-opacity='0.4'%3E%3Cpath opacity='.5' d='M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z'/%3E%3Cpath d='M6 5V0H5v5H0v1h5v94h1V6h94V5H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
                 }}>
-                <PanZoom getZoom={this.getZoom}>
+                <PanZoom panZoomInfo={panZoomInfo} setPanZoomInfo={setPanZoomInfo}>
                     <svg
                         style={{
                             position: "absolute",
@@ -266,16 +296,19 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
                     </svg>
                     {Object.keys(nodes).map((key) => (
                         <Node
+                            nodeId={key}
                             key={key}
                             ref={this.nodesRefs[key]}
                             node={nodes[key]}
-                            isNodeSelected={selectedNodesIds.has(nodes[key].id)}
+                            isNodeSelected={selectedNodesIds.has(key)}
                             getZoom={this.getZoom}
                             onNodeMoveStart={this.onNodeMoveStart}
                             onNodeMove={this.onNodeMove}
                             onNodeMoveEnd={this.onNodeMoveEnd}
                             onCreateLink={this.onCreateLink}
                             onUpdatePreviewLink={this.onUpdatePreviewLink}
+                            onNodeDeletion={this.onNodeDeletion}
+                            onConnectorUpdate={this.onConnectorUpdate}
                         />
                     ))}
                 </PanZoom>

@@ -1,36 +1,73 @@
+/* eslint-disable no-bitwise */
 import React from "react";
 import { produce } from "immer";
 
-import { NodeEditor, NodeModel, LinkModel, PinLayout } from "../../node_editor";
+import {
+    NodeEditor,
+    LinkModel,
+    NodeModel,
+    PanZoomModel,
+    generateUuid,
+    PinLayout,
+    ConnectorModel
+} from "../../node_editor";
 import NodePicker from "../../node_picker";
 
-function createRandomNodeModel(): { [nId: string]: NodeModel } {
-    const nodes: { [nId: string]: NodeModel } = {};
-    for (let index = 0; index < 100; index += 1) {
-        nodes[index.toString()] = {
-            id: index.toString(),
-            name: `node_${index}`,
-            width: Math.floor(Math.random() * 300) + 200,
-            x: Math.floor(Math.random() * 5000),
-            y: Math.floor(Math.random() * 5000),
-            connectors: [
-                { id: "0", name: "x", pinLayout: PinLayout.LEFT_PIN },
-                { id: "1", name: "y", pinLayout: PinLayout.LEFT_PIN, contentType: "string" },
-                { id: "2", name: "z", pinLayout: PinLayout.LEFT_PIN },
-                { id: "4", name: "sum", pinLayout: PinLayout.RIGHT_PIN },
-                { id: "5", name: "abcdefghijklmnopqrstuv", pinLayout: PinLayout.RIGHT_PIN },
-                { id: "6", name: "abcdefghijklmnopqrstuv", pinLayout: PinLayout.NO_PINS },
-                { id: "7", name: "flow", pinLayout: PinLayout.BOTH_PINS }
-            ]
-        };
+const nodesSchemas: { [nId: string]: NodeModel } = {
+    0: {
+        name: "Canvas 2d context",
+        width: 100,
+        x: 0,
+        y: 0,
+        connectors: {
+            0: { name: "ctx2d", pinLayout: PinLayout.RIGHT_PIN, data: {} }
+        }
+    },
+    1: {
+        name: "rectangle",
+        width: 100,
+        x: 0,
+        y: 0,
+        connectors: {
+            0: { name: "ctx2d", pinLayout: PinLayout.BOTH_PINS, data: {} },
+            1: {
+                name: "y",
+                pinLayout: PinLayout.LEFT_PIN,
+                contentType: "string",
+                data: { value: "0" }
+            },
+            2: {
+                name: "z",
+                pinLayout: PinLayout.LEFT_PIN,
+                contentType: "string",
+                data: { value: "0" }
+            },
+            3: {
+                name: "width",
+                pinLayout: PinLayout.LEFT_PIN,
+                contentType: "string",
+                data: { value: "0" }
+            },
+            4: {
+                name: "height",
+                pinLayout: PinLayout.LEFT_PIN,
+                contentType: "string",
+                data: { value: "0" }
+            }
+        }
     }
-    return nodes;
-}
+};
 
 const OuraCanvasApp = (): JSX.Element => {
-    const [zoom, setZoom] = React.useState(1);
-    const [nodes, setNodes] = React.useState(createRandomNodeModel());
-    const [links, setLinks] = React.useState<LinkModel[]>([]);
+    const [showNodePicker, setShowNodePicker] = React.useState(false);
+    const [keysDown, setKeysDown] = React.useState<Set<string>>(new Set());
+    const [panZoomInfo, setPanZoomInfo] = React.useState<PanZoomModel>({
+        zoom: 1,
+        topLeftCorner: { x: 0, y: 0 }
+    });
+    const [nodes, setNodes] = React.useState<{ [nId: string]: NodeModel }>({});
+    const [links, setLinks] = React.useState<{ [nId: string]: LinkModel }>({});
+    const canvasRef = React.useRef<HTMLCanvasElement>(null);
 
     const onNodeMove = React.useCallback(
         (id: string, newX: number, newY: number, newWidth: number) => {
@@ -47,39 +84,138 @@ const OuraCanvasApp = (): JSX.Element => {
     const onCreateLink = React.useCallback(
         (link: LinkModel) => {
             const newLinks = produce(links, (draft) => {
-                draft.push(link);
+                draft[generateUuid()] = link;
             });
             setLinks(newLinks);
         },
         [links]
     );
 
+    const onNodeDeletion = React.useCallback(
+        (id: string) => {
+            const newNodes = { ...nodes };
+            delete newNodes[id];
+            const newLinks = produce(links, (draft: { [nId: string]: LinkModel }) => {
+                Object.keys(links).forEach((key) => {
+                    const link = links[key];
+                    if (link.inputNodeId === id || link.outputNodeId === id) {
+                        delete draft[key];
+                    }
+                });
+            });
+            setNodes(newNodes);
+            setLinks(newLinks);
+        },
+        [nodes, links]
+    );
+
+    const onKeyDown = React.useCallback(
+        (event: React.KeyboardEvent) => {
+            const newKeys = produce(keysDown, (draft) => {
+                draft.add(event.key.toLowerCase());
+            });
+            setKeysDown(newKeys);
+            if (newKeys.has("shift") && newKeys.has("a")) {
+                setShowNodePicker(!showNodePicker);
+            }
+            if (newKeys.has("escape") && showNodePicker) {
+                setShowNodePicker(false);
+            }
+        },
+        [keysDown, showNodePicker]
+    );
+
+    const onKeyUp = React.useCallback(
+        (event: React.KeyboardEvent) => {
+            const newKeys = produce(keysDown, (draft) => {
+                draft.delete(event.key.toLowerCase());
+            });
+            setKeysDown(newKeys);
+        },
+        [keysDown]
+    );
+
+    const onNodeSelection = React.useCallback(
+        (id: string) => {
+            const newNode = { ...nodesSchemas[id] };
+            newNode.x = panZoomInfo.topLeftCorner.x + 10;
+            newNode.y = panZoomInfo.topLeftCorner.y + 10;
+            const newNodes = produce(nodes, (draft) => {
+                draft[generateUuid()] = newNode;
+            });
+            setNodes(newNodes);
+            setShowNodePicker(false);
+        },
+        [panZoomInfo, nodes, showNodePicker]
+    );
+
+    const onConnectorUpdate = React.useCallback(
+        (nodeId: string, connectorId: string, connector: ConnectorModel) => {
+            const newNodes = produce(nodes, (draft) => {
+                draft[nodeId].connectors[connectorId] = connector;
+            });
+            setNodes(newNodes);
+        },
+        [nodes]
+    );
+
+    const canvas = (
+        <canvas
+            width={640}
+            height={480}
+            style={{
+                width: 640,
+                height: 480,
+                position: "absolute",
+                right: 20,
+                bottom: 20,
+                backgroundColor: "white"
+            }}
+            ref={canvasRef}
+        />
+    );
+
+    if (canvasRef.current) {
+        const ctx = canvasRef.current.getContext("2d");
+        if (ctx) {
+            ctx.beginPath();
+            ctx.rect(0, 0, 200, 100);
+            ctx.stroke();
+        }
+    }
+
+    const nodePicker = (
+        <div
+            style={{
+                width: 640,
+                height: 480,
+                position: "absolute",
+                top: "calc(50% - 240px)",
+                left: "calc(50% - 320px)",
+                backgroundColor: "white"
+            }}>
+            <NodePicker nodesSchema={nodesSchemas} onNodeSelection={onNodeSelection} />
+        </div>
+    );
+
     return (
-        <div style={{ width: "100%", height: "100vh" }}>
+        <div
+            style={{ width: "100%", height: "100vh" }}
+            onKeyDown={onKeyDown}
+            onKeyUp={onKeyUp}
+            tabIndex={0}>
             <NodeEditor
-                zoom={zoom}
-                setZoom={setZoom}
+                panZoomInfo={panZoomInfo}
                 nodes={nodes}
                 links={links}
+                setPanZoomInfo={setPanZoomInfo}
                 onNodeMove={onNodeMove}
                 onCreateLink={onCreateLink}
+                onNodeDeletion={onNodeDeletion}
+                onConnectorUpdate={onConnectorUpdate}
             />
-            <div
-                style={{
-                    width: 640,
-                    height: 480,
-                    position: "absolute",
-                    right: 20,
-                    bottom: 20,
-                    backgroundColor: "white"
-                }}>
-                <NodePicker
-                    nodesSchema={nodes}
-                    onNodeSelection={(id) => {
-                        console.log(id);
-                    }}
-                />
-            </div>
+            {canvas}
+            {showNodePicker ? nodePicker : null}
         </div>
     );
 };
