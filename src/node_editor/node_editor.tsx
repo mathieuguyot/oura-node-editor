@@ -2,13 +2,14 @@ import React, { Component, RefObject } from "react";
 import { produce, enableMapSet } from "immer";
 
 import {
-    NodeModel,
     XYPosition,
     LinkModel,
     LinkPositionModel,
     arePositionEquals,
     PanZoomModel,
-    ConnectorModel
+    ConnectorModel,
+    NodeCollection,
+    LinkCollection
 } from "./model";
 import { Node } from "./node";
 import PanZoom from "./pan_zoom";
@@ -18,8 +19,8 @@ import { KeyPressedWrapper } from "./events_wrappers";
 enableMapSet();
 
 type NodeEditorProps = {
-    nodes: { [id: string]: NodeModel };
-    links: { [id: string]: LinkModel };
+    nodes: NodeCollection;
+    links: LinkCollection;
     panZoomInfo: PanZoomModel;
 
     onNodeMove(id: string, offsetX: number, offsetY: number, offsetWidth: number): void;

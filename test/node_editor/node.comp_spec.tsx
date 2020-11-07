@@ -3,7 +3,12 @@ import { mount } from "cypress-react-unit-test";
 import produce from "immer";
 import { NodeEditor, LinkModel, PinLayout } from "../../src/node_editor";
 import "../../src/index.css";
-import { NodeModel, PanZoomModel, generateUuid } from "../../src/node_editor/model";
+import {
+    PanZoomModel,
+    generateUuid,
+    NodeCollection,
+    LinkCollection
+} from "../../src/node_editor/model";
 
 const SingleNodeNodeEditor = (props: { initialZoom: number }): JSX.Element => {
     const { initialZoom } = props;
@@ -11,7 +16,7 @@ const SingleNodeNodeEditor = (props: { initialZoom: number }): JSX.Element => {
         zoom: initialZoom,
         topLeftCorner: { x: 0, y: 0 }
     });
-    const [nodes, setNodes] = React.useState<{ [id: string]: NodeModel }>({
+    const [nodes, setNodes] = React.useState<NodeCollection>({
         node_a: {
             name: "my tested node",
             width: 200,
@@ -23,7 +28,7 @@ const SingleNodeNodeEditor = (props: { initialZoom: number }): JSX.Element => {
             }
         }
     });
-    const [links, setLinks] = React.useState<{ [id: string]: LinkModel }>({});
+    const [links, setLinks] = React.useState<LinkCollection>({});
 
     const onNodeMove = React.useCallback(
         (id: string, newX: number, newY: number, newWidth: number) => {

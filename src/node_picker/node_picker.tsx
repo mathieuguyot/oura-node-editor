@@ -1,5 +1,5 @@
 import React from "react";
-import { NodeModel, Node } from "../node_editor";
+import { NodeModel, Node, NodeCollection } from "../node_editor";
 
 type NodePrevisualizerProps = {
     node: NodeModel | null;
@@ -41,7 +41,7 @@ const NodePrevisualizer = (props: NodePrevisualizerProps): JSX.Element => {
 };
 
 type NodePickerProps = {
-    nodesSchema: { [id: string]: NodeModel };
+    nodesSchema: NodeCollection;
     onNodeSelection: (id: string) => void;
 };
 

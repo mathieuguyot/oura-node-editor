@@ -1,6 +1,9 @@
-/* eslint-disable no-bitwise */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable max-classes-per-file */
+
 import React from "react";
-import { produce } from "immer";
+import { produce, immerable } from "immer";
+import _ from "lodash";
 
 import {
     NodeEditor,
@@ -9,27 +12,75 @@ import {
     PanZoomModel,
     generateUuid,
     PinLayout,
-    ConnectorModel
+    ConnectorModel,
+    NodeCollection,
+    LinkCollection,
+    ConnectorCollection
 } from "../../node_editor";
 import NodePicker from "../../node_picker";
 
-const nodesSchemas: { [nId: string]: NodeModel } = {
-    0: {
-        name: "Canvas 2d context",
-        width: 100,
-        x: 0,
-        y: 0,
-        connectors: {
-            0: { name: "ctx2d", pinLayout: PinLayout.RIGHT_PIN, data: {} }
+const getLinks = (links: LinkCollection, nodeId: string, connectorId: string): Array<LinkModel> => {
+    const validLinks: Array<LinkModel> = [];
+    Object.keys(links).forEach((key) => {
+        const link = links[key];
+        if (
+            (link.inputNodeId === nodeId && link.inputPinId === connectorId) ||
+            (link.outputNodeId === nodeId && link.outputPinId === connectorId)
+        ) {
+            validLinks.push(link);
         }
-    },
-    1: {
-        name: "rectangle",
-        width: 100,
-        x: 0,
-        y: 0,
-        connectors: {
-            0: { name: "ctx2d", pinLayout: PinLayout.BOTH_PINS, data: {} },
+    });
+    return validLinks;
+};
+
+abstract class Node implements NodeModel {
+    [immerable] = true;
+    public name: string;
+    public x = 0;
+    public y = 0;
+    public width: number;
+    public connectors: ConnectorCollection;
+
+    constructor(name: string, width: number, connectors: ConnectorCollection) {
+        this.name = name;
+        this.width = width;
+        this.connectors = connectors;
+    }
+
+    compute(nodes: NodeCollection, links: LinkCollection): { [id: string]: any } {
+        const nodeId = Object.keys(nodes).find((key) => nodes[key] === this);
+        if (nodeId) {
+            const inputs: { [id: string]: any } = {};
+            Object.keys(this.connectors).forEach((key) => {
+                const connector = this.connectors[key];
+                if (connector.pinLayout === PinLayout.LEFT_PIN) {
+                    const otherLinks = getLinks(links, nodeId, key);
+                    otherLinks.forEach((link) => {
+                        const otherNodeId =
+                            link.inputNodeId !== nodeId ? link.inputNodeId : link.outputNodeId;
+                        const otherConnectorId =
+                            link.inputNodeId === otherNodeId ? link.inputPinId : link.outputPinId;
+                        const otherNode = nodes[otherNodeId];
+                        const res = (otherNode as Node).compute(nodes, links);
+                        if (!(key in inputs)) {
+                            inputs[key] = [];
+                        }
+                        inputs[key].push(res[otherConnectorId]);
+                    });
+                }
+            });
+            return this.computeSpecific(inputs);
+        }
+        return {};
+    }
+
+    protected abstract computeSpecific(inputs: { [id: string]: any }): { [id: string]: any };
+}
+
+class CanvasRectangle extends Node implements NodeModel {
+    constructor() {
+        super("rectangle", 100, {
+            0: { name: "draw", pinLayout: PinLayout.RIGHT_PIN, data: {} },
             1: {
                 name: "y",
                 pinLayout: PinLayout.LEFT_PIN,
@@ -46,17 +97,55 @@ const nodesSchemas: { [nId: string]: NodeModel } = {
                 name: "width",
                 pinLayout: PinLayout.LEFT_PIN,
                 contentType: "string",
-                data: { value: "0" }
+                data: { value: "100" }
             },
             4: {
                 name: "height",
                 pinLayout: PinLayout.LEFT_PIN,
                 contentType: "string",
-                data: { value: "0" }
+                data: { value: "100" }
+            }
+        });
+    }
+
+    protected computeSpecific(inputs: { [id: string]: any }): { [id: string]: any } {
+        const y = "1" in inputs ? inputs[1][0] : this.connectors[1].data.value;
+        const x = "2" in inputs ? inputs[2][0] : this.connectors[2].data.value;
+        const width = "3" in inputs ? inputs[3][0] : this.connectors[3].data.value;
+        const height = "4" in inputs ? inputs[4][0] : this.connectors[4].data.value;
+
+        const draw = (ctx: CanvasRenderingContext2D): void => {
+            ctx.fillRect(x, y, width, height);
+        };
+
+        return { "0": draw };
+    }
+}
+
+class Canvas2dContext extends Node implements NodeModel {
+    [immerable] = true;
+    canvasRef: React.RefObject<HTMLCanvasElement>;
+
+    constructor(canvasRef: React.RefObject<HTMLCanvasElement>) {
+        super("canvas", 100, {
+            0: { name: "draw", pinLayout: PinLayout.LEFT_PIN, data: {} }
+        });
+        this.canvasRef = canvasRef;
+    }
+
+    protected computeSpecific(inputs: { [id: string]: any }): { [id: string]: any } {
+        if (this.canvasRef.current) {
+            const ctx = this.canvasRef.current.getContext("2d");
+            if (ctx && inputs[0]) {
+                ctx.clearRect(0, 0, this.canvasRef.current.width, this.canvasRef.current.height);
+                inputs[0].forEach((draw: (arg0: CanvasRenderingContext2D) => void) => {
+                    draw(ctx);
+                });
             }
         }
+        return {};
     }
-};
+}
 
 const OuraCanvasApp = (): JSX.Element => {
     const [showNodePicker, setShowNodePicker] = React.useState(false);
@@ -65,13 +154,27 @@ const OuraCanvasApp = (): JSX.Element => {
         zoom: 1,
         topLeftCorner: { x: 0, y: 0 }
     });
-    const [nodes, setNodes] = React.useState<{ [nId: string]: NodeModel }>({});
-    const [links, setLinks] = React.useState<{ [nId: string]: LinkModel }>({});
+    const [nodes, setNodes] = React.useState<NodeCollection>({});
+    const [links, setLinks] = React.useState<LinkCollection>({});
     const canvasRef = React.useRef<HTMLCanvasElement>(null);
+
+    const nodesSchemas: { [nId: string]: NodeModel } = {
+        0: new Canvas2dContext(canvasRef),
+        1: new CanvasRectangle()
+    };
+
+    const redrawCanvas = React.useCallback((curNodes: NodeCollection, curLink: LinkCollection) => {
+        Object.keys(curNodes).forEach((key) => {
+            const node = curNodes[key];
+            if (node instanceof Canvas2dContext) {
+                (node as Node).compute(curNodes, curLink);
+            }
+        });
+    }, []);
 
     const onNodeMove = React.useCallback(
         (id: string, newX: number, newY: number, newWidth: number) => {
-            const newNodes = produce(nodes, (draft) => {
+            const newNodes = produce(nodes, (draft: NodeCollection) => {
                 draft[id].x = newX;
                 draft[id].y = newY;
                 draft[id].width = newWidth;
@@ -87,15 +190,16 @@ const OuraCanvasApp = (): JSX.Element => {
                 draft[generateUuid()] = link;
             });
             setLinks(newLinks);
+            redrawCanvas(nodes, newLinks);
         },
-        [links]
+        [nodes, links]
     );
 
     const onNodeDeletion = React.useCallback(
         (id: string) => {
             const newNodes = { ...nodes };
             delete newNodes[id];
-            const newLinks = produce(links, (draft: { [nId: string]: LinkModel }) => {
+            const newLinks = produce(links, (draft: LinkCollection) => {
                 Object.keys(links).forEach((key) => {
                     const link = links[key];
                     if (link.inputNodeId === id || link.outputNodeId === id) {
@@ -105,6 +209,7 @@ const OuraCanvasApp = (): JSX.Element => {
             });
             setNodes(newNodes);
             setLinks(newLinks);
+            redrawCanvas(newNodes, newLinks);
         },
         [nodes, links]
     );
@@ -137,7 +242,7 @@ const OuraCanvasApp = (): JSX.Element => {
 
     const onNodeSelection = React.useCallback(
         (id: string) => {
-            const newNode = { ...nodesSchemas[id] };
+            const newNode = _.clone(nodesSchemas[id]);
             newNode.x = panZoomInfo.topLeftCorner.x + 10;
             newNode.y = panZoomInfo.topLeftCorner.y + 10;
             const newNodes = produce(nodes, (draft) => {
@@ -146,7 +251,7 @@ const OuraCanvasApp = (): JSX.Element => {
             setNodes(newNodes);
             setShowNodePicker(false);
         },
-        [panZoomInfo, nodes, showNodePicker]
+        [panZoomInfo, nodes, links, showNodePicker]
     );
 
     const onConnectorUpdate = React.useCallback(
@@ -155,8 +260,9 @@ const OuraCanvasApp = (): JSX.Element => {
                 draft[nodeId].connectors[connectorId] = connector;
             });
             setNodes(newNodes);
+            redrawCanvas(newNodes, links);
         },
-        [nodes]
+        [nodes, links]
     );
 
     const canvas = (
@@ -174,15 +280,6 @@ const OuraCanvasApp = (): JSX.Element => {
             ref={canvasRef}
         />
     );
-
-    if (canvasRef.current) {
-        const ctx = canvasRef.current.getContext("2d");
-        if (ctx) {
-            ctx.beginPath();
-            ctx.rect(0, 0, 200, 100);
-            ctx.stroke();
-        }
-    }
 
     const nodePicker = (
         <div

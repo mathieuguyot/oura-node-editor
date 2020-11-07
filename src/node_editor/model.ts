@@ -23,6 +23,9 @@ export interface LinkModel {
     linkType?: string;
 }
 
+export type LinkCollection = { [id: string]: LinkModel };
+export type ConnectorCollection = { [cId: string]: ConnectorModel };
+
 export interface LinkPositionModel {
     linkId: string;
     inputPinPosition: XYPosition;
@@ -42,8 +45,10 @@ export interface NodeModel {
     x: number;
     y: number;
     width: number;
-    connectors: { [cId: string]: ConnectorModel };
+    connectors: ConnectorCollection;
 }
+
+export type NodeCollection = { [id: string]: NodeModel };
 
 export enum PinType {
     LEFT,
