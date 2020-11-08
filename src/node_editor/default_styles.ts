@@ -34,6 +34,9 @@ const defaultStyles: {
             strokeWidth: "3px",
             fillOpacity: 0
         },
+        linkSelected: {
+            stroke: "white"
+        },
         connector: {
             backgroundColor: "rgba(199, 199, 41, 1)",
             borderRadius: "10px 10px 10px 10px",

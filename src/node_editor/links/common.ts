@@ -1,7 +1,12 @@
 import { LinkPositionModel } from "../model";
 
 export type LinkProps = {
+    linkId?: string;
     linkPosition: LinkPositionModel;
     linkType?: string;
-    key?: string | number;
+
+    isLinkSelected: boolean;
+    onSelectLink?: (linkId: string) => void;
+
+    key?: string;
 };

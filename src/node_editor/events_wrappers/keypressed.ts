@@ -1,10 +1,12 @@
 /* onKey(down|up) event wrapper to simplify access to key states */
 export default class KeyPressedWrapper {
     private keysDown: Set<string> = new Set();
+    private onKeyDownCb?: (key: string) => void;
 
-    constructor() {
+    constructor(onKeyDownCb?: (key: string) => void) {
         this.onKeyUp = this.onKeyUp.bind(this);
         this.onKeyDown = this.onKeyDown.bind(this);
+        this.onKeyDownCb = onKeyDownCb;
     }
 
     isKeyDown(key: string): boolean {
@@ -27,5 +29,8 @@ export default class KeyPressedWrapper {
 
     private onKeyDown(e: KeyboardEvent) {
         this.keysDown.add(e.key.toLowerCase());
+        if (this.onKeyDownCb) {
+            this.onKeyDownCb(e.key.toLowerCase());
+        }
     }
 }

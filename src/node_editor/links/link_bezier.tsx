@@ -18,8 +18,15 @@ export default class BezierLink extends Component<LinkProps> {
         return !_.isEqual(this.props, nextProps);
     }
 
+    onSelectLink(): void {
+        const { linkId, onSelectLink } = this.props;
+        if (onSelectLink && linkId) {
+            onSelectLink(linkId);
+        }
+    }
+
     render(): JSX.Element {
-        const { linkPosition } = this.props;
+        const { linkPosition, isLinkSelected } = this.props;
         const sourceX = linkPosition.inputPinPosition.x;
         const sourceY = linkPosition.inputPinPosition.y;
         const targetX = linkPosition.outputPinPosition.x;
@@ -28,6 +35,14 @@ export default class BezierLink extends Component<LinkProps> {
 
         const path = `M${sourceX},${sourceY} C${center.x},${sourceY} ${center.x},${targetY} ${targetX},${targetY}`;
 
-        return <path d={path} style={defaultStyles.dark.link} />;
+        const selectedStyle = isLinkSelected ? defaultStyles.dark.linkSelected : {};
+
+        return (
+            <path
+                d={path}
+                style={{ ...defaultStyles.dark.link, ...selectedStyle }}
+                onClick={this.onSelectLink.bind(this)}
+            />
+        );
     }
 }

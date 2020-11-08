@@ -25,6 +25,7 @@ type NodeEditorProps = {
 
     onNodeMove(id: string, offsetX: number, offsetY: number, offsetWidth: number): void;
     onNodeDeletion?(id: string): void;
+    onLinkDeletion?(id: string): void;
     onCreateLink(link: LinkModel): void;
     onConnectorUpdate?: (nodeId: string, connectorId: string, connector: ConnectorModel) => void;
     setPanZoomInfo: (panZoomInfo: PanZoomModel) => void;
@@ -34,22 +35,25 @@ type NodeEditorState = {
     linksPositions: { [linkId: string]: LinkPositionModel };
     draggedLink?: LinkPositionModel;
     selectedNodesIds: Set<string>;
+    selectedLinkIds: Set<string>;
 };
 
 class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
     private nodesRefs: { [nodeId: string]: RefObject<Node> } = {};
-    private keyPressedWrapper: KeyPressedWrapper = new KeyPressedWrapper();
+    private keyPressedWrapper: KeyPressedWrapper;
 
     constructor(props: NodeEditorProps) {
         super(props);
         this.state = {
             linksPositions: {},
-            selectedNodesIds: new Set()
+            selectedNodesIds: new Set(),
+            selectedLinkIds: new Set()
         };
 
         this.createNodeReferences();
 
         this.onNodeDeletion = this.onNodeDeletion.bind(this);
+        this.onLinkDeletion = this.onLinkDeletion.bind(this);
         this.getZoom = this.getZoom.bind(this);
 
         this.onNodeMoveStart = this.onNodeMoveStart.bind(this);
@@ -59,6 +63,11 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
         this.onUpdatePreviewLink = this.onUpdatePreviewLink.bind(this);
         this.onCreateLink = this.onCreateLink.bind(this);
         this.onConnectorUpdate = this.onConnectorUpdate.bind(this);
+
+        this.onSelectLink = this.onSelectLink.bind(this);
+        this.onKeyUp = this.onKeyUp.bind(this);
+
+        this.keyPressedWrapper = new KeyPressedWrapper(this.onKeyUp);
     }
 
     componentDidMount(): void {
@@ -96,11 +105,14 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
         const { linksPositions } = this.state;
         let updatedIsNeeded = false;
         const newLinksPositions = produce(linksPositions, (draft) => {
+            // Create or update position of all links positions that need so
             Object.keys(links).forEach((key) => {
                 const link = links[key];
+                // Get node references
                 const inputNodeRef = this.nodesRefs[link.inputNodeId].current;
                 const outputNodeRef = this.nodesRefs[link.outputNodeId].current;
                 if (inputNodeRef && outputNodeRef) {
+                    // From node references, get connectors pin positions
                     const inputPinPosition = inputNodeRef.getConnectorPinPosition(
                         link.inputPinId,
                         link.inputPinType
@@ -109,6 +121,7 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
                         link.outputPinId,
                         link.outputPinType
                     );
+                    // If connector pin position exsits, create or update link position if needed
                     if (inputPinPosition && outputPinPosition) {
                         if (
                             !(key in draft) ||
@@ -121,6 +134,7 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
                     }
                 }
             });
+            // Remove link positions that belongs to a deleted links
             Object.keys(linksPositions).forEach((key) => {
                 if (!(key in links)) {
                     delete draft[key];
@@ -143,6 +157,7 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
     onNodeMoveStart(id: string): void {
         this.setState(
             produce((draftState: NodeEditorState) => {
+                // Clear selection if shift isn't pressed and clicked node not already selected
                 if (
                     !this.keyPressedWrapper.isKeyDown("shift") &&
                     !draftState.selectedNodesIds.has(id)
@@ -150,13 +165,24 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
                     draftState.selectedNodesIds.clear();
                 }
                 draftState.selectedNodesIds.add(id);
+                draftState.selectedLinkIds = new Set();
             })
         );
+    }
+
+    onKeyUp(key: string): void {
+        const { selectedLinkIds } = this.state;
+        if (selectedLinkIds.size > 0 && (key === "delete" || key === "backspace")) {
+            selectedLinkIds.forEach((linkId) => {
+                this.onLinkDeletion(linkId);
+            });
+        }
     }
 
     onNodeMove(offsetX: number, offsetY: number, offsetWidth: number): void {
         const { selectedNodesIds } = this.state;
 
+        // Move each selected node
         selectedNodesIds.forEach((id) => {
             const { nodes, onNodeMove } = this.props;
             const newX = nodes[id].x + offsetX;
@@ -169,6 +195,7 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
     onNodeMoveEnd(id: string, wasNodeMoved: boolean): void {
         this.setState(
             produce((draftState: NodeEditorState) => {
+                // If node was not moved and shift isn't selected, only select clicked node
                 if (!wasNodeMoved && !this.keyPressedWrapper.isKeyDown("shift")) {
                     draftState.selectedNodesIds.clear();
                     draftState.selectedNodesIds.add(id);
@@ -211,11 +238,34 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
         }
     }
 
+    onLinkDeletion(id: string): void {
+        const { onLinkDeletion } = this.props;
+        if (onLinkDeletion) {
+            onLinkDeletion(id);
+        }
+    }
+
     onConnectorUpdate(nodeId: string, connectorId: string, connector: ConnectorModel): void {
         const { onConnectorUpdate } = this.props;
         if (onConnectorUpdate) {
             onConnectorUpdate(nodeId, connectorId, connector);
         }
+    }
+
+    onSelectLink(linkId: string): void {
+        this.setState(
+            produce((draftState: NodeEditorState) => {
+                // Clear selection if shift isn't pressed and clicked node not already selected
+                if (
+                    !this.keyPressedWrapper.isKeyDown("shift") &&
+                    !draftState.selectedLinkIds.has(linkId)
+                ) {
+                    draftState.selectedLinkIds.clear();
+                }
+                draftState.selectedLinkIds.add(linkId);
+                draftState.selectedNodesIds = new Set();
+            })
+        );
     }
 
     getZoom(): number {
@@ -234,10 +284,14 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
 
     render(): JSX.Element {
         const { nodes, links, panZoomInfo, setPanZoomInfo } = this.props;
-        const { draggedLink, selectedNodesIds, linksPositions } = this.state;
+        const { draggedLink, selectedNodesIds, linksPositions, selectedLinkIds } = this.state;
         let svgDraggedLink;
         if (draggedLink) {
-            svgDraggedLink = createLinkComponent({ linkType: "bezier", linkPosition: draggedLink });
+            svgDraggedLink = createLinkComponent({
+                linkType: "bezier",
+                linkPosition: draggedLink,
+                isLinkSelected: false
+            });
         }
 
         const svgLinks: JSX.Element[] = [];
@@ -246,9 +300,12 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
             if (linkPosition) {
                 svgLinks.push(
                     createLinkComponent({
+                        linkId: key,
                         linkType: links[key].linkType,
                         key,
-                        linkPosition
+                        linkPosition,
+                        isLinkSelected: selectedLinkIds.has(key),
+                        onSelectLink: this.onSelectLink
                     })
                 );
             }

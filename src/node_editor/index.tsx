@@ -8,5 +8,5 @@ export type {
     LinkCollection,
     ConnectorCollection
 } from "./model";
-export { PinLayout, generateUuid } from "./model";
+export { PinLayout, PinType, generateUuid } from "./model";
 export { Node } from "./node";
