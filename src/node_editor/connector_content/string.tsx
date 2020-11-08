@@ -6,10 +6,21 @@ import ErrorConnectorContentProps from "./error";
 import { ConnectorContentProps } from "./common";
 import { ConnectorModel } from "../model";
 
-class StringConnectorContent extends Component<ConnectorContentProps> {
+type StringConnectorContentState = {
+    preventPropation: boolean;
+};
+
+class StringConnectorContent extends Component<ConnectorContentProps, StringConnectorContentState> {
     constructor(props: ConnectorContentProps) {
         super(props);
+        this.state = {
+            preventPropation: false
+        };
+
         this.onChange = this.onChange.bind(this);
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
     }
 
     shouldComponentUpdate(nextProps: ConnectorContentProps): boolean {
@@ -24,6 +35,25 @@ class StringConnectorContent extends Component<ConnectorContentProps> {
         onConnectorUpdate(nodeId, connectorId, newConnector);
     }
 
+    onMouseDown(): void {
+        this.setState({
+            preventPropation: true
+        });
+    }
+
+    onMouseUp(): void {
+        this.setState({
+            preventPropation: false
+        });
+    }
+
+    onMouseMove(event: React.MouseEvent): void {
+        const { preventPropation } = this.state;
+        if (preventPropation) {
+            event.stopPropagation();
+        }
+    }
+
     render(): JSX.Element {
         const { connector } = this.props;
         if (!("value" in connector.data)) {
@@ -34,6 +64,9 @@ class StringConnectorContent extends Component<ConnectorContentProps> {
             <input
                 tabIndex={-1}
                 value={connector.data.value}
+                onMouseDown={this.onMouseDown}
+                onMouseUp={this.onMouseUp}
+                onMouseMove={this.onMouseMove}
                 onChange={this.onChange}
                 placeholder={connector.name}
                 style={{

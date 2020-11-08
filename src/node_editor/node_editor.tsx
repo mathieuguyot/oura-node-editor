@@ -32,7 +32,6 @@ type NodeEditorProps = {
 
 type NodeEditorState = {
     linksPositions: { [linkId: string]: LinkPositionModel };
-    isNodeBeingMoved: boolean;
     draggedLink?: LinkPositionModel;
     selectedNodesIds: Set<string>;
 };
@@ -44,7 +43,6 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
     constructor(props: NodeEditorProps) {
         super(props);
         this.state = {
-            isNodeBeingMoved: false,
             linksPositions: {},
             selectedNodesIds: new Set()
         };
@@ -145,7 +143,6 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
     onNodeMoveStart(id: string): void {
         this.setState(
             produce((draftState: NodeEditorState) => {
-                draftState.isNodeBeingMoved = true;
                 if (
                     !this.keyPressedWrapper.isKeyDown("shift") &&
                     !draftState.selectedNodesIds.has(id)
@@ -172,24 +169,12 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
     onNodeMoveEnd(id: string, wasNodeMoved: boolean): void {
         this.setState(
             produce((draftState: NodeEditorState) => {
-                draftState.isNodeBeingMoved = false;
                 if (!wasNodeMoved && !this.keyPressedWrapper.isKeyDown("shift")) {
                     draftState.selectedNodesIds.clear();
                     draftState.selectedNodesIds.add(id);
                 }
             })
         );
-    }
-
-    onWheelZoom(event: React.WheelEvent): void {
-        const { panZoomInfo, setPanZoomInfo } = this.props;
-        const { isNodeBeingMoved, draggedLink } = this.state;
-        if (!isNodeBeingMoved && !draggedLink) {
-            const newPanZoomInfo = { ...panZoomInfo };
-            newPanZoomInfo.zoom =
-                event.deltaY > 0 ? panZoomInfo.zoom / 1.1 : panZoomInfo.zoom * 1.1;
-            setPanZoomInfo(newPanZoomInfo);
-        }
     }
 
     onUpdatePreviewLink(
@@ -271,7 +256,6 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
         const grid = String(300 * panZoomInfo.zoom);
         return (
             <div
-                onWheel={this.onWheelZoom.bind(this)}
                 style={{
                     position: "relative",
                     top: "0",

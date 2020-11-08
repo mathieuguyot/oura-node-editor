@@ -18,6 +18,7 @@ import {
     ConnectorCollection
 } from "../../node_editor";
 import NodePicker from "../../node_picker";
+import { PinType } from "../../node_editor/model";
 
 const getLinks = (links: LinkCollection, nodeId: string, connectorId: string): Array<LinkModel> => {
     const validLinks: Array<LinkModel> = [];
@@ -53,13 +54,26 @@ abstract class Node implements NodeModel {
             const inputs: { [id: string]: any } = {};
             Object.keys(this.connectors).forEach((key) => {
                 const connector = this.connectors[key];
-                if (connector.pinLayout === PinLayout.LEFT_PIN) {
+                if (
+                    connector.pinLayout === PinLayout.LEFT_PIN ||
+                    connector.pinLayout === PinLayout.BOTH_PINS
+                ) {
                     const otherLinks = getLinks(links, nodeId, key);
                     otherLinks.forEach((link) => {
                         const otherNodeId =
                             link.inputNodeId !== nodeId ? link.inputNodeId : link.outputNodeId;
                         const otherConnectorId =
                             link.inputNodeId === otherNodeId ? link.inputPinId : link.outputPinId;
+                        const otherPinType =
+                            link.inputNodeId === otherNodeId
+                                ? link.inputPinType
+                                : link.outputPinType;
+                        if (
+                            otherPinType === PinType.LEFT &&
+                            connector.pinLayout === PinLayout.BOTH_PINS
+                        ) {
+                            return;
+                        }
                         const otherNode = nodes[otherNodeId];
                         const res = (otherNode as Node).compute(nodes, links);
                         if (!(key in inputs)) {
@@ -123,7 +137,6 @@ class CanvasRectangle extends Node implements NodeModel {
 }
 
 class Canvas2dContext extends Node implements NodeModel {
-    [immerable] = true;
     canvasRef: React.RefObject<HTMLCanvasElement>;
 
     constructor(canvasRef: React.RefObject<HTMLCanvasElement>) {
@@ -136,14 +149,45 @@ class Canvas2dContext extends Node implements NodeModel {
     protected computeSpecific(inputs: { [id: string]: any }): { [id: string]: any } {
         if (this.canvasRef.current) {
             const ctx = this.canvasRef.current.getContext("2d");
-            if (ctx && inputs[0]) {
+            if (ctx) {
                 ctx.clearRect(0, 0, this.canvasRef.current.width, this.canvasRef.current.height);
+                if (inputs[0]) {
+                    inputs[0].forEach((draw: (arg0: CanvasRenderingContext2D) => void) => {
+                        draw(ctx);
+                    });
+                }
+            }
+        }
+        return {};
+    }
+}
+
+class RotateNode extends Node implements NodeModel {
+    constructor() {
+        super("rotate", 100, {
+            0: { name: "draw", pinLayout: PinLayout.BOTH_PINS, data: {} },
+            1: {
+                name: "angle",
+                pinLayout: PinLayout.LEFT_PIN,
+                contentType: "string",
+                data: { value: "0" }
+            }
+        });
+    }
+
+    protected computeSpecific(inputs: { [id: string]: any }): { [id: string]: any } {
+        let rotation = "1" in inputs ? inputs[1][0] : this.connectors[1].data.value;
+        rotation = (rotation * Math.PI) / 180;
+        const drawWithRotation = (ctx: CanvasRenderingContext2D): void => {
+            ctx.rotate(rotation);
+            if (inputs[0]) {
                 inputs[0].forEach((draw: (arg0: CanvasRenderingContext2D) => void) => {
                     draw(ctx);
                 });
             }
-        }
-        return {};
+            ctx.rotate(-rotation);
+        };
+        return { "0": drawWithRotation };
     }
 }
 
@@ -160,7 +204,8 @@ const OuraCanvasApp = (): JSX.Element => {
 
     const nodesSchemas: { [nId: string]: NodeModel } = {
         0: new Canvas2dContext(canvasRef),
-        1: new CanvasRectangle()
+        1: new CanvasRectangle(),
+        2: new RotateNode()
     };
 
     const redrawCanvas = React.useCallback((curNodes: NodeCollection, curLink: LinkCollection) => {
