@@ -6,7 +6,8 @@ export type {
     PanZoomModel,
     NodeCollection,
     LinkCollection,
-    ConnectorCollection
+    ConnectorCollection,
+    SelectionItem
 } from "./model";
-export { PinLayout, PinType, generateUuid } from "./model";
+export { PinLayout, PinSide, generateUuid } from "./model";
 export { Node } from "./node";

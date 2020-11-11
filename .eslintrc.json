@@ -24,6 +24,7 @@
       "jsx-a11y/click-events-have-key-events": "off", // TODO: Same
       "react/jsx-filename-extension": ["error", { "extensions": [".tsx"] }],
       "no-use-before-define": "off", // Buggy with typescript enums
+      "@typescript-eslint/no-use-before-define": "off",
       "no-param-reassign": ["error", { "props": true, "ignorePropertyModificationsForRegex": ["draft*"] }],
       // Disabling some annoying import rules
       "import/no-unresolved": "off",

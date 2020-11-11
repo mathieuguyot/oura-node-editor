@@ -1,4 +1,10 @@
 /* eslint-disable no-bitwise */
+
+export interface SelectionItem {
+    id: string;
+    type: string;
+}
+
 export interface XYPosition {
     x: number;
     y: number;
@@ -16,10 +22,10 @@ export function arePositionEquals(rPos: XYPosition, lPos: XYPosition): boolean {
 export interface LinkModel {
     inputNodeId: string;
     inputPinId: string;
-    inputPinType: PinType;
+    inputPinSide: PinSide;
     outputNodeId: string;
     outputPinId: string;
-    outputPinType: PinType;
+    outputPinSide: PinSide;
     linkType?: string;
 }
 
@@ -50,12 +56,12 @@ export interface NodeModel {
 
 export type NodeCollection = { [id: string]: NodeModel };
 
-export enum PinType {
+export enum PinSide {
     LEFT,
     RIGHT
 }
 
-export enum PinLayout {
+export enum PinLayout { // => ConnectorType ou ConnectorLayout
     NO_PINS,
     LEFT_PIN,
     RIGHT_PIN,

@@ -4,7 +4,7 @@ import { XYPosition, PanZoomModel } from "./model";
 
 export interface PanZoomInputProps {
     panZoomInfo: PanZoomModel;
-    setPanZoomInfo: (panZoomInfo: PanZoomModel) => void;
+    onPanZoomInfo: (panZoomInfo: PanZoomModel) => void;
 }
 
 export default class PanZoom extends React.Component<PanZoomInputProps> {
@@ -28,13 +28,13 @@ export default class PanZoom extends React.Component<PanZoomInputProps> {
             finalPos: XYPosition,
             offSetPos: XYPosition
         ) => {
-            const { panZoomInfo, setPanZoomInfo } = this.props;
+            const { panZoomInfo, onPanZoomInfo } = this.props;
             const newPanZoomInfo = { ...panZoomInfo };
             newPanZoomInfo.topLeftCorner = {
                 x: panZoomInfo.topLeftCorner.x - offSetPos.x,
                 y: panZoomInfo.topLeftCorner.y - offSetPos.y
             };
-            setPanZoomInfo(newPanZoomInfo);
+            onPanZoomInfo(newPanZoomInfo);
         };
 
         const onMouseUpCb = () => {
@@ -51,13 +51,13 @@ export default class PanZoom extends React.Component<PanZoomInputProps> {
     };
 
     private onWheelZoom(event: React.WheelEvent): void {
-        const { panZoomInfo, setPanZoomInfo } = this.props;
+        const { panZoomInfo, onPanZoomInfo } = this.props;
         const newPanZoomInfo = { ...panZoomInfo };
         const prevZoom = panZoomInfo.zoom;
         const newZoom = event.deltaY > 0 ? prevZoom / 1.1 : prevZoom * 1.1;
 
         newPanZoomInfo.zoom = newZoom;
-        setPanZoomInfo(newPanZoomInfo);
+        onPanZoomInfo(newPanZoomInfo);
     }
 
     render(): JSX.Element {
@@ -82,7 +82,7 @@ export default class PanZoom extends React.Component<PanZoomInputProps> {
                         width: "100%",
                         transform: `matrix(${matrixData.toString()})`,
                         userSelect: "none",
-                        transformOrigin: "center"
+                        transformOrigin: "top left"
                     }}>
                     {children}
                 </div>

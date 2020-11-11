@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import * as _ from "lodash";
 import CSS from "csstype";
 
-import { ConnectorModel, PinLayout, XYPosition, NodeModel, LinkModel, PinType } from "./model";
+import { ConnectorModel, PinLayout, XYPosition, NodeModel, LinkModel, PinSide } from "./model";
 import createConnectorComponent from "./connector_content";
 import defaultStyles from "./default_styles";
 import { DragWrapper } from "./events_wrappers";
@@ -31,9 +31,9 @@ class Connector extends Component<ConnectorProps> {
         return !_.isEqual(this.props, nextProps);
     }
 
-    onMouseDown(pinType: PinType, event: React.MouseEvent): void {
+    onMouseDown(pinSide: PinSide, event: React.MouseEvent): void {
         const { nodeId, connectorId, getZoom, onUpdatePreviewLink, onCreateLink } = this.props;
-        const pinPosition = this.getConnectorPinPosition(pinType);
+        const pinPosition = this.getConnectorPinPosition(pinSide);
         if (pinPosition && onUpdatePreviewLink && onCreateLink) {
             const onMouseMoveCb = (initialPos: XYPosition, finalPos: XYPosition) => {
                 onUpdatePreviewLink(initialPos, finalPos);
@@ -50,10 +50,10 @@ class Connector extends Component<ConnectorProps> {
                     onCreateLink({
                         inputNodeId: nodeId,
                         inputPinId: connectorId,
-                        inputPinType: pinType === PinType.LEFT ? PinType.LEFT : PinType.RIGHT,
+                        inputPinSide: pinSide === PinSide.LEFT ? PinSide.LEFT : PinSide.RIGHT,
                         outputNodeId: tag[1],
                         outputPinId: tag[2],
-                        outputPinType: tag[3] === "left" ? PinType.LEFT : PinType.RIGHT,
+                        outputPinSide: tag[3] === "left" ? PinSide.LEFT : PinSide.RIGHT,
                         linkType: "bezier"
                     });
                 }
@@ -64,25 +64,25 @@ class Connector extends Component<ConnectorProps> {
         }
     }
 
-    getConnectorPinPosition(pinType: PinType): XYPosition | null {
+    getConnectorPinPosition(pinSide: PinSide): XYPosition | null {
         const { connector, node } = this.props;
-        const pin = this.connectorRef.current;
+        const connectorRef = this.connectorRef.current;
         if (
-            !pin ||
+            !connectorRef ||
             connector.pinLayout === PinLayout.NO_PINS ||
-            (pinType === PinType.LEFT && connector.pinLayout === PinLayout.RIGHT_PIN) ||
-            (pinType === PinType.RIGHT && connector.pinLayout === PinLayout.LEFT_PIN)
+            (pinSide === PinSide.LEFT && connector.pinLayout === PinLayout.RIGHT_PIN) ||
+            (pinSide === PinSide.RIGHT && connector.pinLayout === PinLayout.LEFT_PIN)
         ) {
             return null;
         }
 
         return {
-            x: pinType === PinType.RIGHT ? node.width + node.x : node.x,
-            y: node.y + pin.offsetTop + pin.offsetHeight / 2
+            x: pinSide === PinSide.RIGHT ? node.width + node.x : node.x,
+            y: node.y + connectorRef.offsetTop + connectorRef.offsetHeight / 2
         };
     }
 
-    renderPin(pinType: PinType, leftPinPosition: number): JSX.Element {
+    renderPin(pinSide: PinSide, leftPinPosition: number): JSX.Element {
         const { connectorId, nodeId } = this.props;
 
         const connectorStyle: CSS.Properties = {
@@ -93,13 +93,13 @@ class Connector extends Component<ConnectorProps> {
             top: `calc(50% - ${this.pinPxRadius}px)`
         };
 
-        const direction = pinType === PinType.LEFT ? "left" : "right";
+        const direction = pinSide === PinSide.LEFT ? "left" : "right";
 
         return (
             <div
                 className={`node-${nodeId}-connector-${connectorId}-${direction}`}
                 style={{ ...connectorStyle, ...defaultStyles.dark.connector }}
-                onMouseDown={this.onMouseDown.bind(this, pinType)}
+                onMouseDown={this.onMouseDown.bind(this, pinSide)}
             />
         );
     }
@@ -118,11 +118,11 @@ class Connector extends Component<ConnectorProps> {
                 }}>
                 {(connector.pinLayout === PinLayout.LEFT_PIN ||
                     connector.pinLayout === PinLayout.BOTH_PINS) &&
-                    this.renderPin(PinType.LEFT, -this.pinPxRadius)}
+                    this.renderPin(PinSide.LEFT, -this.pinPxRadius)}
 
                 {(connector.pinLayout === PinLayout.RIGHT_PIN ||
                     connector.pinLayout === PinLayout.BOTH_PINS) &&
-                    this.renderPin(PinType.RIGHT, node.width - this.pinPxRadius)}
+                    this.renderPin(PinSide.RIGHT, node.width - this.pinPxRadius)}
 
                 <div style={{ overflow: "hidden" }}>{createConnectorComponent(this.props)}</div>
             </div>

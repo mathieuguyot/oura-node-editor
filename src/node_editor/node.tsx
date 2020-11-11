@@ -1,11 +1,11 @@
 import React, { Component, RefObject } from "react";
-import * as _ from "lodash";
+import _ from "lodash";
 import CSS from "csstype";
 
 import {
     LinkModel,
     NodeModel,
-    PinType,
+    PinSide,
     XYPosition,
     arePositionEquals,
     ConnectorModel
@@ -21,7 +21,6 @@ export type NodeProps = {
 
     getZoom: () => number;
 
-    onNodeDeletion?(id: string): void;
     onNodeMoveStart?: (id: string) => void;
     onNodeMove?: (offsetX: number, offsetY: number, offsetWidth: number) => void;
     onNodeMoveEnd?: (ids: string, wasNodeMoved: boolean) => void;
@@ -78,11 +77,11 @@ export class Node extends Component<NodeProps> {
         this.dragWrapper.onMouseDown(event, initialPos, getZoom, onMouseMoveCb, onMouseUpCb);
     }
 
-    getConnectorPinPosition(connectorId: string, pinType: PinType): XYPosition | null {
+    getConnectorPinPosition(connectorId: string, pinSide: PinSide): XYPosition | null {
         if (connectorId in this.connectorRefs) {
             const pin = this.connectorRefs[connectorId].current;
             if (pin) {
-                return pin.getConnectorPinPosition(pinType);
+                return pin.getConnectorPinPosition(pinSide);
             }
         }
         return null;
@@ -104,7 +103,6 @@ export class Node extends Component<NodeProps> {
             onCreateLink,
             onUpdatePreviewLink,
             getZoom,
-            onNodeDeletion,
             onConnectorUpdate
         } = this.props;
 
@@ -137,16 +135,7 @@ export class Node extends Component<NodeProps> {
                     style={{ ...nodeHeaderStyle, ...defaultStyles.dark.nodeHeader }}
                     onMouseDown={this.onMouseDown.bind(this, NodePart.Header)}>
                     <div style={{ paddingLeft: "10px", paddingRight: "10px", overflow: "hidden" }}>
-                        <div style={{ float: "left" }}>{node.name}</div>
-                        <div
-                            style={{ float: "right", cursor: "default" }}
-                            onClick={() => {
-                                if (onNodeDeletion) {
-                                    onNodeDeletion(nodeId);
-                                }
-                            }}>
-                            X
-                        </div>
+                        {node.name}
                     </div>
                 </div>
                 <div style={defaultStyles.dark.nodeBackground}>

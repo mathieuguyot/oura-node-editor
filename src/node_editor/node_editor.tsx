@@ -1,5 +1,6 @@
 import React, { Component, RefObject } from "react";
 import { produce, enableMapSet } from "immer";
+import _ from "lodash";
 
 import {
     XYPosition,
@@ -9,7 +10,8 @@ import {
     PanZoomModel,
     ConnectorModel,
     NodeCollection,
-    LinkCollection
+    LinkCollection,
+    SelectionItem
 } from "./model";
 import { Node } from "./node";
 import PanZoom from "./pan_zoom";
@@ -22,20 +24,19 @@ type NodeEditorProps = {
     nodes: NodeCollection;
     links: LinkCollection;
     panZoomInfo: PanZoomModel;
+    selectedItems: Array<SelectionItem>;
 
     onNodeMove(id: string, offsetX: number, offsetY: number, offsetWidth: number): void;
-    onNodeDeletion?(id: string): void;
-    onLinkDeletion?(id: string): void;
     onCreateLink(link: LinkModel): void;
     onConnectorUpdate?: (nodeId: string, connectorId: string, connector: ConnectorModel) => void;
-    setPanZoomInfo: (panZoomInfo: PanZoomModel) => void;
+
+    onPanZoomInfo: (panZoomInfo: PanZoomModel) => void;
+    onSelectedItems: (selection: Array<SelectionItem>) => void;
 };
 
 type NodeEditorState = {
     linksPositions: { [linkId: string]: LinkPositionModel };
     draggedLink?: LinkPositionModel;
-    selectedNodesIds: Set<string>;
-    selectedLinkIds: Set<string>;
 };
 
 class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
@@ -45,15 +46,11 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
     constructor(props: NodeEditorProps) {
         super(props);
         this.state = {
-            linksPositions: {},
-            selectedNodesIds: new Set(),
-            selectedLinkIds: new Set()
+            linksPositions: {}
         };
 
         this.createNodeReferences();
 
-        this.onNodeDeletion = this.onNodeDeletion.bind(this);
-        this.onLinkDeletion = this.onLinkDeletion.bind(this);
         this.getZoom = this.getZoom.bind(this);
 
         this.onNodeMoveStart = this.onNodeMoveStart.bind(this);
@@ -65,9 +62,8 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
         this.onConnectorUpdate = this.onConnectorUpdate.bind(this);
 
         this.onSelectLink = this.onSelectLink.bind(this);
-        this.onKeyUp = this.onKeyUp.bind(this);
 
-        this.keyPressedWrapper = new KeyPressedWrapper(this.onKeyUp);
+        this.keyPressedWrapper = new KeyPressedWrapper();
     }
 
     componentDidMount(): void {
@@ -82,11 +78,11 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
                 if (inputNodeRef && outputNodeRef) {
                     const inputPinPosition = inputNodeRef.getConnectorPinPosition(
                         link.inputPinId,
-                        link.inputPinType
+                        link.inputPinSide
                     );
                     const outputPinPosition = outputNodeRef.getConnectorPinPosition(
                         link.outputPinId,
-                        link.outputPinType
+                        link.outputPinSide
                     );
                     if (inputPinPosition && outputPinPosition) {
                         draft[key] = { linkId: key, inputPinPosition, outputPinPosition };
@@ -115,11 +111,11 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
                     // From node references, get connectors pin positions
                     const inputPinPosition = inputNodeRef.getConnectorPinPosition(
                         link.inputPinId,
-                        link.inputPinType
+                        link.inputPinSide
                     );
                     const outputPinPosition = outputNodeRef.getConnectorPinPosition(
                         link.outputPinId,
-                        link.outputPinType
+                        link.outputPinSide
                     );
                     // If connector pin position exsits, create or update link position if needed
                     if (inputPinPosition && outputPinPosition) {
@@ -155,53 +151,37 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
     }
 
     onNodeMoveStart(id: string): void {
-        this.setState(
-            produce((draftState: NodeEditorState) => {
-                // Clear selection if shift isn't pressed and clicked node not already selected
-                if (
-                    !this.keyPressedWrapper.isKeyDown("shift") &&
-                    !draftState.selectedNodesIds.has(id)
-                ) {
-                    draftState.selectedNodesIds.clear();
-                }
-                draftState.selectedNodesIds.add(id);
-                draftState.selectedLinkIds = new Set();
-            })
-        );
-    }
-
-    onKeyUp(key: string): void {
-        const { selectedLinkIds } = this.state;
-        if (selectedLinkIds.size > 0 && (key === "delete" || key === "backspace")) {
-            selectedLinkIds.forEach((linkId) => {
-                this.onLinkDeletion(linkId);
-            });
+        const { selectedItems, onSelectedItems } = this.props;
+        if (!_.some(selectedItems, { id, type: "node" })) {
+            let newSelection = [...selectedItems];
+            if (!this.keyPressedWrapper.isKeyDown("shift")) {
+                newSelection = [];
+            }
+            newSelection.push({ id, type: "node" });
+            onSelectedItems(newSelection);
         }
     }
 
     onNodeMove(offsetX: number, offsetY: number, offsetWidth: number): void {
-        const { selectedNodesIds } = this.state;
+        const { selectedItems } = this.props;
 
         // Move each selected node
-        selectedNodesIds.forEach((id) => {
-            const { nodes, onNodeMove } = this.props;
-            const newX = nodes[id].x + offsetX;
-            const newY = nodes[id].y + offsetY;
-            const newWidth = nodes[id].width + offsetWidth;
-            onNodeMove(id, newX, newY, newWidth > 100 ? newWidth : 100);
+        selectedItems.forEach((item) => {
+            if (item.type === "node") {
+                const { nodes, onNodeMove } = this.props;
+                const newX = nodes[item.id].x + offsetX;
+                const newY = nodes[item.id].y + offsetY;
+                const newWidth = nodes[item.id].width + offsetWidth;
+                onNodeMove(item.id, newX, newY, newWidth > 100 ? newWidth : 100);
+            }
         });
     }
 
     onNodeMoveEnd(id: string, wasNodeMoved: boolean): void {
-        this.setState(
-            produce((draftState: NodeEditorState) => {
-                // If node was not moved and shift isn't selected, only select clicked node
-                if (!wasNodeMoved && !this.keyPressedWrapper.isKeyDown("shift")) {
-                    draftState.selectedNodesIds.clear();
-                    draftState.selectedNodesIds.add(id);
-                }
-            })
-        );
+        const { onSelectedItems } = this.props;
+        if (!wasNodeMoved && !this.keyPressedWrapper.isKeyDown("shift")) {
+            onSelectedItems([{ id, type: "node" }]);
+        }
     }
 
     onUpdatePreviewLink(
@@ -225,24 +205,10 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
 
     onCreateLink(link: LinkModel): void {
         const { onCreateLink } = this.props;
-        if (link.inputPinType === link.outputPinType || link.inputNodeId === link.outputNodeId) {
+        if (link.inputPinSide === link.outputPinSide || link.inputNodeId === link.outputNodeId) {
             return;
         }
         onCreateLink(link);
-    }
-
-    onNodeDeletion(id: string): void {
-        const { onNodeDeletion } = this.props;
-        if (onNodeDeletion) {
-            onNodeDeletion(id);
-        }
-    }
-
-    onLinkDeletion(id: string): void {
-        const { onLinkDeletion } = this.props;
-        if (onLinkDeletion) {
-            onLinkDeletion(id);
-        }
     }
 
     onConnectorUpdate(nodeId: string, connectorId: string, connector: ConnectorModel): void {
@@ -252,20 +218,16 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
         }
     }
 
-    onSelectLink(linkId: string): void {
-        this.setState(
-            produce((draftState: NodeEditorState) => {
-                // Clear selection if shift isn't pressed and clicked node not already selected
-                if (
-                    !this.keyPressedWrapper.isKeyDown("shift") &&
-                    !draftState.selectedLinkIds.has(linkId)
-                ) {
-                    draftState.selectedLinkIds.clear();
-                }
-                draftState.selectedLinkIds.add(linkId);
-                draftState.selectedNodesIds = new Set();
-            })
-        );
+    onSelectLink(id: string): void {
+        const { selectedItems, onSelectedItems } = this.props;
+        if (!_.some(selectedItems, { id, type: "link" })) {
+            let newSelection = [...selectedItems];
+            if (!this.keyPressedWrapper.isKeyDown("shift")) {
+                newSelection = [];
+            }
+            newSelection.push({ id, type: "link" });
+            onSelectedItems(newSelection);
+        }
     }
 
     getZoom(): number {
@@ -283,8 +245,8 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
     }
 
     render(): JSX.Element {
-        const { nodes, links, panZoomInfo, setPanZoomInfo } = this.props;
-        const { draggedLink, selectedNodesIds, linksPositions, selectedLinkIds } = this.state;
+        const { nodes, links, selectedItems, panZoomInfo, onPanZoomInfo } = this.props;
+        const { draggedLink, linksPositions } = this.state;
         let svgDraggedLink;
         if (draggedLink) {
             svgDraggedLink = createLinkComponent({
@@ -304,7 +266,7 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
                         linkType: links[key].linkType,
                         key,
                         linkPosition,
-                        isLinkSelected: selectedLinkIds.has(key),
+                        isLinkSelected: _.some(selectedItems, { id: key, type: "link" }),
                         onSelectLink: this.onSelectLink
                     })
                 );
@@ -323,7 +285,7 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
                     backgroundColor: "#232323",
                     backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${grid}' height='${grid}' viewBox='0 0 100 100'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='black' fill-opacity='0.4'%3E%3Cpath opacity='.5' d='M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z'/%3E%3Cpath d='M6 5V0H5v5H0v1h5v94h1V6h94V5H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
                 }}>
-                <PanZoom panZoomInfo={panZoomInfo} setPanZoomInfo={setPanZoomInfo}>
+                <PanZoom panZoomInfo={panZoomInfo} onPanZoomInfo={onPanZoomInfo}>
                     <svg
                         style={{
                             position: "absolute",
@@ -342,14 +304,13 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
                             key={key}
                             ref={this.nodesRefs[key]}
                             node={nodes[key]}
-                            isNodeSelected={selectedNodesIds.has(key)}
+                            isNodeSelected={_.some(selectedItems, { id: key, type: "node" })}
                             getZoom={this.getZoom}
                             onNodeMoveStart={this.onNodeMoveStart}
                             onNodeMove={this.onNodeMove}
                             onNodeMoveEnd={this.onNodeMoveEnd}
                             onCreateLink={this.onCreateLink}
                             onUpdatePreviewLink={this.onUpdatePreviewLink}
-                            onNodeDeletion={this.onNodeDeletion}
                             onConnectorUpdate={this.onConnectorUpdate}
                         />
                     ))}

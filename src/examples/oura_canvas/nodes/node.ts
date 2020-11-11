@@ -7,7 +7,7 @@ import {
     NodeCollection,
     NodeModel,
     PinLayout,
-    PinType
+    PinSide
 } from "../../../node_editor";
 
 const getLinks = (links: LinkCollection, nodeId: string, connectorId: string): Array<LinkModel> => {
@@ -54,12 +54,12 @@ export default abstract class Node implements NodeModel {
                             link.inputNodeId !== nodeId ? link.inputNodeId : link.outputNodeId;
                         const otherConnectorId =
                             link.inputNodeId === otherNodeId ? link.inputPinId : link.outputPinId;
-                        const otherPinType =
+                        const otherPinSide =
                             link.inputNodeId === otherNodeId
-                                ? link.inputPinType
-                                : link.outputPinType;
+                                ? link.inputPinSide
+                                : link.outputPinSide;
                         if (
-                            otherPinType === PinType.LEFT &&
+                            otherPinSide === PinSide.LEFT &&
                             connector.pinLayout === PinLayout.BOTH_PINS
                         ) {
                             return;
