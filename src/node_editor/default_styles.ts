@@ -37,7 +37,7 @@ const defaultStyles: {
         linkSelected: {
             stroke: "white"
         },
-        connector: {
+        pin: {
             backgroundColor: "rgba(199, 199, 41, 1)",
             borderRadius: "10px 10px 10px 10px",
             cursor: "grab"

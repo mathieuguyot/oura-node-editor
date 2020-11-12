@@ -7,17 +7,19 @@ import {
     PanZoomModel,
     generateUuid,
     NodeCollection,
-    LinkCollection
+    LinkCollection,
+    SelectionItem
 } from "../../src/node_editor/model";
 
 const SingleNodeNodeEditor = (props: { initialZoom: number }): JSX.Element => {
     const { initialZoom } = props;
+    const [selectedItems, setSelectedItems] = React.useState<SelectionItem[]>([]);
     const [panZoomInfo, setPanZoomInfo] = React.useState<PanZoomModel>({
         zoom: initialZoom,
         topLeftCorner: { x: 0, y: 0 }
     });
     const [nodes, setNodes] = React.useState<NodeCollection>({
-        node_a: {
+        0: {
             name: "my tested node",
             width: 200,
             x: 100,
@@ -56,11 +58,13 @@ const SingleNodeNodeEditor = (props: { initialZoom: number }): JSX.Element => {
         <div style={{ width: "100%", height: "100vh" }}>
             <NodeEditor
                 panZoomInfo={panZoomInfo}
-                setPanZoomInfo={setPanZoomInfo}
+                onPanZoomInfo={setPanZoomInfo}
                 nodes={nodes}
                 links={links}
                 onNodeMove={onNodeMove}
                 onCreateLink={onCreateLink}
+                selectedItems={selectedItems}
+                onSelectedItems={setSelectedItems}
             />
         </div>
     );
@@ -109,7 +113,7 @@ zoomFactors.forEach((zoom) => {
             const dragX = 300;
             const dragY = 200;
             const node = cy.contains("my tested node").should("exist");
-            const footer = node.parent().parent().parent().children().last();
+            const footer = node.parent().parent().children().last();
             // Save its initial position
             node.then((elem) => {
                 const begginCords = elem[0].getBoundingClientRect();

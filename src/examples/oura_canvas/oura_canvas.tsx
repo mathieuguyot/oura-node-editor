@@ -20,7 +20,6 @@ import { SelectionItem, XYPosition } from "../../node_editor/model";
 
 const OuraCanvasApp = (): JSX.Element => {
     const [nodePickerPos, setNodePickerPos] = React.useState<XYPosition | null>(null);
-    const [keysDown, setKeysDown] = React.useState<Set<string>>(new Set());
     const [panZoomInfo, setPanZoomInfo] = React.useState<PanZoomModel>({
         zoom: 1,
         topLeftCorner: { x: 0, y: 0 }
@@ -93,29 +92,6 @@ const OuraCanvasApp = (): JSX.Element => {
         [nodes, links]
     );
 
-    const onKeyDown = React.useCallback(
-        (event: React.KeyboardEvent) => {
-            const newKeys = produce(keysDown, (draft) => {
-                draft.add(event.key.toLowerCase());
-            });
-            setKeysDown(newKeys);
-            if (newKeys.has("escape") && nodePickerPos) {
-                setNodePickerPos(null);
-            }
-        },
-        [keysDown, nodePickerPos]
-    );
-
-    const onKeyUp = React.useCallback(
-        (event: React.KeyboardEvent) => {
-            const newKeys = produce(keysDown, (draft) => {
-                draft.delete(event.key.toLowerCase());
-            });
-            setKeysDown(newKeys);
-        },
-        [keysDown]
-    );
-
     const onNodeSelection = React.useCallback(
         (id: string) => {
             if (nodePickerPos) {
@@ -186,12 +162,7 @@ const OuraCanvasApp = (): JSX.Element => {
     ) : null;
 
     return (
-        <div
-            style={{ width: "100%", height: "100vh" }}
-            onKeyDown={onKeyDown}
-            onKeyUp={onKeyUp}
-            onContextMenu={onContextMenu}
-            tabIndex={0}>
+        <div style={{ width: "100%", height: "100vh" }} onContextMenu={onContextMenu} tabIndex={0}>
             <NodeEditor
                 panZoomInfo={panZoomInfo}
                 nodes={nodes}

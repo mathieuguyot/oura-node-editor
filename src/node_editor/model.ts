@@ -61,7 +61,7 @@ export enum PinSide {
     RIGHT
 }
 
-export enum PinLayout { // => ConnectorType ou ConnectorLayout
+export enum PinLayout {
     NO_PINS,
     LEFT_PIN,
     RIGHT_PIN,

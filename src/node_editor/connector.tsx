@@ -1,11 +1,9 @@
 import React, { Component } from "react";
-import * as _ from "lodash";
-import CSS from "csstype";
 
 import { ConnectorModel, PinLayout, XYPosition, NodeModel, LinkModel, PinSide } from "./model";
 import createConnectorComponent from "./connector_content";
-import defaultStyles from "./default_styles";
 import { DragWrapper } from "./events_wrappers";
+import Pin from "./pin";
 
 type ConnectorProps = {
     nodeId: string;
@@ -27,8 +25,12 @@ class Connector extends Component<ConnectorProps> {
     private connectorRef = React.createRef<HTMLDivElement>();
     private pinPxRadius = 7;
 
-    shouldComponentUpdate(nextProps: ConnectorProps): boolean {
-        return !_.isEqual(this.props, nextProps);
+    constructor(props: ConnectorProps) {
+        super(props);
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseDownLeftPin = this.onMouseDownLeftPin.bind(this);
+        this.onMouseDownRightPin = this.onMouseDownRightPin.bind(this);
     }
 
     onMouseDown(pinSide: PinSide, event: React.MouseEvent): void {
@@ -64,6 +66,14 @@ class Connector extends Component<ConnectorProps> {
         }
     }
 
+    onMouseDownLeftPin(event: React.MouseEvent): void {
+        this.onMouseDown(PinSide.LEFT, event);
+    }
+
+    onMouseDownRightPin(event: React.MouseEvent): void {
+        this.onMouseDown(PinSide.RIGHT, event);
+    }
+
     getConnectorPinPosition(pinSide: PinSide): XYPosition | null {
         const { connector, node } = this.props;
         const connectorRef = this.connectorRef.current;
@@ -82,30 +92,8 @@ class Connector extends Component<ConnectorProps> {
         };
     }
 
-    renderPin(pinSide: PinSide, leftPinPosition: number): JSX.Element {
-        const { connectorId, nodeId } = this.props;
-
-        const connectorStyle: CSS.Properties = {
-            position: "absolute",
-            width: `${this.pinPxRadius * 2}px`,
-            height: `${this.pinPxRadius * 2}px`,
-            left: `${leftPinPosition}px`,
-            top: `calc(50% - ${this.pinPxRadius}px)`
-        };
-
-        const direction = pinSide === PinSide.LEFT ? "left" : "right";
-
-        return (
-            <div
-                className={`node-${nodeId}-connector-${connectorId}-${direction}`}
-                style={{ ...connectorStyle, ...defaultStyles.dark.connector }}
-                onMouseDown={this.onMouseDown.bind(this, pinSide)}
-            />
-        );
-    }
-
     render(): JSX.Element {
-        const { connector, node } = this.props;
+        const { connector, node, nodeId, connectorId } = this.props;
 
         return (
             <div
@@ -117,12 +105,24 @@ class Connector extends Component<ConnectorProps> {
                     paddingTop: 3
                 }}>
                 {(connector.pinLayout === PinLayout.LEFT_PIN ||
-                    connector.pinLayout === PinLayout.BOTH_PINS) &&
-                    this.renderPin(PinSide.LEFT, -this.pinPxRadius)}
+                    connector.pinLayout === PinLayout.BOTH_PINS) && (
+                    <Pin
+                        className={`node-${nodeId}-connector-${connectorId}-left`}
+                        pinPxRadius={this.pinPxRadius}
+                        leftPinPosition={-this.pinPxRadius}
+                        onMouseDown={this.onMouseDownLeftPin}
+                    />
+                )}
 
                 {(connector.pinLayout === PinLayout.RIGHT_PIN ||
-                    connector.pinLayout === PinLayout.BOTH_PINS) &&
-                    this.renderPin(PinSide.RIGHT, node.width - this.pinPxRadius)}
+                    connector.pinLayout === PinLayout.BOTH_PINS) && (
+                    <Pin
+                        className={`node-${nodeId}-connector-${connectorId}-right`}
+                        pinPxRadius={this.pinPxRadius}
+                        leftPinPosition={node.width - this.pinPxRadius}
+                        onMouseDown={this.onMouseDownRightPin}
+                    />
+                )}
 
                 <div style={{ overflow: "hidden" }}>{createConnectorComponent(this.props)}</div>
             </div>
