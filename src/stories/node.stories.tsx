@@ -26,6 +26,8 @@ const defaultProps: NodeProps = {
         return 1;
     },
 
+    onNodePinPositionsUpdate: () => null,
+
     onConnectorUpdate: () => null,
 
     onNodeMoveStart: () => null,

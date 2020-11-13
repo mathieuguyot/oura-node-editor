@@ -11,12 +11,13 @@ import {
     ConnectorModel,
     NodeCollection,
     LinkCollection,
-    NodeModel
+    NodeModel,
+    XYPosition,
+    SelectionItem
 } from "../../node_editor";
 import { createNodeSchema, Node } from "./nodes";
 import CanvasNode from "./nodes/canvas";
 import { AddNodeContextualMenu } from "../../contextual_menu";
-import { SelectionItem, XYPosition } from "../../node_editor/model";
 
 const OuraCanvasApp = (): JSX.Element => {
     const [nodePickerPos, setNodePickerPos] = React.useState<XYPosition | null>(null);
@@ -63,7 +64,7 @@ const OuraCanvasApp = (): JSX.Element => {
         [nodes, links]
     );
 
-    const onNodeDeletion = React.useCallback(
+    /* const onNodeDeletion = React.useCallback(
         (id: string) => {
             const newNodes = { ...nodes };
             delete newNodes[id];
@@ -90,7 +91,7 @@ const OuraCanvasApp = (): JSX.Element => {
             redrawCanvas(nodes, newLinks);
         },
         [nodes, links]
-    );
+    ); */
 
     const onNodeSelection = React.useCallback(
         (id: string) => {
@@ -109,9 +110,9 @@ const OuraCanvasApp = (): JSX.Element => {
     );
 
     const onConnectorUpdate = React.useCallback(
-        (nodeId: string, connectorId: string, connector: ConnectorModel) => {
+        (nodeId: string, cId: string, connector: ConnectorModel) => {
             const newNodes = produce(nodes, (draft) => {
-                draft[nodeId].connectors[connectorId] = connector;
+                draft[nodeId].connectors[cId] = connector;
             });
             setNodes(newNodes);
             redrawCanvas(newNodes, links);

@@ -2,10 +2,10 @@ import { ConnectorModel, NodeModel } from "../model";
 
 export type ConnectorContentProps = {
     nodeId: string;
-    connectorId: string;
+    cId: string;
     node: NodeModel;
     connector: ConnectorModel;
 
     getZoom: () => number;
-    onConnectorUpdate: (nodeId: string, connectorId: string, connector: ConnectorModel) => void;
+    onConnectorUpdate: (nodeId: string, cId: string, connector: ConnectorModel) => void;
 };

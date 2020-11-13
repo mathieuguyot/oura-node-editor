@@ -1,14 +1,15 @@
-import React, { Component, RefObject } from "react";
+import React, { Component } from "react";
 import _ from "lodash";
 import CSS from "csstype";
 
 import {
     LinkModel,
     NodeModel,
-    PinSide,
     XYPosition,
     arePositionEquals,
-    ConnectorModel
+    ConnectorModel,
+    NodePinPositions,
+    PinPosition
 } from "./model";
 import Connector from "./connector";
 import defaultStyles from "./default_styles";
@@ -21,16 +22,15 @@ export type NodeProps = {
 
     getZoom: () => number;
 
+    onNodePinPositionsUpdate: (nodeId: string, pinPositions: NodePinPositions) => void;
+
     onNodeMoveStart?: (id: string) => void;
     onNodeMove?: (offsetX: number, offsetY: number, offsetWidth: number) => void;
     onNodeMoveEnd?: (ids: string, wasNodeMoved: boolean) => void;
 
-    onConnectorUpdate: (nodeId: string, connectorId: string, connector: ConnectorModel) => void;
+    onConnectorUpdate: (nodeId: string, cId: string, connector: ConnectorModel) => void;
     onCreateLink?: (link: LinkModel) => void;
-    onUpdatePreviewLink?: (
-        inputPosition: XYPosition | null,
-        outputPosition: XYPosition | null
-    ) => void;
+    onUpdatePreviewLink?: (inputPos: PinPosition, outputPos: PinPosition) => void;
 };
 
 enum NodePart {
@@ -41,11 +41,12 @@ enum NodePart {
 
 export class Node extends Component<NodeProps> {
     private dragWrapper: DragWrapper = new DragWrapper();
-    private connectorRefs: { [id: string]: RefObject<Connector> } = {};
+    private pinPositions: NodePinPositions = {};
 
     constructor(props: NodeProps) {
         super(props);
-        this.createReferences();
+
+        this.onPinPositionUpdate = this.onPinPositionUpdate.bind(this);
     }
 
     shouldComponentUpdate(nextProps: NodeProps): boolean {
@@ -77,22 +78,12 @@ export class Node extends Component<NodeProps> {
         this.dragWrapper.onMouseDown(event, initialPos, getZoom, onMouseMoveCb, onMouseUpCb);
     }
 
-    getConnectorPinPosition(connectorId: string, pinSide: PinSide): XYPosition | null {
-        if (connectorId in this.connectorRefs) {
-            const pin = this.connectorRefs[connectorId].current;
-            if (pin) {
-                return pin.getConnectorPinPosition(pinSide);
-            }
+    onPinPositionUpdate(cId: string, leftPinPos: PinPosition, rightPinPos: PinPosition): void {
+        const { nodeId, node, onNodePinPositionsUpdate } = this.props;
+        this.pinPositions[cId] = [leftPinPos, rightPinPos];
+        if (Object.keys(this.pinPositions).length === Object.keys(node.connectors).length) {
+            onNodePinPositionsUpdate(nodeId, this.pinPositions);
         }
-        return null;
-    }
-
-    createReferences(): void {
-        const { node } = this.props;
-        this.connectorRefs = {};
-        Object.keys(node.connectors).forEach((key) => {
-            this.connectorRefs[key] = React.createRef<Connector>();
-        });
     }
 
     render(): JSX.Element {
@@ -144,15 +135,15 @@ export class Node extends Component<NodeProps> {
                         return (
                             <Connector
                                 nodeId={nodeId}
-                                connectorId={key}
+                                cId={key}
                                 getZoom={getZoom}
                                 node={node}
                                 key={key}
                                 connector={connector}
-                                ref={this.connectorRefs[key]}
                                 onCreateLink={onCreateLink}
                                 onUpdatePreviewLink={onUpdatePreviewLink}
                                 onConnectorUpdate={onConnectorUpdate}
+                                onPinPositionUpdate={this.onPinPositionUpdate}
                             />
                         );
                     })}

@@ -7,7 +7,8 @@ export type {
     NodeCollection,
     LinkCollection,
     ConnectorCollection,
-    SelectionItem
+    SelectionItem,
+    XYPosition
 } from "./model";
 export { PinLayout, PinSide, generateUuid } from "./model";
 export { Node } from "./node";

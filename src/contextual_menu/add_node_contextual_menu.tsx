@@ -26,6 +26,7 @@ const NodePrevisualizer = (props: NodePrevisualizerProps): JSX.Element => {
                 isNodeSelected
                 node={displayedNode}
                 onConnectorUpdate={() => null}
+                onNodePinPositionsUpdate={() => null}
             />
         ) : null;
     }

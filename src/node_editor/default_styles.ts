@@ -32,7 +32,7 @@ const defaultStyles: {
         link: {
             stroke: "rgba(170, 170, 170, 0.75)",
             strokeWidth: "3px",
-            fillOpacity: 0
+            fill: "none"
         },
         linkSelected: {
             stroke: "white"

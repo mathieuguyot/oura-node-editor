@@ -28,11 +28,11 @@ class StringConnectorContent extends Component<ConnectorContentProps, StringConn
     }
 
     onChange(event: React.FormEvent<HTMLInputElement>): void {
-        const { nodeId, connectorId, connector, onConnectorUpdate } = this.props;
+        const { nodeId, cId, connector, onConnectorUpdate } = this.props;
         const newConnector = produce(connector, (draft: ConnectorModel) => {
             draft.data.value = event.currentTarget.value;
         });
-        onConnectorUpdate(nodeId, connectorId, newConnector);
+        onConnectorUpdate(nodeId, cId, newConnector);
     }
 
     onMouseDown(): void {

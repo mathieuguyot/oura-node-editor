@@ -75,3 +75,6 @@ export interface ConnectorModel {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: any;
 }
+
+export type PinPosition = XYPosition | null;
+export type NodePinPositions = { [cId: string]: Array<PinPosition> };

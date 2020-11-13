@@ -1,4 +1,4 @@
-import React, { Component, RefObject } from "react";
+import React, { Component } from "react";
 import { produce, enableMapSet } from "immer";
 import _ from "lodash";
 
@@ -11,7 +11,10 @@ import {
     ConnectorModel,
     NodeCollection,
     LinkCollection,
-    SelectionItem
+    SelectionItem,
+    PinSide,
+    NodePinPositions,
+    PinPosition
 } from "./model";
 import { Node } from "./node";
 import PanZoom from "./pan_zoom";
@@ -28,7 +31,7 @@ type NodeEditorProps = {
 
     onNodeMove(id: string, offsetX: number, offsetY: number, offsetWidth: number): void;
     onCreateLink(link: LinkModel): void;
-    onConnectorUpdate?: (nodeId: string, connectorId: string, connector: ConnectorModel) => void;
+    onConnectorUpdate?: (nodeId: string, cId: string, connector: ConnectorModel) => void;
 
     onPanZoomInfo: (panZoomInfo: PanZoomModel) => void;
     onSelectedItems: (selection: Array<SelectionItem>) => void;
@@ -40,16 +43,15 @@ type NodeEditorState = {
 };
 
 class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
-    private nodesRefs: { [nodeId: string]: RefObject<Node> } = {};
     private keyPressedWrapper: KeyPressedWrapper;
+    private nodesPinPositions: { [nodeId: string]: NodePinPositions } = {};
+    private redrawPinPosition = false;
 
     constructor(props: NodeEditorProps) {
         super(props);
         this.state = {
             linksPositions: {}
         };
-
-        this.createNodeReferences();
 
         this.getZoom = this.getZoom.bind(this);
 
@@ -63,82 +65,26 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
 
         this.onSelectLink = this.onSelectLink.bind(this);
 
+        this.onNodePinPositionsUpdate = this.onNodePinPositionsUpdate.bind(this);
+
         this.keyPressedWrapper = new KeyPressedWrapper();
     }
 
     componentDidMount(): void {
         this.keyPressedWrapper.attachListeners();
-        const { links } = this.props;
-        const { linksPositions } = this.state;
-        const newLinksPositions = produce(linksPositions, (draft) => {
-            Object.keys(links).forEach((key) => {
-                const link = links[key];
-                const inputNodeRef = this.nodesRefs[link.inputNodeId].current;
-                const outputNodeRef = this.nodesRefs[link.outputNodeId].current;
-                if (inputNodeRef && outputNodeRef) {
-                    const inputPinPosition = inputNodeRef.getConnectorPinPosition(
-                        link.inputPinId,
-                        link.inputPinSide
-                    );
-                    const outputPinPosition = outputNodeRef.getConnectorPinPosition(
-                        link.outputPinId,
-                        link.outputPinSide
-                    );
-                    if (inputPinPosition && outputPinPosition) {
-                        draft[key] = { linkId: key, inputPinPosition, outputPinPosition };
-                    }
-                }
+        const newLinksPositions = this.updateLinkPositions();
+        if (this.redrawPinPosition) {
+            this.redrawPinPosition = false;
+            this.setState({
+                linksPositions: newLinksPositions
             });
-        });
-        this.setState({
-            linksPositions: newLinksPositions
-        });
+        }
     }
 
     componentDidUpdate(): void {
-        this.createNodeReferences();
-        const { links } = this.props;
-        const { linksPositions } = this.state;
-        let updatedIsNeeded = false;
-        const newLinksPositions = produce(linksPositions, (draft) => {
-            // Create or update position of all links positions that need so
-            Object.keys(links).forEach((key) => {
-                const link = links[key];
-                // Get node references
-                const inputNodeRef = this.nodesRefs[link.inputNodeId].current;
-                const outputNodeRef = this.nodesRefs[link.outputNodeId].current;
-                if (inputNodeRef && outputNodeRef) {
-                    // From node references, get connectors pin positions
-                    const inputPinPosition = inputNodeRef.getConnectorPinPosition(
-                        link.inputPinId,
-                        link.inputPinSide
-                    );
-                    const outputPinPosition = outputNodeRef.getConnectorPinPosition(
-                        link.outputPinId,
-                        link.outputPinSide
-                    );
-                    // If connector pin position exsits, create or update link position if needed
-                    if (inputPinPosition && outputPinPosition) {
-                        if (
-                            !(key in draft) ||
-                            !arePositionEquals(draft[key].inputPinPosition, inputPinPosition) ||
-                            !arePositionEquals(draft[key].outputPinPosition, outputPinPosition)
-                        ) {
-                            draft[key] = { linkId: key, inputPinPosition, outputPinPosition };
-                            updatedIsNeeded = true;
-                        }
-                    }
-                }
-            });
-            // Remove link positions that belongs to a deleted links
-            Object.keys(linksPositions).forEach((key) => {
-                if (!(key in links)) {
-                    delete draft[key];
-                    updatedIsNeeded = true;
-                }
-            });
-        });
-        if (updatedIsNeeded) {
+        const newLinksPositions = this.updateLinkPositions();
+        if (this.redrawPinPosition) {
+            this.redrawPinPosition = false;
             // eslint-disable-next-line react/no-did-update-set-state
             this.setState({
                 linksPositions: newLinksPositions
@@ -184,11 +130,8 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
         }
     }
 
-    onUpdatePreviewLink(
-        inputPinPosition: XYPosition | null,
-        outputPinPosition: XYPosition | null
-    ): void {
-        if (inputPinPosition === null || outputPinPosition === null) {
+    onUpdatePreviewLink(inputPinPos: PinPosition, outputPinPos: PinPosition): void {
+        if (inputPinPos === null || outputPinPos === null) {
             this.setState({
                 draggedLink: undefined
             });
@@ -196,8 +139,8 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
             this.setState({
                 draggedLink: {
                     linkId: "preview",
-                    inputPinPosition,
-                    outputPinPosition
+                    inputPinPosition: inputPinPos,
+                    outputPinPosition: outputPinPos
                 }
             });
         }
@@ -211,10 +154,10 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
         onCreateLink(link);
     }
 
-    onConnectorUpdate(nodeId: string, connectorId: string, connector: ConnectorModel): void {
+    onConnectorUpdate(nodeId: string, cId: string, connector: ConnectorModel): void {
         const { onConnectorUpdate } = this.props;
         if (onConnectorUpdate) {
-            onConnectorUpdate(nodeId, connectorId, connector);
+            onConnectorUpdate(nodeId, cId, connector);
         }
     }
 
@@ -230,18 +173,58 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
         }
     }
 
+    onNodePinPositionsUpdate(nodeId: string, pinPositions: NodePinPositions): void {
+        this.nodesPinPositions[nodeId] = pinPositions;
+    }
+
     getZoom(): number {
         const { panZoomInfo } = this.props;
         return panZoomInfo.zoom;
     }
 
-    createNodeReferences(): void {
-        const { nodes } = this.props;
-        Object.keys(nodes).forEach((key) => {
-            if (!(key in this.nodesRefs)) {
-                this.nodesRefs[key] = React.createRef<Node>();
-            }
+    updateLinkPositions(): { [linkId: string]: LinkPositionModel } {
+        const { links } = this.props;
+        const { linksPositions } = this.state;
+        const newLinksPositions = produce(linksPositions, (draft) => {
+            // Create or update position of all links positions that need so
+            Object.keys(links).forEach((key) => {
+                const link = links[key];
+                if (
+                    !(
+                        link.inputNodeId in this.nodesPinPositions &&
+                        link.outputNodeId in this.nodesPinPositions
+                    )
+                ) {
+                    return;
+                }
+                const inputNodePins = this.nodesPinPositions[link.inputNodeId][link.inputPinId];
+                const outputNodePins = this.nodesPinPositions[link.outputNodeId][link.outputPinId];
+                if (inputNodePins && outputNodePins) {
+                    const inputPinPosition: XYPosition | null =
+                        inputNodePins[link.inputPinSide === PinSide.LEFT ? 0 : 1];
+                    const outputPinPosition: XYPosition | null =
+                        outputNodePins[link.outputPinSide === PinSide.LEFT ? 0 : 1];
+                    if (inputPinPosition && outputPinPosition) {
+                        if (
+                            !(key in draft) ||
+                            !arePositionEquals(draft[key].inputPinPosition, inputPinPosition) ||
+                            !arePositionEquals(draft[key].outputPinPosition, outputPinPosition)
+                        ) {
+                            draft[key] = { linkId: key, inputPinPosition, outputPinPosition };
+                            this.redrawPinPosition = true;
+                        }
+                    }
+                }
+            });
+            // Remove link positions that belongs to a deleted links
+            Object.keys(linksPositions).forEach((key) => {
+                if (!(key in links)) {
+                    delete draft[key];
+                    this.redrawPinPosition = true;
+                }
+            });
         });
+        return newLinksPositions;
     }
 
     render(): JSX.Element {
@@ -302,7 +285,6 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
                         <Node
                             nodeId={key}
                             key={key}
-                            ref={this.nodesRefs[key]}
                             node={nodes[key]}
                             isNodeSelected={_.some(selectedItems, { id: key, type: "node" })}
                             getZoom={this.getZoom}
@@ -312,6 +294,7 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
                             onCreateLink={this.onCreateLink}
                             onUpdatePreviewLink={this.onUpdatePreviewLink}
                             onConnectorUpdate={this.onConnectorUpdate}
+                            onNodePinPositionsUpdate={this.onNodePinPositionsUpdate}
                         />
                     ))}
                 </PanZoom>

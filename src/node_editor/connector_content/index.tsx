@@ -5,12 +5,12 @@ import DefaultConnectorContent from "./default";
 import StringConnectorContent from "./string";
 
 export default function createConnectorComponent(props: ConnectorContentProps): JSX.Element {
-    const { nodeId, connectorId, node, connector, getZoom, onConnectorUpdate } = props;
+    const { nodeId, cId, node, connector, getZoom, onConnectorUpdate } = props;
     if (connector.contentType === "string") {
         return (
             <StringConnectorContent
                 nodeId={nodeId}
-                connectorId={connectorId}
+                cId={cId}
                 node={node}
                 connector={connector}
                 getZoom={getZoom}
@@ -22,7 +22,7 @@ export default function createConnectorComponent(props: ConnectorContentProps): 
     return (
         <DefaultConnectorContent
             nodeId={nodeId}
-            connectorId={connectorId}
+            cId={cId}
             node={node}
             connector={connector}
             getZoom={getZoom}

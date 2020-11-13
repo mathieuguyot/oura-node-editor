@@ -10,13 +10,13 @@ import {
     PinSide
 } from "../../../node_editor";
 
-const getLinks = (links: LinkCollection, nodeId: string, connectorId: string): Array<LinkModel> => {
+const getLinks = (links: LinkCollection, nodeId: string, cId: string): Array<LinkModel> => {
     const validLinks: Array<LinkModel> = [];
     Object.keys(links).forEach((key) => {
         const link = links[key];
         if (
-            (link.inputNodeId === nodeId && link.inputPinId === connectorId) ||
-            (link.outputNodeId === nodeId && link.outputPinId === connectorId)
+            (link.inputNodeId === nodeId && link.inputPinId === cId) ||
+            (link.outputNodeId === nodeId && link.outputPinId === cId)
         ) {
             validLinks.push(link);
         }
