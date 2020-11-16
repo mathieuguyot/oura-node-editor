@@ -272,10 +272,10 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
                     <svg
                         style={{
                             position: "absolute",
-                            top: "-1",
-                            left: "-1",
-                            width: "1",
-                            height: "1",
+                            top: "0",
+                            left: "0",
+                            width: "100%",
+                            height: "100%",
                             overflow: "visible"
                         }}>
                         {svgLinks}

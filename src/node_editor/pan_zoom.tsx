@@ -1,6 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import * as React from "react";
-import { DragWrapper } from "./events_wrappers";
-import { XYPosition, PanZoomModel } from "./model";
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
+
+import { PanZoomModel } from "./model";
 
 export interface PanZoomInputProps {
     panZoomInfo: PanZoomModel;
@@ -8,85 +11,50 @@ export interface PanZoomInputProps {
 }
 
 export default class PanZoom extends React.Component<PanZoomInputProps> {
-    // Used to set cursor while moving.
-    private panWrapper: React.RefObject<HTMLDivElement> = React.createRef();
-    private dragWrapper: DragWrapper = new DragWrapper();
-
     constructor(props: PanZoomInputProps) {
         super(props);
-        this.onWheelZoom = this.onWheelZoom.bind(this);
+
+        this.onZoomChange = this.onZoomChange.bind(this);
+        this.onPanning = this.onPanning.bind(this);
     }
 
-    private onMouseDown = (e: React.MouseEvent) => {
-        const getZoom = (): number => {
-            const { panZoomInfo } = this.props;
-            return panZoomInfo.zoom;
-        };
+    onZoomChange(e: any): void {
+        const { onPanZoomInfo } = this.props;
+        onPanZoomInfo({ zoom: e.scale, topLeftCorner: { x: e.positionX, y: e.positionY } });
+    }
 
-        const onMouseMoveCb = (
-            initialPos: XYPosition,
-            finalPos: XYPosition,
-            offSetPos: XYPosition
-        ) => {
-            const { panZoomInfo, onPanZoomInfo } = this.props;
-            const newPanZoomInfo = { ...panZoomInfo };
-            newPanZoomInfo.topLeftCorner = {
-                x: panZoomInfo.topLeftCorner.x - offSetPos.x,
-                y: panZoomInfo.topLeftCorner.y - offSetPos.y
-            };
-            onPanZoomInfo(newPanZoomInfo);
-        };
-
-        const onMouseUpCb = () => {
-            if (this.panWrapper.current) {
-                this.panWrapper.current.style.cursor = "";
-            }
-        };
-
-        const initialPosition: XYPosition = { x: e.pageX, y: e.pageY };
-        this.dragWrapper.onMouseDown(e, initialPosition, getZoom, onMouseMoveCb, onMouseUpCb);
-        if (this.panWrapper.current) {
-            this.panWrapper.current.style.cursor = "move";
-        }
-    };
-
-    private onWheelZoom(event: React.WheelEvent): void {
-        const { panZoomInfo, onPanZoomInfo } = this.props;
-        const newPanZoomInfo = { ...panZoomInfo };
-        const prevZoom = panZoomInfo.zoom;
-        const newZoom = event.deltaY > 0 ? prevZoom / 1.1 : prevZoom * 1.1;
-
-        newPanZoomInfo.zoom = newZoom;
-        onPanZoomInfo(newPanZoomInfo);
+    onPanning(e: any): void {
+        const { onPanZoomInfo } = this.props;
+        onPanZoomInfo({ zoom: e.scale, topLeftCorner: { x: e.positionX, y: e.positionY } });
     }
 
     render(): JSX.Element {
-        const { children, panZoomInfo } = this.props;
-        const { zoom } = panZoomInfo;
-        const matrixDataTx = -panZoomInfo.topLeftCorner.x * zoom;
-        const matrixDataTy = -panZoomInfo.topLeftCorner.y * zoom;
-        const matrixData = [zoom, 0, 0, zoom, matrixDataTx, matrixDataTy];
+        const { panZoomInfo, children } = this.props;
         return (
-            <div
-                style={{
-                    height: "100%",
-                    width: "100%"
+            <TransformWrapper
+                options={{
+                    limitToBounds: false,
+                    minScale: 0.1,
+                    centerContent: false
                 }}
-                ref={this.panWrapper}
-                onMouseDown={this.onMouseDown}
-                onWheel={this.onWheelZoom}
-                className="panWrapper">
-                <div
-                    style={{
-                        height: "100%",
-                        width: "100%",
-                        transform: `matrix(${matrixData.toString()})`,
-                        userSelect: "none",
-                        transformOrigin: "top left"
-                    }}>
-                    {children}
-                </div>
-            </div>
+                pan={{
+                    velocity: false
+                }}
+                doubleClick={{
+                    disabled: true
+                }}
+                wheel={{
+                    step: 100
+                }}
+                onWheel={this.onZoomChange}
+                onPanning={this.onPanning}
+                defaultScale={panZoomInfo.zoom}
+                defaultPositionX={panZoomInfo.topLeftCorner.x}
+                defaultPositionY={panZoomInfo.topLeftCorner.y}>
+                <TransformComponent>
+                    <div style={{ height: "100vh", width: "100vw" }}>{children}</div>
+                </TransformComponent>
+            </TransformWrapper>
         );
     }
 }

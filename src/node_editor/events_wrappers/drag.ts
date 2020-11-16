@@ -19,6 +19,7 @@ export default class DragWrapper {
         return 1;
     };
     private targetClassName = "";
+    private lastZoom = 0;
 
     constructor() {
         this.onMouseMove = this.onMouseMove.bind(this);
@@ -39,16 +40,18 @@ export default class DragWrapper {
         this.initialPos = initialPos;
         this.finalPos = { x: initialPos.x, y: initialPos.y };
         const zoom = getZoom();
+        this.lastZoom = zoom;
         this.tmpPos = { x: event.pageX / zoom, y: event.pageY / zoom };
         this.onMouseMoveCb = onMouseMove;
         this.onMouseUpCb = onMouseUp;
     }
 
     private onMouseMove(event: MouseEvent) {
+        event.stopPropagation();
         const zoom = this.getZoom();
         const offsetPos = {
-            x: event.pageX / zoom - this.tmpPos.x,
-            y: event.pageY / zoom - this.tmpPos.y
+            x: event.pageX / this.lastZoom - this.tmpPos.x,
+            y: event.pageY / this.lastZoom - this.tmpPos.y
         };
         this.finalPos.x += offsetPos.x;
         this.finalPos.y += offsetPos.y;
@@ -63,6 +66,7 @@ export default class DragWrapper {
             offsetPos,
             this.targetClassName
         );
+        this.lastZoom = zoom;
     }
 
     private onMouseUp() {

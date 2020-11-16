@@ -98,8 +98,12 @@ const OuraCanvasApp = (): JSX.Element => {
         (id: string) => {
             if (nodePickerPos) {
                 const newNode = _.clone(nodesSchemas[id]);
-                newNode.x = panZoomInfo.topLeftCorner.x + nodePickerPos.x;
-                newNode.y = panZoomInfo.topLeftCorner.y + nodePickerPos.y;
+                newNode.x =
+                    -panZoomInfo.topLeftCorner.x / panZoomInfo.zoom +
+                    nodePickerPos.x / panZoomInfo.zoom;
+                newNode.y =
+                    -panZoomInfo.topLeftCorner.y / panZoomInfo.zoom +
+                    nodePickerPos.y / panZoomInfo.zoom;
                 const newNodes = produce(nodes, (draft) => {
                     draft[generateUuid()] = newNode;
                 });
@@ -164,7 +168,7 @@ const OuraCanvasApp = (): JSX.Element => {
     ) : null;
 
     return (
-        <div style={{ width: "100%", height: "100vh" }} onContextMenu={onContextMenu} tabIndex={0}>
+        <div style={{ width: "100%", height: "100%" }} onContextMenu={onContextMenu} tabIndex={0}>
             <NodeEditor
                 panZoomInfo={panZoomInfo}
                 nodes={nodes}
