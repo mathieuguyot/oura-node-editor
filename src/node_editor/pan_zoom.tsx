@@ -2,20 +2,25 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import * as React from "react";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
+import _ from "lodash";
 
-import { PanZoomModel } from "./model";
+import { PanZoomModel, SelectionItem, XYPosition } from "./model";
 
 export interface PanZoomInputProps {
     panZoomInfo: PanZoomModel;
     onPanZoomInfo: (panZoomInfo: PanZoomModel) => void;
+    onSelectItem: (selection: SelectionItem | null) => void;
 }
 
 export default class PanZoom extends React.Component<PanZoomInputProps> {
+    private panStartPosition: XYPosition | null = null;
     constructor(props: PanZoomInputProps) {
         super(props);
 
         this.onZoomChange = this.onZoomChange.bind(this);
         this.onPanning = this.onPanning.bind(this);
+        this.onPanningStart = this.onPanningStart.bind(this);
+        this.onPanningStop = this.onPanningStop.bind(this);
     }
 
     onZoomChange(e: any): void {
@@ -28,33 +33,62 @@ export default class PanZoom extends React.Component<PanZoomInputProps> {
         onPanZoomInfo({ zoom: e.scale, topLeftCorner: { x: e.positionX, y: e.positionY } });
     }
 
+    onPanningStart(e: any): void {
+        this.panStartPosition = { x: e.positionX, y: e.positionY };
+    }
+
+    onPanningStop(e: any): void {
+        const { onSelectItem } = this.props;
+        const panEndPosition = { x: e.positionX, y: e.positionY };
+        if (_.isEqual(this.panStartPosition, panEndPosition)) {
+            onSelectItem(null);
+        }
+    }
+
     render(): JSX.Element {
         const { panZoomInfo, children } = this.props;
         return (
-            <TransformWrapper
-                options={{
-                    limitToBounds: false,
-                    minScale: 0.1,
-                    centerContent: false
+            <div
+                style={{
+                    position: "absolute",
+                    top: "0",
+                    left: "0",
+                    width: "100%",
+                    height: "100%"
                 }}
-                pan={{
-                    velocity: false
-                }}
-                doubleClick={{
-                    disabled: true
-                }}
-                wheel={{
-                    step: 100
-                }}
-                onWheel={this.onZoomChange}
-                onPanning={this.onPanning}
-                defaultScale={panZoomInfo.zoom}
-                defaultPositionX={panZoomInfo.topLeftCorner.x}
-                defaultPositionY={panZoomInfo.topLeftCorner.y}>
-                <TransformComponent>
-                    <div style={{ height: "100vh", width: "100vw" }}>{children}</div>
-                </TransformComponent>
-            </TransformWrapper>
+                onMouseDown={(e) => {
+                    if (e.button !== 0) {
+                        e.stopPropagation();
+                        e.preventDefault();
+                    }
+                }}>
+                <TransformWrapper
+                    options={{
+                        limitToBounds: false,
+                        minScale: 0.35,
+                        centerContent: false
+                    }}
+                    pan={{
+                        velocity: false
+                    }}
+                    doubleClick={{
+                        disabled: true
+                    }}
+                    wheel={{
+                        step: 100
+                    }}
+                    onWheel={this.onZoomChange}
+                    onPanningStart={this.onPanningStart}
+                    onPanning={this.onPanning}
+                    onPanningStop={this.onPanningStop}
+                    defaultScale={panZoomInfo.zoom}
+                    defaultPositionX={panZoomInfo.topLeftCorner.x}
+                    defaultPositionY={panZoomInfo.topLeftCorner.y}>
+                    <TransformComponent>
+                        <div style={{ height: "100vh", width: "100vw" }}>{children}</div>
+                    </TransformComponent>
+                </TransformWrapper>
+            </div>
         );
     }
 }

@@ -46,6 +46,7 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
     private keyPressedWrapper: KeyPressedWrapper;
     private nodesPinPositions: { [nodeId: string]: NodePinPositions } = {};
     private redrawPinPosition = false;
+    private lastSettedSelection: SelectionItem | null = null;
 
     constructor(props: NodeEditorProps) {
         super(props);
@@ -66,6 +67,8 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
         this.onSelectLink = this.onSelectLink.bind(this);
 
         this.onNodePinPositionsUpdate = this.onNodePinPositionsUpdate.bind(this);
+
+        this.onSelectItem = this.onSelectItem.bind(this);
 
         this.keyPressedWrapper = new KeyPressedWrapper();
     }
@@ -97,13 +100,20 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
     }
 
     onNodeMoveStart(id: string): void {
+        this.onSelectItem({ id, type: "node" });
+    }
+
+    onSelectItem(selection: SelectionItem | null): void {
         const { selectedItems, onSelectedItems } = this.props;
-        if (!_.some(selectedItems, { id, type: "node" })) {
+        if (!selection && !this.keyPressedWrapper.isKeyDown("shift")) {
+            onSelectedItems([]);
+        } else if (selection && !_.some(selectedItems, selection)) {
             let newSelection = [...selectedItems];
             if (!this.keyPressedWrapper.isKeyDown("shift")) {
                 newSelection = [];
             }
-            newSelection.push({ id, type: "node" });
+            newSelection.push(selection);
+            this.lastSettedSelection = selection;
             onSelectedItems(newSelection);
         }
     }
@@ -124,10 +134,28 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
     }
 
     onNodeMoveEnd(id: string, wasNodeMoved: boolean): void {
-        const { onSelectedItems } = this.props;
+        const { selectedItems, onSelectedItems } = this.props;
+        const selection = { id, type: "node" };
         if (!wasNodeMoved && !this.keyPressedWrapper.isKeyDown("shift")) {
-            onSelectedItems([{ id, type: "node" }]);
+            onSelectedItems([selection]);
+        } else if (
+            !wasNodeMoved &&
+            this.keyPressedWrapper.isKeyDown("shift") &&
+            !_.isEqual(selection, this.lastSettedSelection)
+        ) {
+            let indexToDelete = -1;
+            selectedItems.forEach((item, index) => {
+                if (item.id === id && item.type === "node") {
+                    indexToDelete = index;
+                }
+            });
+            if (indexToDelete !== -1) {
+                const newSelection = [...selectedItems];
+                newSelection.splice(indexToDelete, 1);
+                onSelectedItems(newSelection);
+            }
         }
+        this.lastSettedSelection = null;
     }
 
     onUpdatePreviewLink(inputPinPos: PinPosition, outputPinPos: PinPosition): void {
@@ -162,15 +190,7 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
     }
 
     onSelectLink(id: string): void {
-        const { selectedItems, onSelectedItems } = this.props;
-        if (!_.some(selectedItems, { id, type: "link" })) {
-            let newSelection = [...selectedItems];
-            if (!this.keyPressedWrapper.isKeyDown("shift")) {
-                newSelection = [];
-            }
-            newSelection.push({ id, type: "link" });
-            onSelectedItems(newSelection);
-        }
+        this.onSelectItem({ id, type: "link" });
     }
 
     onNodePinPositionsUpdate(nodeId: string, pinPositions: NodePinPositions): void {
@@ -255,7 +275,7 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
                 );
             }
         });
-        const grid = String(300 * panZoomInfo.zoom);
+        const grid = String(200 * panZoomInfo.zoom);
         return (
             <div
                 style={{
@@ -266,9 +286,13 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
                     height: "100%",
                     overflow: "hidden",
                     backgroundColor: "#232323",
+                    backgroundPosition: `${panZoomInfo.topLeftCorner.x}px ${panZoomInfo.topLeftCorner.y}px`,
                     backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${grid}' height='${grid}' viewBox='0 0 100 100'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='black' fill-opacity='0.4'%3E%3Cpath opacity='.5' d='M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z'/%3E%3Cpath d='M6 5V0H5v5H0v1h5v94h1V6h94V5H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
                 }}>
-                <PanZoom panZoomInfo={panZoomInfo} onPanZoomInfo={onPanZoomInfo}>
+                <PanZoom
+                    panZoomInfo={panZoomInfo}
+                    onPanZoomInfo={onPanZoomInfo}
+                    onSelectItem={this.onSelectItem}>
                     <svg
                         style={{
                             position: "absolute",

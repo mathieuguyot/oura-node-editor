@@ -18,7 +18,6 @@ import {
 import { createNodeSchema, Node } from "./nodes";
 import CanvasNode from "./nodes/canvas";
 import { AddNodeContextualMenu } from "../../contextual_menu";
-import { dumbLinkCreator, dumbNodeCreator } from "./debug";
 
 const OuraCanvasApp = (): JSX.Element => {
     const [nodePickerPos, setNodePickerPos] = React.useState<XYPosition | null>(null);
@@ -27,8 +26,8 @@ const OuraCanvasApp = (): JSX.Element => {
         topLeftCorner: { x: 0, y: 0 }
     });
     const [selectedItems, setSelectedItems] = React.useState<SelectionItem[]>([]);
-    const [nodes, setNodes] = React.useState<NodeCollection>(dumbNodeCreator());
-    const [links, setLinks] = React.useState<LinkCollection>(dumbLinkCreator(nodes));
+    const [nodes, setNodes] = React.useState<NodeCollection>({});
+    const [links, setLinks] = React.useState<LinkCollection>({});
     const canvasRef = React.useRef<HTMLCanvasElement>(null);
 
     const nodesSchemas: { [nId: string]: NodeModel } = createNodeSchema(canvasRef);
@@ -180,6 +179,7 @@ const OuraCanvasApp = (): JSX.Element => {
                 onCreateLink={onCreateLink}
                 onConnectorUpdate={onConnectorUpdate}
             />
+            {canvas}
             {nodePicker}
         </div>
     );
