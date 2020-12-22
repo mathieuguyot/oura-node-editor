@@ -13,7 +13,7 @@ import {
 } from "./model";
 import Connector from "./connector";
 import defaultStyles from "./default_styles";
-import { DragWrapper } from "./events_wrappers";
+import DragWrapper from "./events_wrappers";
 
 export type NodeProps = {
     nodeId: string;
@@ -24,9 +24,9 @@ export type NodeProps = {
 
     onNodePinPositionsUpdate: (nodeId: string, pinPositions: NodePinPositions) => void;
 
-    onNodeMoveStart?: (id: string) => void;
+    onNodeMoveStart?: (id: string, shiftKey: boolean) => void;
     onNodeMove?: (offsetX: number, offsetY: number, offsetWidth: number) => void;
-    onNodeMoveEnd?: (ids: string, wasNodeMoved: boolean) => void;
+    onNodeMoveEnd?: (ids: string, wasNodeMoved: boolean, shiftKey: boolean) => void;
 
     onConnectorUpdate: (nodeId: string, cId: string, connector: ConnectorModel) => void;
     onCreateLink?: (link: LinkModel) => void;
@@ -59,7 +59,7 @@ export class Node extends Component<NodeProps> {
         if (!onNodeMoveStart || !onNodeMove || !onNodeMoveEnd) {
             return;
         }
-        onNodeMoveStart(nodeId);
+        onNodeMoveStart(nodeId, event.shiftKey);
 
         const onMouseMoveCb = (iPos: XYPosition, finalPos: XYPosition, offsetPos: XYPosition) => {
             if (part === NodePart.Header || part === NodePart.Core) {
@@ -69,8 +69,8 @@ export class Node extends Component<NodeProps> {
             }
         };
 
-        const onMouseUpCb = (initialPos: XYPosition, finalPos: XYPosition) => {
-            onNodeMoveEnd(nodeId, !arePositionEquals(initialPos, finalPos));
+        const onMouseUpCb = (iPos: XYPosition, fPos: XYPosition, mouseUpEv: MouseEvent) => {
+            onNodeMoveEnd(nodeId, !arePositionEquals(iPos, fPos), mouseUpEv.shiftKey);
         };
 
         const zoom = getZoom();
@@ -87,15 +87,8 @@ export class Node extends Component<NodeProps> {
     }
 
     render(): JSX.Element {
-        const {
-            nodeId,
-            node,
-            isNodeSelected,
-            onCreateLink,
-            onUpdatePreviewLink,
-            getZoom,
-            onConnectorUpdate
-        } = this.props;
+        const { nodeId, node, isNodeSelected } = this.props;
+        const { onCreateLink, onUpdatePreviewLink, getZoom, onConnectorUpdate } = this.props;
 
         const nodeCoreStyle: CSS.Properties = {
             position: "absolute",
@@ -121,7 +114,8 @@ export class Node extends Component<NodeProps> {
         return (
             <div
                 style={{ ...nodeCoreStyle, ...nodeCoreSelectionStyle }}
-                onMouseDown={this.onMouseDown.bind(this, NodePart.Core)}>
+                onMouseDown={this.onMouseDown.bind(this, NodePart.Core)}
+                id={`node_${nodeId}`}>
                 <div
                     style={{ ...nodeHeaderStyle, ...defaultStyles.dark.nodeHeader }}
                     onMouseDown={this.onMouseDown.bind(this, NodePart.Header)}>

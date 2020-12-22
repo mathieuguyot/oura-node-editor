@@ -16,3 +16,4 @@
 // Import commands.js using ES2015 syntax:
 import "./commands";
 import "cypress-react-unit-test/support";
+import 'cypress-react-selector';

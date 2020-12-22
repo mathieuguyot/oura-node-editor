@@ -9,20 +9,21 @@ export default class LineLink extends Component<LinkProps> {
         return !_.isEqual(this.props, nextProps);
     }
 
-    onSelectLink(): void {
+    onSelectLink(event: React.MouseEvent): void {
         const { linkId, onSelectLink } = this.props;
         if (onSelectLink && linkId) {
-            onSelectLink(linkId);
+            onSelectLink(linkId, event.shiftKey);
         }
     }
 
     render(): JSX.Element {
-        const { linkPosition, isLinkSelected } = this.props;
+        const { linkId, linkPosition, isLinkSelected } = this.props;
 
         const selectedStyle = isLinkSelected ? defaultStyles.dark.linkSelected : {};
 
         return (
             <line
+                id={`link_${linkId}`}
                 x1={linkPosition.inputPinPosition.x}
                 y1={linkPosition.inputPinPosition.y}
                 x2={linkPosition.outputPinPosition.x}

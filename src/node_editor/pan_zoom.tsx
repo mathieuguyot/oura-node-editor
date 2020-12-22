@@ -9,18 +9,28 @@ import { PanZoomModel, SelectionItem, XYPosition } from "./model";
 export interface PanZoomInputProps {
     panZoomInfo: PanZoomModel;
     onPanZoomInfo: (panZoomInfo: PanZoomModel) => void;
-    onSelectItem: (selection: SelectionItem | null) => void;
+    onSelectItem: (selection: SelectionItem | null, shiftKey: boolean) => void;
 }
 
 export default class PanZoom extends React.Component<PanZoomInputProps> {
     private panStartPosition: XYPosition | null = null;
+    private shiftKey = false;
     constructor(props: PanZoomInputProps) {
         super(props);
 
+        this.onMouseDown = this.onMouseDown.bind(this);
         this.onZoomChange = this.onZoomChange.bind(this);
         this.onPanning = this.onPanning.bind(this);
         this.onPanningStart = this.onPanningStart.bind(this);
         this.onPanningStop = this.onPanningStop.bind(this);
+    }
+
+    onMouseDown(e: React.MouseEvent) {
+        this.shiftKey = e.shiftKey;
+        if (e.button !== 0) {
+            e.stopPropagation();
+            e.preventDefault();
+        }
     }
 
     onZoomChange(e: any): void {
@@ -41,7 +51,7 @@ export default class PanZoom extends React.Component<PanZoomInputProps> {
         const { onSelectItem } = this.props;
         const panEndPosition = { x: e.positionX, y: e.positionY };
         if (_.isEqual(this.panStartPosition, panEndPosition)) {
-            onSelectItem(null);
+            onSelectItem(null, this.shiftKey);
         }
     }
 
@@ -49,6 +59,7 @@ export default class PanZoom extends React.Component<PanZoomInputProps> {
         const { panZoomInfo, children } = this.props;
         return (
             <div
+                id="panzoom"
                 style={{
                     position: "absolute",
                     top: "0",
@@ -56,12 +67,7 @@ export default class PanZoom extends React.Component<PanZoomInputProps> {
                     width: "100%",
                     height: "100%"
                 }}
-                onMouseDown={(e) => {
-                    if (e.button !== 0) {
-                        e.stopPropagation();
-                        e.preventDefault();
-                    }
-                }}>
+                onMouseDown={this.onMouseDown}>
                 <TransformWrapper
                     options={{
                         limitToBounds: false,

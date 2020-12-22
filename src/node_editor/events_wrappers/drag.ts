@@ -6,7 +6,7 @@ type MouseMoveCb = (
     offSetPos: XYPosition,
     targetClassName: string
 ) => void;
-type MouseUpCb = (initialPos: XYPosition, finalPos: XYPosition, targetClassName: string) => void;
+type MouseUpCb = (initialPos: XYPosition, finalPos: XYPosition, event: MouseEvent) => void;
 
 /* onMouse(down|move|up) events wrapper helping to simplify computations of drag motions */
 export default class DragWrapper {
@@ -69,9 +69,10 @@ export default class DragWrapper {
         this.lastZoom = zoom;
     }
 
-    private onMouseUp() {
+    private onMouseUp(event: MouseEvent) {
+        event.stopPropagation();
         window.removeEventListener("mousemove", this.onMouseMove);
         window.removeEventListener("mouseup", this.onMouseUp);
-        this.onMouseUpCb({ ...this.initialPos }, { ...this.finalPos }, this.targetClassName);
+        this.onMouseUpCb({ ...this.initialPos }, { ...this.finalPos }, event);
     }
 }

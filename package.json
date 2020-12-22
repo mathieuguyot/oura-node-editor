@@ -43,6 +43,7 @@
         "@typescript-eslint/eslint-plugin": "^4.5.0",
         "@typescript-eslint/parser": "^4.5.0",
         "cypress": "^5.4.0",
+        "cypress-react-selector": "^2.2.1",
         "cypress-react-unit-test": "^4.16.5",
         "eslint": "^7.11.0",
         "eslint-config-airbnb-typescript": "^12.0.0",

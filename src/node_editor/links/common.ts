@@ -6,7 +6,7 @@ export type LinkProps = {
     linkType?: string;
 
     isLinkSelected: boolean;
-    onSelectLink?: (linkId: string) => void;
+    onSelectLink?: (linkId: string, shiftKey: boolean) => void;
 
     key?: string;
 };

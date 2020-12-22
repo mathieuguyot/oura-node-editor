@@ -11,7 +11,7 @@ import {
     PinPosition
 } from "./model";
 import createConnectorComponent from "./connector_content";
-import { DragWrapper } from "./events_wrappers";
+import DragWrapper from "./events_wrappers";
 import Pin from "./pin";
 
 type ConnectorProps = {
@@ -70,9 +70,15 @@ class Connector extends Component<ConnectorProps> {
                 onUpdatePreviewLink(initialPos, finalPos);
             };
 
-            const onMouseUpCb = (iPos: XYPosition, fPos: XYPosition, targetClassName: string) => {
+            const onMouseUpCb = (iPos: XYPosition, fPos: XYPosition, mouseUpEvent: MouseEvent) => {
                 const connectorRegex = /node-(.+)-connector-(.+)-(left|right)/;
-                const tag = targetClassName.match(connectorRegex);
+                let tag = null;
+                if (mouseUpEvent.target) {
+                    const { className } = mouseUpEvent.target as Element;
+                    if (typeof className === "string") {
+                        tag = (mouseUpEvent.target as Element).className.match(connectorRegex);
+                    }
+                }
                 if (tag !== null) {
                     onCreateLink({
                         inputNodeId: nodeId,

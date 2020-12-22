@@ -1,2 +1,3 @@
-export { default as KeyPressedWrapper } from "./keypressed";
-export { default as DragWrapper } from "./drag";
+import DragWrapper from "./drag";
+
+export default DragWrapper;
