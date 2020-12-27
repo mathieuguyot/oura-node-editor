@@ -1,10 +1,17 @@
 {
-    "name": "ostep",
+    "name": "oura-node-editor",
     "version": "0.1.0",
-    "private": true,
+    "license": "MIT",
+    "main": "lib/index.js",
+    "private": false,
+    "author": "Mathieu Guyot",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/ouranos588/oura-node-editor"
+    },
     "scripts": {
-        "start": "react-scripts start",
-        "build": "react-scripts build",
+        "build-watch": "tsc --build \"./tsconfig.json\" -w",
+        "build": "tsc --build \"./tsconfig.json\"",
         "test": "jest --silent",
         "eject": "react-scripts eject",
         "storybook": "start-storybook -p 6006 -s public",
@@ -12,64 +19,52 @@
         "lint": "eslint ./src/ ./test/ --ext .js,.jsx,.ts,.tsx",
         "prettify": "prettier --write 'src/**/*.(ts|tsx)'",
         "cypress": "cypress open",
-        "pre-commit": "npm run prettify && npm run lint && npm run test && cypress run"
+        "pre-commit": "npm run prettify && npm run lint && npm run test && cypress run && npm run build"
     },
     "dependencies": {
-        "@types/lodash": "^4.14.162",
-        "@types/node": "14.14.0",
-        "@types/react": "16.9.53",
-        "@types/react-dom": "16.9.8",
-        "babel-loader": "^8.1.0",
-        "eslint-plugin-prettier": "^3.1.4",
-        "immer": "^7.0.12",
+        "@types/lodash": "^4.14.166",
+        "@types/node": "14.14.16",
+        "@types/react": "17.0.0",
+        "@types/react-dom": "17.0.0",
+        "babel-loader": "^8.2.2",
+        "eslint-plugin-prettier": "^3.3.0",
+        "immer": "^8.0.0",
         "lodash": "^4.17.20",
-        "react": "^16.13.1",
-        "react-dom": "^16.13.1",
-        "react-scripts": "3.4.3",
+        "react": "^17.0.1",
+        "react-dom": "^17.0.1",
+        "react-scripts": "^4.0.1",
         "react-zoom-pan-pinch": "^1.6.1",
-        "typescript": "^4.0.3"
+        "typescript": "^4.1.3"
     },
     "devDependencies": {
-        "@babel/core": "^7.12.3",
-        "@storybook/addon-actions": "^6.0.26",
-        "@storybook/addon-essentials": "^6.0.26",
-        "@storybook/addon-links": "^6.0.26",
-        "@storybook/addon-storyshots": "^6.0.26",
-        "@storybook/addons": "^6.0.26",
-        "@storybook/node-logger": "^6.0.26",
-        "@storybook/preset-create-react-app": "^3.1.4",
-        "@storybook/react": "^6.0.26",
-        "@storybook/theming": "^6.0.26",
-        "@typescript-eslint/eslint-plugin": "^4.5.0",
-        "@typescript-eslint/parser": "^4.5.0",
-        "cypress": "^5.4.0",
-        "cypress-react-selector": "^2.2.1",
-        "cypress-react-unit-test": "^4.16.5",
-        "eslint": "^7.11.0",
+        "@babel/core": "^7.12.10",
+        "@storybook/addon-actions": "^6.1.11",
+        "@storybook/addon-essentials": "^6.1.11",
+        "@storybook/addon-links": "^6.1.11",
+        "@storybook/addon-storyshots": "^6.1.11",
+        "@storybook/addons": "^6.1.11",
+        "@storybook/node-logger": "^6.1.11",
+        "@storybook/preset-create-react-app": "^3.1.5",
+        "@storybook/react": "^6.1.11",
+        "@storybook/theming": "^6.1.11",
+        "@typescript-eslint/eslint-plugin": "^4.11.0",
+        "@typescript-eslint/parser": "^4.11.0",
+        "cypress": "^6.2.0",
+        "cypress-react-selector": "^2.2.2",
+        "cypress-react-unit-test": "^4.17.2",
+        "eslint": "^7.16.0",
         "eslint-config-airbnb-typescript": "^12.0.0",
-        "eslint-config-prettier": "^6.13.0",
+        "eslint-config-prettier": "^7.1.0",
         "eslint-plugin-import": "^2.22.1",
-        "eslint-plugin-jsx-a11y": "^6.3.1",
+        "eslint-plugin-jsx-a11y": "^6.4.1",
         "eslint-plugin-react": "^7.21.5",
-        "jest": "^26.6.0",
-        "prettier": "^2.1.2",
-        "react-is": "^16.13.1",
-        "react-test-renderer": "^16.13.1",
-        "ts-jest": "^26.4.1"
+        "jest": "^26.6.3",
+        "prettier": "^2.2.1",
+        "react-is": "^17.0.1",
+        "react-test-renderer": "^17.0.1",
+        "ts-jest": "^26.4.4"
     },
     "eslintConfig": {
         "extends": "react-app"
-    },
-    "browserslist": {
-        "production": [
-            ">0.2%",
-            "not dead",
-            "not op_mini all"
-        ],
-        "development": [
-            "last 1 chrome version",
-            "last 1 firefox version",
-            "last 1 safari version"
-        ]
     }
 }

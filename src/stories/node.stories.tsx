@@ -21,9 +21,7 @@ const defaultProps: NodeProps = {
     },
     isNodeSelected: false,
 
-    getZoom: () => {
-        return 1;
-    },
+    getZoom: () => 1,
 
     onNodePinPositionsUpdate: () => null,
 

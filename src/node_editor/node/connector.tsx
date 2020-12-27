@@ -75,9 +75,13 @@ class Connector extends Component<ConnectorProps> {
                 });
             };
 
-            const onMouseUpCb = (iPos: XYPosition, fPos: XYPosition, mouseUpEvent: MouseEvent) => {
+            const onMouseUpCb = (
+                _iPos: XYPosition,
+                _fPos: XYPosition,
+                mouseUpEvent: MouseEvent
+            ) => {
                 const connectorRegex = /node-(.+)-connector-(.+)-(left|right)/;
-                let tag = null;
+                let tag: RegExpMatchArray | null = null;
                 if (mouseUpEvent.target) {
                     const { className } = mouseUpEvent.target as Element;
                     if (typeof className === "string") {

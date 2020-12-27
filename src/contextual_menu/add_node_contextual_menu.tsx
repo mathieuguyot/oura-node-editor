@@ -12,7 +12,7 @@ const NodePrevisualizer = (props: NodePrevisualizerProps): JSX.Element => {
     const { node } = props;
     const previewDivRef = React.useRef<HTMLHeadingElement>(null);
 
-    let nodeElem = null;
+    let nodeElem: JSX.Element | null = null;
     if (node && previewDivRef && previewDivRef.current) {
         const divDim = previewDivRef.current.getBoundingClientRect();
         const displayedNode = { ...node };

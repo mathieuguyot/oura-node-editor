@@ -69,7 +69,7 @@ export class Node extends Component<NodeProps> {
 
         // 2. Every times the mouse is dragged, node position (if clicked on header or core)
         // or width (if clicked on footer) is updated using onNodeMove callback
-        const onMouseMoveCb = (iPos: XYPosition, finalPos: XYPosition, offsetPos: XYPosition) => {
+        const onMouseMoveCb = (_iPos: XYPosition, _finalPos: XYPosition, offsetPos: XYPosition) => {
             if (part === NodePart.HEADER || part === NodePart.BODY) {
                 onNodeMove(offsetPos.x, offsetPos.y, 0);
             } else {

@@ -15,9 +15,7 @@ export default class DragWrapper {
     private initialPos: XYPosition = { x: 0, y: 0 };
     private finalPos: XYPosition = { x: 0, y: 0 };
     private tmpPos: XYPosition = { x: 0, y: 0 };
-    private getZoom = () => {
-        return 1;
-    };
+    private getZoom = () => 1;
     private targetClassName = "";
     private lastZoom = 0;
 
