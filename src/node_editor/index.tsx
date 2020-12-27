@@ -13,3 +13,5 @@ export type {
 export { PinLayout, PinSide, generateUuid } from "./model";
 export { Node } from "./node";
 export type { NodeProps } from "./node";
+export { ThemeContext, darkTheme } from "./theme";
+export type { ThemeContextType, Theme } from "./theme";

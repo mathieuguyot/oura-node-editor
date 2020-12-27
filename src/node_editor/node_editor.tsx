@@ -18,7 +18,7 @@ import PanZoom from "./pan_zoom";
 import BackGround from "./background";
 import LinkCanvas from "./link_canvas";
 import NodeCanvas from "./node_canvas";
-import { ThemeContext, Theme, darkTheme } from "./theme";
+import { ThemeContext, darkTheme, ThemeContextType } from "./theme";
 
 enableMapSet();
 
@@ -27,7 +27,7 @@ type NodeEditorProps = {
     links: LinkCollection;
     panZoomInfo: PanZoomModel;
     selectedItems: Array<SelectionItem>;
-    theme?: Theme;
+    theme?: ThemeContextType;
 
     onNodeMove?(id: string, newX: number, newY: number, newWidth: number): void;
     onCreateLink?(link: LinkModel): void;
@@ -184,12 +184,12 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
     }
 
     render(): JSX.Element {
-        const { nodes, links, selectedItems, panZoomInfo } = this.props;
+        const { nodes, links, selectedItems, panZoomInfo, theme } = this.props;
         const { onPanZoomInfo } = this.props;
         const { draggedLink, linksPositions } = this.state;
 
         return (
-            <ThemeContext.Provider value={darkTheme}>
+            <ThemeContext.Provider value={theme || darkTheme}>
                 <BackGround panZoomInfo={panZoomInfo}>
                     <PanZoom
                         panZoomInfo={panZoomInfo}

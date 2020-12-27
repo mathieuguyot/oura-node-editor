@@ -7,7 +7,7 @@ import { Theme } from "./theme";
 
 type ThemeContextType = {
     theme: Theme;
-    buildBackgroundStyle: (panZoomInfo: PanZoomModel) => CSS.Properties;
+    buildBackgroundStyle?: (panZoomInfo: PanZoomModel) => CSS.Properties;
 };
 
 const ThemeContext = createContext<ThemeContextType>(darkTheme);
