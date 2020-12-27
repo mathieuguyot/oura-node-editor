@@ -4,9 +4,9 @@ import _ from "lodash";
 import {
     ConnectorModel,
     LinkModel,
+    LinkPositionModel,
     NodeCollection,
     NodePinPositions,
-    PinPosition,
     SelectionItem
 } from "./model";
 import { Node } from "./node";
@@ -16,10 +16,10 @@ export interface NodeCanvasProps {
     selectedItems: Array<SelectionItem>;
 
     onSelectItem: (selection: SelectionItem | null, shiftKey: boolean) => void;
-    onUpdatePreviewLink: (inputPinPos: PinPosition, outputPinPos: PinPosition) => void;
+    onUpdatePreviewLink: (previewLink?: LinkPositionModel) => void;
     getZoom: () => number;
 
-    onNodeMove: (id: string, offsetX: number, offsetY: number, offsetWidth: number) => void;
+    onNodeMove: (id: string, newX: number, newY: number, newWidth: number) => void;
     onCreateLink?: (link: LinkModel) => void;
     onConnectorUpdate: (nodeId: string, cId: string, connector: ConnectorModel) => void;
     onNodePinPositionsUpdate: (nodeId: string, pinPositions: NodePinPositions) => void;
@@ -68,8 +68,8 @@ export default class NodeEditor extends React.Component<NodeCanvasProps> {
         selectedItems.forEach((item) => {
             if (item.type === "node") {
                 const { nodes, onNodeMove } = this.props;
-                const newX = nodes[item.id].x + offsetX;
-                const newY = nodes[item.id].y + offsetY;
+                const newX = nodes[item.id].position.x + offsetX;
+                const newY = nodes[item.id].position.y + offsetY;
                 const newWidth = nodes[item.id].width + offsetWidth;
                 onNodeMove(item.id, newX, newY, newWidth > 100 ? newWidth : 100);
             }

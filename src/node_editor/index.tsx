@@ -12,3 +12,4 @@ export type {
 } from "./model";
 export { PinLayout, PinSide, generateUuid } from "./model";
 export { Node } from "./node";
+export type { NodeProps } from "./node";

@@ -5,12 +5,16 @@ import _ from "lodash";
 import ErrorConnectorContentProps from "./error";
 import { ConnectorContentProps } from "./common";
 import { ConnectorModel } from "../model";
+import { ThemeContext } from "../theme";
 
 type StringConnectorContentState = {
     preventPropation: boolean;
 };
 
-class StringConnectorContent extends Component<ConnectorContentProps, StringConnectorContentState> {
+export default class StringConnectorContent extends Component<
+    ConnectorContentProps,
+    StringConnectorContentState
+> {
     constructor(props: ConnectorContentProps) {
         super(props);
         this.state = {
@@ -55,6 +59,7 @@ class StringConnectorContent extends Component<ConnectorContentProps, StringConn
     }
 
     render(): JSX.Element {
+        const { theme } = this.context;
         const { connector } = this.props;
         if (!("value" in connector.data)) {
             const message = "'string' connector types must provide a string field named 'value'";
@@ -62,6 +67,7 @@ class StringConnectorContent extends Component<ConnectorContentProps, StringConn
         }
         return (
             <input
+                style={theme?.connectors?.string}
                 tabIndex={-1}
                 value={connector.data.value}
                 onMouseDown={this.onMouseDown}
@@ -69,16 +75,9 @@ class StringConnectorContent extends Component<ConnectorContentProps, StringConn
                 onMouseMove={this.onMouseMove}
                 onChange={this.onChange}
                 placeholder={connector.name}
-                style={{
-                    width: "100%",
-                    backgroundColor: "#585858",
-                    color: "white",
-                    border: 0,
-                    outline: "none"
-                }}
             />
         );
     }
 }
 
-export default StringConnectorContent;
+StringConnectorContent.contextType = ThemeContext;

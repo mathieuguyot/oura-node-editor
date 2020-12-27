@@ -21,21 +21,19 @@ const SingleNodeNodeEditor = (): JSX.Element => {
         0: {
             name: "node_0",
             width: 200,
-            x: 400,
-            y: 100,
+            position: { x: 400, y: 100 },
             connectors: {
-                0: { name: "x", pinLayout: PinLayout.LEFT_PIN, data: {} },
-                1: { name: "y", pinLayout: PinLayout.LEFT_PIN, data: {} }
+                0: { name: "x", pinLayout: PinLayout.LEFT_PIN, contentType: "none", data: {} },
+                1: { name: "y", pinLayout: PinLayout.LEFT_PIN, contentType: "none", data: {} }
             }
         },
         1: {
             name: "node_1",
             width: 200,
-            x: 100,
-            y: 100,
+            position: { x: 100, y: 100 },
             connectors: {
-                0: { name: "x", pinLayout: PinLayout.RIGHT_PIN, data: {} },
-                1: { name: "y", pinLayout: PinLayout.RIGHT_PIN, data: {} }
+                0: { name: "x", pinLayout: PinLayout.RIGHT_PIN, contentType: "none", data: {} },
+                1: { name: "y", pinLayout: PinLayout.RIGHT_PIN, contentType: "none", data: {} }
             }
         }
     });
@@ -61,8 +59,7 @@ const SingleNodeNodeEditor = (): JSX.Element => {
     const onNodeMove = React.useCallback(
         (id: string, newX: number, newY: number, newWidth: number) => {
             const newNodes = produce(nodes, (draft) => {
-                draft[id].x = newX;
-                draft[id].y = newY;
+                draft[id].position = { x: newX, y: newY };
                 draft[id].width = newWidth;
             });
             setNodes(newNodes);

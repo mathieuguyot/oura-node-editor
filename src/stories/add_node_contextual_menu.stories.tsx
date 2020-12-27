@@ -16,10 +16,9 @@ const defaultProps: AddNodeContextualMenuProps = {
         rectangle: {
             name: "rectangle",
             width: 100,
-            x: 0,
-            y: 0,
+            position: { x: 0, y: 0 },
             connectors: {
-                0: { name: "draw", pinLayout: PinLayout.RIGHT_PIN, data: {} },
+                0: { name: "draw", pinLayout: PinLayout.RIGHT_PIN, contentType: "none", data: {} },
                 1: {
                     name: "y",
                     pinLayout: PinLayout.LEFT_PIN,

@@ -5,7 +5,7 @@ import { LinkProps } from "./common";
 import BezierLink from "./link_bezier";
 import LineLink from "./link_line";
 
-export default function createLinkComponent(props: LinkProps): JSX.Element {
+export default function createLink(props: LinkProps): JSX.Element {
     const { linkType } = props;
     if (linkType === "line") {
         return <LineLink {...props} />;

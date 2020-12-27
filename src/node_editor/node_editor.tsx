@@ -12,13 +12,13 @@ import {
     LinkCollection,
     SelectionItem,
     PinSide,
-    NodePinPositions,
-    PinPosition
+    NodePinPositions
 } from "./model";
 import PanZoom from "./pan_zoom";
 import BackGround from "./background";
 import LinkCanvas from "./link_canvas";
 import NodeCanvas from "./node_canvas";
+import { ThemeContext, Theme, darkTheme } from "./theme";
 
 enableMapSet();
 
@@ -27,8 +27,9 @@ type NodeEditorProps = {
     links: LinkCollection;
     panZoomInfo: PanZoomModel;
     selectedItems: Array<SelectionItem>;
+    theme?: Theme;
 
-    onNodeMove(id: string, offsetX: number, offsetY: number, offsetWidth: number): void;
+    onNodeMove?(id: string, newX: number, newY: number, newWidth: number): void;
     onCreateLink?(link: LinkModel): void;
     onConnectorUpdate?: (nodeId: string, cId: string, connector: ConnectorModel) => void;
 
@@ -56,6 +57,7 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
         this.onSelectItem = this.onSelectItem.bind(this);
         this.onCreateLink = this.onCreateLink.bind(this);
         this.onConnectorUpdate = this.onConnectorUpdate.bind(this);
+        this.onNodeMove = this.onNodeMove.bind(this);
     }
 
     componentDidMount(): void {
@@ -88,7 +90,6 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
                 newSelection = [];
             }
             newSelection.push(selection);
-            // this.lastSettedSelection = selection;
             onSelectedItems(newSelection);
         }
         if (!shiftKey && selection) {
@@ -96,20 +97,10 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
         }
     }
 
-    onUpdatePreviewLink(inputPinPos: PinPosition, outputPinPos: PinPosition): void {
-        if (inputPinPos === null || outputPinPos === null) {
-            this.setState({
-                draggedLink: undefined
-            });
-        } else {
-            this.setState({
-                draggedLink: {
-                    linkId: "preview",
-                    inputPinPosition: inputPinPos,
-                    outputPinPosition: outputPinPos
-                }
-            });
-        }
+    onUpdatePreviewLink(previewLink?: LinkPositionModel): void {
+        this.setState({
+            draggedLink: previewLink
+        });
     }
 
     onNodePinPositionsUpdate(nodeId: string, pinPositions: NodePinPositions): void {
@@ -119,13 +110,19 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
     onCreateLink(link: LinkModel): void {
         const { onCreateLink } = this.props;
         if (
-            !onCreateLink ||
-            link.inputPinSide === link.outputPinSide ||
-            link.inputNodeId === link.outputNodeId
+            onCreateLink &&
+            link.inputPinSide !== link.outputPinSide &&
+            link.inputNodeId !== link.outputNodeId
         ) {
-            return;
+            onCreateLink(link);
         }
-        onCreateLink(link);
+    }
+
+    onNodeMove(id: string, newX: number, newY: number, newWidth: number): void {
+        const { onNodeMove } = this.props;
+        if (onNodeMove) {
+            onNodeMove(id, newX, newY, newWidth);
+        }
     }
 
     onConnectorUpdate(nodeId: string, cId: string, connector: ConnectorModel): void {
@@ -188,35 +185,37 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
 
     render(): JSX.Element {
         const { nodes, links, selectedItems, panZoomInfo } = this.props;
-        const { onPanZoomInfo, onNodeMove } = this.props;
+        const { onPanZoomInfo } = this.props;
         const { draggedLink, linksPositions } = this.state;
 
         return (
-            <BackGround panZoomInfo={panZoomInfo}>
-                <PanZoom
-                    panZoomInfo={panZoomInfo}
-                    onPanZoomInfo={onPanZoomInfo}
-                    onSelectItem={this.onSelectItem}>
-                    <LinkCanvas
-                        links={links}
-                        linksPositions={linksPositions}
-                        draggedLink={draggedLink}
-                        selectedItems={selectedItems}
-                        onSelectItem={this.onSelectItem}
-                    />
-                    <NodeCanvas
-                        nodes={nodes}
-                        getZoom={this.getZoom}
-                        onNodeMove={onNodeMove}
-                        onCreateLink={this.onCreateLink}
-                        onUpdatePreviewLink={this.onUpdatePreviewLink}
-                        onConnectorUpdate={this.onConnectorUpdate}
-                        onNodePinPositionsUpdate={this.onNodePinPositionsUpdate}
-                        selectedItems={selectedItems}
-                        onSelectItem={this.onSelectItem}
-                    />
-                </PanZoom>
-            </BackGround>
+            <ThemeContext.Provider value={darkTheme}>
+                <BackGround panZoomInfo={panZoomInfo}>
+                    <PanZoom
+                        panZoomInfo={panZoomInfo}
+                        onPanZoomInfo={onPanZoomInfo}
+                        onSelectItem={this.onSelectItem}>
+                        <LinkCanvas
+                            links={links}
+                            linksPositions={linksPositions}
+                            draggedLink={draggedLink}
+                            selectedItems={selectedItems}
+                            onSelectItem={this.onSelectItem}
+                        />
+                        <NodeCanvas
+                            nodes={nodes}
+                            getZoom={this.getZoom}
+                            onNodeMove={this.onNodeMove}
+                            onCreateLink={this.onCreateLink}
+                            onUpdatePreviewLink={this.onUpdatePreviewLink}
+                            onConnectorUpdate={this.onConnectorUpdate}
+                            onNodePinPositionsUpdate={this.onNodePinPositionsUpdate}
+                            selectedItems={selectedItems}
+                            onSelectItem={this.onSelectItem}
+                        />
+                    </PanZoom>
+                </BackGround>
+            </ThemeContext.Provider>
         );
     }
 }

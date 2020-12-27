@@ -8,10 +8,11 @@ import {
     NodeModel,
     LinkModel,
     PinSide,
-    PinPosition
-} from "./model";
-import createConnectorComponent from "./connector_content";
-import DragWrapper from "./events_wrappers";
+    PinPosition,
+    LinkPositionModel
+} from "../model";
+import createConnectorComponent from "../connector_content";
+import DragWrapper from "../utils";
 import Pin from "./pin";
 
 type ConnectorProps = {
@@ -24,7 +25,7 @@ type ConnectorProps = {
     onPinPositionUpdate: (cId: string, leftPinPos: PinPosition, rightPinPos: PinPosition) => void;
     onConnectorUpdate: (nodeId: string, cId: string, connector: ConnectorModel) => void;
     onCreateLink?: (link: LinkModel) => void;
-    onUpdatePreviewLink?: (inputPos: PinPosition, outputPos: PinPosition) => void;
+    onUpdatePreviewLink?: (previewLink?: LinkPositionModel) => void;
 };
 
 class Connector extends Component<ConnectorProps> {
@@ -67,7 +68,11 @@ class Connector extends Component<ConnectorProps> {
         const pinPosition = this.getConnectorPinPosition(pinSide);
         if (pinPosition && onUpdatePreviewLink && onCreateLink) {
             const onMouseMoveCb = (initialPos: XYPosition, finalPos: XYPosition) => {
-                onUpdatePreviewLink(initialPos, finalPos);
+                onUpdatePreviewLink({
+                    linkId: "preview",
+                    outputPinPosition: finalPos,
+                    inputPinPosition: initialPos
+                });
             };
 
             const onMouseUpCb = (iPos: XYPosition, fPos: XYPosition, mouseUpEvent: MouseEvent) => {
@@ -90,7 +95,7 @@ class Connector extends Component<ConnectorProps> {
                         linkType: "bezier"
                     });
                 }
-                onUpdatePreviewLink(null, null);
+                onUpdatePreviewLink(undefined);
             };
 
             this.dragWrapper.onMouseDown(event, pinPosition, getZoom, onMouseMoveCb, onMouseUpCb);
@@ -110,8 +115,8 @@ class Connector extends Component<ConnectorProps> {
         }
 
         return {
-            x: pinSide === PinSide.RIGHT ? node.width + node.x : node.x,
-            y: node.y + connectorRef.offsetTop + connectorRef.offsetHeight / 2
+            x: pinSide === PinSide.RIGHT ? node.width + node.position.x : node.position.x,
+            y: node.position.y + connectorRef.offsetTop + connectorRef.offsetHeight / 2
         };
     }
 

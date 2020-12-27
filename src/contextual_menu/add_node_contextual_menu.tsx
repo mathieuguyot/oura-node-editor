@@ -16,9 +16,8 @@ const NodePrevisualizer = (props: NodePrevisualizerProps): JSX.Element => {
     if (node && previewDivRef && previewDivRef.current) {
         const divDim = previewDivRef.current.getBoundingClientRect();
         const displayedNode = { ...node };
-        displayedNode.x = 10;
+        displayedNode.position = { x: 10, y: 10 };
         displayedNode.width = divDim.width - 20;
-        displayedNode.y = 10;
         nodeElem = node ? (
             <Node
                 nodeId="0"

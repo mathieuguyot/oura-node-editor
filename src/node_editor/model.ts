@@ -48,8 +48,7 @@ export function generateUuid(): string {
 
 export interface NodeModel {
     name: string;
-    x: number;
-    y: number;
+    position: XYPosition;
     width: number;
     connectors: ConnectorCollection;
 }
@@ -71,7 +70,7 @@ export enum PinLayout {
 export interface ConnectorModel {
     name: string;
     pinLayout: PinLayout;
-    contentType?: string;
+    contentType: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: any;
 }

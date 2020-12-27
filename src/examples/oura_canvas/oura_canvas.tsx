@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import { produce } from "immer";
 import _ from "lodash";
@@ -18,7 +17,7 @@ import {
 import { createNodeSchema, Node } from "./nodes";
 import CanvasNode from "./nodes/canvas";
 import { AddNodeContextualMenu } from "../../contextual_menu";
-import { dumbLinkCreator, dumbNodeCreator } from "./debug";
+// import { dumbLinkCreator, dumbNodeCreator } from "./debug";
 
 const OuraCanvasApp = (): JSX.Element => {
     const [nodePickerPos, setNodePickerPos] = React.useState<XYPosition | null>(null);
@@ -27,8 +26,8 @@ const OuraCanvasApp = (): JSX.Element => {
         topLeftCorner: { x: 0, y: 0 }
     });
     const [selectedItems, setSelectedItems] = React.useState<SelectionItem[]>([]);
-    const [nodes, setNodes] = React.useState<NodeCollection>(dumbNodeCreator());
-    const [links, setLinks] = React.useState<LinkCollection>(dumbLinkCreator(nodes));
+    const [nodes, setNodes] = React.useState<NodeCollection>({} /* dumbNodeCreator() */);
+    const [links, setLinks] = React.useState<LinkCollection>({} /* dumbLinkCreator(nodes) */);
     const canvasRef = React.useRef<HTMLCanvasElement>(null);
 
     const nodesSchemas: { [nId: string]: NodeModel } = createNodeSchema(canvasRef);
@@ -45,8 +44,7 @@ const OuraCanvasApp = (): JSX.Element => {
     const onNodeMove = React.useCallback(
         (id: string, newX: number, newY: number, newWidth: number) => {
             const newNodes = produce(nodes, (draft: NodeCollection) => {
-                draft[id].x = newX;
-                draft[id].y = newY;
+                draft[id].position = { x: newX, y: newY };
                 draft[id].width = newWidth;
             });
             setNodes(newNodes);
@@ -98,12 +96,13 @@ const OuraCanvasApp = (): JSX.Element => {
         (id: string) => {
             if (nodePickerPos) {
                 const newNode = _.clone(nodesSchemas[id]);
-                newNode.x =
+                const newX =
                     -panZoomInfo.topLeftCorner.x / panZoomInfo.zoom +
                     nodePickerPos.x / panZoomInfo.zoom;
-                newNode.y =
+                const newY =
                     -panZoomInfo.topLeftCorner.y / panZoomInfo.zoom +
                     nodePickerPos.y / panZoomInfo.zoom;
+                newNode.position = { x: newX, y: newY };
                 const newNodes = produce(nodes, (draft) => {
                     draft[generateUuid()] = newNode;
                 });
@@ -168,21 +167,26 @@ const OuraCanvasApp = (): JSX.Element => {
     ) : null;
 
     return (
-        <div style={{ width: "100%", height: "100%" }} onContextMenu={onContextMenu} tabIndex={0}>
-            <NodeEditor
-                panZoomInfo={panZoomInfo}
-                nodes={nodes}
-                links={links}
-                selectedItems={selectedItems}
-                onPanZoomInfo={setPanZoomInfo}
-                onSelectedItems={setSelectedItems}
-                onNodeMove={onNodeMove}
-                onCreateLink={onCreateLink}
-                onConnectorUpdate={onConnectorUpdate}
-            />
-            {canvas}
-            {nodePicker}
-        </div>
+        <>
+            <div
+                style={{ width: "100%", height: "100%" }}
+                onContextMenu={onContextMenu}
+                tabIndex={0}>
+                <NodeEditor
+                    panZoomInfo={panZoomInfo}
+                    nodes={nodes}
+                    links={links}
+                    selectedItems={selectedItems}
+                    onPanZoomInfo={setPanZoomInfo}
+                    onSelectedItems={setSelectedItems}
+                    onNodeMove={onNodeMove}
+                    onCreateLink={onCreateLink}
+                    onConnectorUpdate={onConnectorUpdate}
+                />
+                {canvas}
+                {nodePicker}
+            </div>
+        </>
     );
 };
 

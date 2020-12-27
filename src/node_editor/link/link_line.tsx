@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import * as _ from "lodash";
 
 import { LinkProps } from "./common";
-import defaultStyles from "../default_styles";
+import { ThemeContext } from "../theme";
 
 export default class LineLink extends Component<LinkProps> {
     shouldComponentUpdate(nextProps: LinkProps): boolean {
@@ -17,9 +17,10 @@ export default class LineLink extends Component<LinkProps> {
     }
 
     render(): JSX.Element {
+        const { theme } = this.context;
         const { linkId, linkPosition, isLinkSelected } = this.props;
 
-        const selectedStyle = isLinkSelected ? defaultStyles.dark.linkSelected : {};
+        const style = isLinkSelected ? theme?.link?.selected : theme?.link?.unselected;
 
         return (
             <line
@@ -28,9 +29,11 @@ export default class LineLink extends Component<LinkProps> {
                 y1={linkPosition.inputPinPosition.y}
                 x2={linkPosition.outputPinPosition.x}
                 y2={linkPosition.outputPinPosition.y}
-                style={{ ...defaultStyles.dark.link, ...selectedStyle }}
+                style={style}
                 onClick={this.onSelectLink.bind(this)}
             />
         );
     }
 }
+
+LineLink.contextType = ThemeContext;

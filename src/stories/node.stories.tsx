@@ -15,8 +15,7 @@ const defaultProps: NodeProps = {
     nodeId: "0",
     node: {
         name: "default_node",
-        x: 0,
-        y: 0,
+        position: { x: 0, y: 0 },
         connectors: {},
         width: 200
     },
@@ -57,14 +56,13 @@ export const BasicUnselectedNode = Template.bind({});
 BasicUnselectedNode.args = { ...defaultProps };
 BasicUnselectedNode.args.node = {
     name: "full_node",
-    x: 0,
-    y: 0,
+    position: { x: 0, y: 0 },
     connectors: {
-        0: { name: "x", pinLayout: PinLayout.LEFT_PIN, data: {} },
+        0: { name: "x", pinLayout: PinLayout.LEFT_PIN, contentType: "none", data: {} },
         1: { name: "y", pinLayout: PinLayout.LEFT_PIN, contentType: "string", data: {} },
-        2: { name: "z", pinLayout: PinLayout.LEFT_PIN, data: {} },
-        3: { name: "sum", pinLayout: PinLayout.RIGHT_PIN, data: {} },
-        4: { name: "product", pinLayout: PinLayout.RIGHT_PIN, data: {} }
+        2: { name: "z", pinLayout: PinLayout.LEFT_PIN, contentType: "none", data: {} },
+        3: { name: "sum", pinLayout: PinLayout.RIGHT_PIN, contentType: "none", data: {} },
+        4: { name: "product", pinLayout: PinLayout.RIGHT_PIN, contentType: "none", data: {} }
     },
     width: 300
 };

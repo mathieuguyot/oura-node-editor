@@ -22,11 +22,10 @@ const SingleNodeNodeEditor = (props: { initialZoom: number }): JSX.Element => {
         0: {
             name: "my tested node",
             width: 200,
-            x: 100,
-            y: 100,
+            position: { x: 100, y: 100 },
             connectors: {
-                0: { name: "x", pinLayout: PinLayout.LEFT_PIN, data: {} },
-                1: { name: "y", pinLayout: PinLayout.LEFT_PIN, data: {} }
+                0: { name: "x", pinLayout: PinLayout.LEFT_PIN, contentType: "none", data: {} },
+                1: { name: "y", pinLayout: PinLayout.LEFT_PIN, contentType: "none", data: {} }
             }
         }
     });
@@ -35,8 +34,7 @@ const SingleNodeNodeEditor = (props: { initialZoom: number }): JSX.Element => {
     const onNodeMove = React.useCallback(
         (id: string, newX: number, newY: number, newWidth: number) => {
             const newNodes = produce(nodes, (draft) => {
-                draft[id].x = newX;
-                draft[id].y = newY;
+                draft[id].position = { x: newX, y: newY };
                 draft[id].width = newWidth;
             });
             setNodes(newNodes);
@@ -113,7 +111,7 @@ zoomFactors.forEach((zoom) => {
             const dragX = 300;
             const dragY = 200;
             const node = cy.contains("my tested node").should("exist");
-            const footer = node.parent().parent().children().last();
+            const footer = node.parent().children().last();
             // Save its initial position
             node.then((elem) => {
                 const begginCords = elem[0].getBoundingClientRect();

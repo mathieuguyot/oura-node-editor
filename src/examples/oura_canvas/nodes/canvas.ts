@@ -7,7 +7,7 @@ export default class CanvasNode extends Node {
 
     constructor(canvasRef: React.RefObject<HTMLCanvasElement>) {
         super("canvas", 100, {
-            0: { name: "draw", pinLayout: PinLayout.LEFT_PIN, data: {} }
+            0: { name: "draw", pinLayout: PinLayout.LEFT_PIN, contentType: "none", data: {} }
         });
         this.canvasRef = canvasRef;
     }

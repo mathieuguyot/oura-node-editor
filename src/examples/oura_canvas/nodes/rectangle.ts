@@ -5,7 +5,7 @@ import { PinLayout } from "../../../node_editor";
 export default class RectangleNode extends Node {
     constructor() {
         super("rectangle", 100, {
-            0: { name: "draw", pinLayout: PinLayout.RIGHT_PIN, data: {} },
+            0: { name: "draw", pinLayout: PinLayout.RIGHT_PIN, contentType: "none", data: {} },
             1: {
                 name: "y",
                 pinLayout: PinLayout.LEFT_PIN,

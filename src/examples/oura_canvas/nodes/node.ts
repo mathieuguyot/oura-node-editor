@@ -27,8 +27,7 @@ const getLinks = (links: LinkCollection, nodeId: string, cId: string): Array<Lin
 export default abstract class Node implements NodeModel {
     [immerable] = true;
     public name: string;
-    public x = 0;
-    public y = 0;
+    public position = { x: 0, y: 0 };
     public width: number;
     public connectors: ConnectorCollection;
 

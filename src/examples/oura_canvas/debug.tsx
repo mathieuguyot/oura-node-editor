@@ -6,8 +6,8 @@ export function dumbNodeCreator(): NodeCollection {
     for (let index = 0; index < 10; index += 1) {
         const rectNode = new RectangleNode();
         rectNode.name = `${rectNode.name}_${index}`;
-        rectNode.x = Math.floor(Math.random() * 5000);
-        rectNode.y = Math.floor(Math.random() * 5000);
+        rectNode.position.x = Math.floor(Math.random() * 5000);
+        rectNode.position.y = Math.floor(Math.random() * 5000);
         nodes[index.toString()] = rectNode;
     }
     return nodes;

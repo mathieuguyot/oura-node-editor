@@ -5,7 +5,7 @@ import { PinLayout } from "../../../node_editor";
 export default class RotateNode extends Node {
     constructor() {
         super("rotate", 100, {
-            0: { name: "draw", pinLayout: PinLayout.BOTH_PINS, data: {} },
+            0: { name: "draw", pinLayout: PinLayout.BOTH_PINS, contentType: "none", data: {} },
             1: {
                 name: "angle",
                 pinLayout: PinLayout.LEFT_PIN,

@@ -3,7 +3,7 @@ import * as _ from "lodash";
 
 import { XYPosition } from "../model";
 import { LinkProps } from "./common";
-import defaultStyles from "../default_styles";
+import { ThemeContext } from "../theme";
 
 const getCenter = (source: XYPosition, target: XYPosition): XYPosition => {
     const offsetX = Math.abs(target.x - source.x) / 2;
@@ -26,6 +26,7 @@ export default class BezierLink extends Component<LinkProps> {
     }
 
     render(): JSX.Element {
+        const { theme } = this.context;
         const { linkId, linkPosition, isLinkSelected } = this.props;
         const sourceX = linkPosition.inputPinPosition.x;
         const sourceY = linkPosition.inputPinPosition.y;
@@ -35,15 +36,17 @@ export default class BezierLink extends Component<LinkProps> {
 
         const path = `M${sourceX},${sourceY} C${center.x},${sourceY} ${center.x},${targetY} ${targetX},${targetY}`;
 
-        const selectedStyle = isLinkSelected ? defaultStyles.dark.linkSelected : {};
+        const style = isLinkSelected ? theme?.link?.selected : theme?.link?.unselected;
 
         return (
             <path
                 id={`link_${linkId}`}
                 d={path}
-                style={{ ...defaultStyles.dark.link, ...selectedStyle }}
+                style={style}
                 onClick={this.onSelectLink.bind(this)}
             />
         );
     }
 }
+
+BezierLink.contextType = ThemeContext;

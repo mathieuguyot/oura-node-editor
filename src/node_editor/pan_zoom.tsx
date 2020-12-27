@@ -15,6 +15,7 @@ export interface PanZoomInputProps {
 export default class PanZoom extends React.Component<PanZoomInputProps> {
     private panStartPosition: XYPosition | null = null;
     private shiftKey = false;
+    private test = Math.random() * 10;
     constructor(props: PanZoomInputProps) {
         super(props);
 
@@ -87,6 +88,9 @@ export default class PanZoom extends React.Component<PanZoomInputProps> {
                     onPanningStart={this.onPanningStart}
                     onPanning={this.onPanning}
                     onPanningStop={this.onPanningStop}
+                    scale={panZoomInfo.zoom}
+                    positionX={panZoomInfo.topLeftCorner.x}
+                    positionY={panZoomInfo.topLeftCorner.y}
                     defaultScale={panZoomInfo.zoom}
                     defaultPositionX={panZoomInfo.topLeftCorner.x}
                     defaultPositionY={panZoomInfo.topLeftCorner.y}>
