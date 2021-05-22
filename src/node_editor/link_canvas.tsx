@@ -27,7 +27,7 @@ export default function LinkCanvas(props: LinkCanvasProps): JSX.Element {
     };
 
     return (
-        <svg style={style}>
+        <svg style={style} id="link_canvas">
             {/* Render all links */}
             {Object.keys(links)
                 .filter((key) => key in linksPositions)

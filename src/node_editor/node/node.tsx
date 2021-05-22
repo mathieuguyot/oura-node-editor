@@ -18,6 +18,7 @@ import DragWrapper from "../utils";
 import Header from "./header";
 import Footer from "./footer";
 import { ThemeContext } from "../theme";
+import { ConnectorContentProps } from "../connector_content";
 
 export type NodeProps = {
     nodeId: string;
@@ -35,13 +36,9 @@ export type NodeProps = {
     onConnectorUpdate: (nodeId: string, cId: string, connector: ConnectorModel) => void;
     onCreateLink?: (link: LinkModel) => void;
     onUpdatePreviewLink?: (previewLink?: LinkPositionModel) => void;
-};
 
-export enum NodePart {
-    HEADER,
-    BODY,
-    FOOTER
-}
+    createCustomConnectorComponent?(props: ConnectorContentProps): JSX.Element | null;
+};
 
 export class Node extends Component<NodeProps> {
     private dragWrapper: DragWrapper = new DragWrapper();
@@ -50,6 +47,7 @@ export class Node extends Component<NodeProps> {
     constructor(props: NodeProps) {
         super(props);
 
+        this.onMouseDown = this.onMouseDown.bind(this);
         this.onPinPositionUpdate = this.onPinPositionUpdate.bind(this);
     }
 
@@ -58,11 +56,27 @@ export class Node extends Component<NodeProps> {
         return isNodeSelected !== nextProps.isNodeSelected || !_.isEqual(node, nextProps.node);
     }
 
-    onMouseDown(part: NodePart, event: React.MouseEvent): void {
+    onMouseDown(event: React.MouseEvent): void {
         const { nodeId, getZoom, onNodeMoveStart, onNodeMove, onNodeMoveEnd } = this.props;
         if (!onNodeMoveStart || !onNodeMove || !onNodeMoveEnd) {
             return;
         }
+
+        // Check if its the node that is targeted to be moved or something else
+        // eg. node can be moved only if target element has node-background in is class name
+        let stopEvent = true;
+        let classNameStr = "";
+        if (event.target) {
+            const { className } = event.target as Element;
+            if (typeof className === "string" && className.includes("node-background")) {
+                classNameStr = className;
+                stopEvent = false;
+            }
+        }
+        if (stopEvent) {
+            return;
+        }
+
         // Node move management is performed following 3 steps
         // 1. When mouse button is pressed down, node move start callback is called
         onNodeMoveStart(nodeId, event.shiftKey);
@@ -70,10 +84,10 @@ export class Node extends Component<NodeProps> {
         // 2. Every times the mouse is dragged, node position (if clicked on header or core)
         // or width (if clicked on footer) is updated using onNodeMove callback
         const onMouseMoveCb = (_iPos: XYPosition, _finalPos: XYPosition, offsetPos: XYPosition) => {
-            if (part === NodePart.HEADER || part === NodePart.BODY) {
-                onNodeMove(offsetPos.x, offsetPos.y, 0);
-            } else {
+            if (classNameStr.includes("node-footer")) {
                 onNodeMove(0, 0, offsetPos.x);
+            } else {
+                onNodeMove(offsetPos.x, offsetPos.y, 0);
             }
         };
 
@@ -99,6 +113,7 @@ export class Node extends Component<NodeProps> {
         const { theme } = this.context;
         const { nodeId, node, isNodeSelected } = this.props;
         const { onCreateLink, onUpdatePreviewLink, getZoom, onConnectorUpdate } = this.props;
+        const { createCustomConnectorComponent } = this.props;
 
         const style: CSS.Properties = {
             position: "absolute",
@@ -112,10 +127,11 @@ export class Node extends Component<NodeProps> {
             : theme?.node?.unselected;
         return (
             <div
+                className="node-background"
                 style={{ ...style, ...nodeCoreSelectionStyle }}
-                onMouseDown={this.onMouseDown.bind(this, NodePart.BODY)}
+                onMouseDown={this.onMouseDown}
                 id={`node_${nodeId}`}>
-                <Header node={node} onMouseDown={this.onMouseDown.bind(this, NodePart.HEADER)} />
+                <Header node={node} />
                 {/* Node body (list of connectors) */}
                 <div style={theme?.node?.body}>
                     {Object.keys(node.connectors).map((key) => (
@@ -130,10 +146,11 @@ export class Node extends Component<NodeProps> {
                             onUpdatePreviewLink={onUpdatePreviewLink}
                             onConnectorUpdate={onConnectorUpdate}
                             onPinPositionUpdate={this.onPinPositionUpdate}
+                            createCustomConnectorComponent={createCustomConnectorComponent}
                         />
                     ))}
                 </div>
-                <Footer node={node} onMouseDown={this.onMouseDown.bind(this, NodePart.FOOTER)} />
+                <Footer />
             </div>
         );
     }

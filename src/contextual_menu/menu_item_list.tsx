@@ -2,12 +2,10 @@ import React from "react";
 import { MenuItemProps } from "./common";
 
 const MenuItem = (props: MenuItemProps): JSX.Element => {
-    const { name, description, onClick, onMouseEnter, onMouseLeave } = props;
+    const { name, onClick, onMouseEnter, onMouseLeave } = props;
     return (
         <div onClick={onClick} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
             {name}
-            <br />
-            {description}
         </div>
     );
 };
@@ -25,7 +23,6 @@ const MenuItemList = (props: MenuItemListProps): JSX.Element => {
                 return (
                     <MenuItem
                         name={item.name}
-                        description={item.description}
                         onClick={item.onClick}
                         onMouseEnter={item.onMouseEnter}
                         onMouseLeave={item.onMouseLeave}

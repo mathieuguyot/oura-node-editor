@@ -1,15 +1,16 @@
 import React from "react";
 
-import { Node, NodeModel, NodeCollection } from "../node_editor";
+import { Node, NodeModel, NodeCollection, ConnectorContentProps } from "../node_editor";
 import { MenuItemProps } from "./common";
 import { BasicContextualMenu } from "./basic_contextual_menu";
 
 type NodePrevisualizerProps = {
     node: NodeModel | null;
+    createCustomConnectorComponent: (props: ConnectorContentProps) => JSX.Element | null;
 };
 
 const NodePrevisualizer = (props: NodePrevisualizerProps): JSX.Element => {
-    const { node } = props;
+    const { node, createCustomConnectorComponent } = props;
     const previewDivRef = React.useRef<HTMLHeadingElement>(null);
 
     let nodeElem: JSX.Element | null = null;
@@ -26,6 +27,7 @@ const NodePrevisualizer = (props: NodePrevisualizerProps): JSX.Element => {
                 node={displayedNode}
                 onConnectorUpdate={() => null}
                 onNodePinPositionsUpdate={() => null}
+                createCustomConnectorComponent={createCustomConnectorComponent}
             />
         ) : null;
     }
@@ -48,10 +50,12 @@ const NodePrevisualizer = (props: NodePrevisualizerProps): JSX.Element => {
 export type AddNodeContextualMenuProps = {
     nodesSchema: NodeCollection;
     onNodeSelection: (id: string) => void;
+    onMouseHover: (isMouseHover: boolean) => void;
+    createCustomConnectorComponent: (props: ConnectorContentProps) => JSX.Element | null;
 };
 
 export const AddNodeContextualMenu = (props: AddNodeContextualMenuProps): JSX.Element => {
-    const { nodesSchema, onNodeSelection } = props;
+    const { nodesSchema, onNodeSelection, createCustomConnectorComponent, onMouseHover } = props;
 
     const [previsualizedNodeId, setPrevisualizedNodeId] = React.useState<string>("");
 
@@ -59,7 +63,6 @@ export const AddNodeContextualMenu = (props: AddNodeContextualMenuProps): JSX.El
     Object.keys(nodesSchema).forEach((id) => {
         items[id] = {
             name: nodesSchema[id].name,
-            description: "Need this...",
             onMouseEnter: () => {
                 setPrevisualizedNodeId(id);
             },
@@ -72,12 +75,21 @@ export const AddNodeContextualMenu = (props: AddNodeContextualMenuProps): JSX.El
         };
     });
 
+    const onMouseEnter = React.useCallback(() => {
+        onMouseHover(true);
+    }, [onMouseHover]);
+
+    const onMouseLeaves = React.useCallback(() => {
+        onMouseHover(false);
+    }, [onMouseHover]);
+
     return (
-        <>
+        <div onMouseLeave={onMouseLeaves} onMouseEnter={onMouseEnter}>
             <BasicContextualMenu menuTitle="Add a new node" items={items} />
             <NodePrevisualizer
                 node={previsualizedNodeId ? nodesSchema[previsualizedNodeId] : null}
+                createCustomConnectorComponent={createCustomConnectorComponent}
             />
-        </>
+        </div>
     );
 };

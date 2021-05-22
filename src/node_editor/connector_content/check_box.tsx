@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import produce from "immer";
 
-import ErrorConnectorContentProps from "./error";
+import ErrorConnectorContent from "./error";
 import { ConnectorContentProps } from "./common";
 import { ConnectorModel } from "../model";
 
@@ -24,7 +24,7 @@ class CheckBox extends Component<ConnectorContentProps> {
         const { connector } = this.props;
         if (!("value" in connector.data)) {
             const message = "'check_box' connector types must provide a bool field named 'value'";
-            return <ErrorConnectorContentProps message={message} />;
+            return <ErrorConnectorContent message={message} />;
         }
         return (
             <>

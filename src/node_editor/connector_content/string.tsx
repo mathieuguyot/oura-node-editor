@@ -2,29 +2,16 @@ import React, { Component } from "react";
 import produce from "immer";
 import _ from "lodash";
 
-import ErrorConnectorContentProps from "./error";
+import ErrorConnectorContent from "./error";
 import { ConnectorContentProps } from "./common";
 import { ConnectorModel } from "../model";
 import { ThemeContext } from "../theme";
 
-type StringConnectorContentState = {
-    preventPropation: boolean;
-};
-
-export default class StringConnectorContent extends Component<
-    ConnectorContentProps,
-    StringConnectorContentState
-> {
+export default class StringConnectorContent extends Component<ConnectorContentProps> {
     constructor(props: ConnectorContentProps) {
         super(props);
-        this.state = {
-            preventPropation: false
-        };
 
         this.onChange = this.onChange.bind(this);
-        this.onMouseDown = this.onMouseDown.bind(this);
-        this.onMouseUp = this.onMouseUp.bind(this);
-        this.onMouseMove = this.onMouseMove.bind(this);
     }
 
     shouldComponentUpdate(nextProps: ConnectorContentProps): boolean {
@@ -39,40 +26,18 @@ export default class StringConnectorContent extends Component<
         onConnectorUpdate(nodeId, cId, newConnector);
     }
 
-    onMouseDown(): void {
-        this.setState({
-            preventPropation: true
-        });
-    }
-
-    onMouseUp(): void {
-        this.setState({
-            preventPropation: false
-        });
-    }
-
-    onMouseMove(event: React.MouseEvent): void {
-        const { preventPropation } = this.state;
-        if (preventPropation) {
-            event.stopPropagation();
-        }
-    }
-
     render(): JSX.Element {
         const { theme } = this.context;
         const { connector } = this.props;
         if (!("value" in connector.data)) {
             const message = "'string' connector types must provide a string field named 'value'";
-            return <ErrorConnectorContentProps message={message} />;
+            return <ErrorConnectorContent message={message} />;
         }
         return (
             <input
                 style={theme?.connectors?.string}
                 tabIndex={-1}
                 value={connector.data.value}
-                onMouseDown={this.onMouseDown}
-                onMouseUp={this.onMouseUp}
-                onMouseMove={this.onMouseMove}
                 onChange={this.onChange}
                 placeholder={connector.name}
             />

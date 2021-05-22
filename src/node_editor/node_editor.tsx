@@ -19,6 +19,7 @@ import BackGround from "./background";
 import LinkCanvas from "./link_canvas";
 import NodeCanvas from "./node_canvas";
 import { ThemeContext, darkTheme, ThemeContextType } from "./theme";
+import { ConnectorContentProps } from "./connector_content/common";
 
 enableMapSet();
 
@@ -35,6 +36,8 @@ type NodeEditorProps = {
 
     onPanZoomInfo: (panZoomInfo: PanZoomModel) => void;
     onSelectedItems: (selection: Array<SelectionItem>) => void;
+
+    createCustomConnectorComponent?(props: ConnectorContentProps): JSX.Element | null;
 };
 
 type NodeEditorState = {
@@ -185,7 +188,7 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
 
     render(): JSX.Element {
         const { nodes, links, selectedItems, panZoomInfo, theme } = this.props;
-        const { onPanZoomInfo } = this.props;
+        const { onPanZoomInfo, createCustomConnectorComponent } = this.props;
         const { draggedLink, linksPositions } = this.state;
 
         return (
@@ -212,6 +215,7 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
                             onNodePinPositionsUpdate={this.onNodePinPositionsUpdate}
                             selectedItems={selectedItems}
                             onSelectItem={this.onSelectItem}
+                            createCustomConnectorComponent={createCustomConnectorComponent}
                         />
                     </PanZoom>
                 </BackGround>

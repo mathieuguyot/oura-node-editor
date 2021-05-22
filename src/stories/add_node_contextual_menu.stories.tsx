@@ -46,6 +46,8 @@ const defaultProps: AddNodeContextualMenuProps = {
             }
         }
     },
+    createCustomConnectorComponent: () => null,
+    onMouseHover: () => null,
     onNodeSelection: () => null
 };
 

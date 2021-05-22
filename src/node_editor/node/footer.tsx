@@ -1,15 +1,8 @@
 import React, { useContext } from "react";
-import { NodeModel } from "..";
 import { ThemeContext } from "../theme";
 
-export type FooterProps = {
-    node: NodeModel;
-    onMouseDown: (event: React.MouseEvent) => void;
-};
-
-export default function Footer(props: FooterProps): JSX.Element {
-    const { onMouseDown } = props;
+export default function Footer(): JSX.Element {
     const { theme } = useContext(ThemeContext);
 
-    return <div style={theme?.node?.footer} onMouseDown={onMouseDown} />;
+    return <div className="node-background node-footer" style={theme?.node?.footer} />;
 }

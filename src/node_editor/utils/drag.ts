@@ -31,7 +31,6 @@ export default class DragWrapper {
         onMouseMove: MouseMoveCb,
         onMouseUp: MouseUpCb
     ): void {
-        event.stopPropagation();
         window.addEventListener("mousemove", this.onMouseMove);
         window.addEventListener("mouseup", this.onMouseUp);
         this.getZoom = getZoom;
@@ -45,7 +44,6 @@ export default class DragWrapper {
     }
 
     private onMouseMove(event: MouseEvent) {
-        event.stopPropagation();
         const zoom = this.getZoom();
         const offsetPos = {
             x: event.pageX / this.lastZoom - this.tmpPos.x,
@@ -68,7 +66,6 @@ export default class DragWrapper {
     }
 
     private onMouseUp(event: MouseEvent) {
-        event.stopPropagation();
         window.removeEventListener("mousemove", this.onMouseMove);
         window.removeEventListener("mouseup", this.onMouseUp);
         this.onMouseUpCb({ ...this.initialPos }, { ...this.finalPos }, event);

@@ -10,6 +10,7 @@ import {
     SelectionItem
 } from "./model";
 import { Node } from "./node";
+import { ConnectorContentProps } from "./connector_content";
 
 export interface NodeCanvasProps {
     nodes: NodeCollection;
@@ -23,6 +24,8 @@ export interface NodeCanvasProps {
     onCreateLink?: (link: LinkModel) => void;
     onConnectorUpdate: (nodeId: string, cId: string, connector: ConnectorModel) => void;
     onNodePinPositionsUpdate: (nodeId: string, pinPositions: NodePinPositions) => void;
+
+    createCustomConnectorComponent?(props: ConnectorContentProps): JSX.Element | null;
 }
 
 export default class NodeEditor extends React.Component<NodeCanvasProps> {
@@ -89,13 +92,9 @@ export default class NodeEditor extends React.Component<NodeCanvasProps> {
 
     render(): JSX.Element {
         const { nodes, selectedItems } = this.props;
-        const {
-            getZoom,
-            onCreateLink,
-            onUpdatePreviewLink,
-            onNodePinPositionsUpdate,
-            onConnectorUpdate
-        } = this.props;
+        const { getZoom, onCreateLink, onUpdatePreviewLink, onNodePinPositionsUpdate } = this.props;
+        const { onConnectorUpdate, createCustomConnectorComponent } = this.props;
+
         return (
             <>
                 {Object.keys(nodes).map((key) => (
@@ -112,6 +111,7 @@ export default class NodeEditor extends React.Component<NodeCanvasProps> {
                         onUpdatePreviewLink={onUpdatePreviewLink}
                         onNodePinPositionsUpdate={onNodePinPositionsUpdate}
                         onConnectorUpdate={onConnectorUpdate}
+                        createCustomConnectorComponent={createCustomConnectorComponent}
                     />
                 ))}
             </>

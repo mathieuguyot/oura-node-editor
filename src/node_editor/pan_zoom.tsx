@@ -12,14 +12,22 @@ export interface PanZoomInputProps {
     onSelectItem: (selection: SelectionItem | null, shiftKey: boolean) => void;
 }
 
-export default class PanZoom extends React.Component<PanZoomInputProps> {
+export interface PanZoomInputState {
+    panDisabled: boolean;
+}
+
+export default class PanZoom extends React.Component<PanZoomInputProps, PanZoomInputState> {
     private panStartPosition: XYPosition | null = null;
     private shiftKey = false;
 
     constructor(props: PanZoomInputProps) {
         super(props);
+        this.state = {
+            panDisabled: false
+        };
 
         this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
         this.onZoomChange = this.onZoomChange.bind(this);
         this.onPanning = this.onPanning.bind(this);
         this.onPanningStart = this.onPanningStart.bind(this);
@@ -27,11 +35,31 @@ export default class PanZoom extends React.Component<PanZoomInputProps> {
     }
 
     onMouseDown(e: React.MouseEvent) {
+        // Register shift key status
         this.shiftKey = e.shiftKey;
-        if (e.button !== 0) {
-            e.stopPropagation();
-            e.preventDefault();
+
+        const target = e.target as HTMLTextAreaElement;
+        // Check if mouse button down was on link_canvas
+        let mouseDownOnLinkCanvas = false;
+        if (typeof target.id === "string") {
+            mouseDownOnLinkCanvas = target.id === "link_canvas";
         }
+        // Check if mouse button down was on react-zoom-pan-pinch canvas
+        let mouseDownOnPanCanvas = false;
+        if (typeof target.className === "string") {
+            mouseDownOnPanCanvas = target.className.includes("react-transform-component");
+        }
+
+        // Disable pad interactions if mouse ckick is not left was not on link or react-zoom-pan-pinch canvas
+        this.setState({
+            panDisabled: e.button !== 0 || (!mouseDownOnLinkCanvas && !mouseDownOnPanCanvas)
+        });
+    }
+
+    onMouseUp() {
+        this.setState({
+            panDisabled: false
+        });
     }
 
     onZoomChange(e: any): void {
@@ -58,6 +86,8 @@ export default class PanZoom extends React.Component<PanZoomInputProps> {
 
     render(): JSX.Element {
         const { panZoomInfo, children } = this.props;
+        const { panDisabled } = this.state;
+
         return (
             <div
                 id="panzoom"
@@ -68,9 +98,11 @@ export default class PanZoom extends React.Component<PanZoomInputProps> {
                     width: "100%",
                     height: "100%"
                 }}
-                onMouseDown={this.onMouseDown}>
+                onMouseDown={this.onMouseDown}
+                onMouseUp={this.onMouseUp}>
                 <TransformWrapper
                     options={{
+                        disabled: panDisabled,
                         limitToBounds: false,
                         minScale: 0.35,
                         centerContent: false

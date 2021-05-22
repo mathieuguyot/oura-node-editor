@@ -13,6 +13,7 @@ class DefaultConnectorContent extends Component<ConnectorContentProps> {
         const { connector } = this.props;
         return (
             <div
+                className="node-background"
                 style={{
                     textAlign: connector.pinLayout === PinLayout.RIGHT_PIN ? "right" : "left"
                 }}>

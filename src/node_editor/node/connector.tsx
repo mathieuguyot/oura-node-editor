@@ -11,7 +11,7 @@ import {
     PinPosition,
     LinkPositionModel
 } from "../model";
-import createConnectorComponent from "../connector_content";
+import { createConnectorComponent, ConnectorContentProps } from "../connector_content";
 import DragWrapper from "../utils";
 import Pin from "./pin";
 
@@ -26,6 +26,7 @@ type ConnectorProps = {
     onConnectorUpdate: (nodeId: string, cId: string, connector: ConnectorModel) => void;
     onCreateLink?: (link: LinkModel) => void;
     onUpdatePreviewLink?: (previewLink?: LinkPositionModel) => void;
+    createCustomConnectorComponent?(props: ConnectorContentProps): JSX.Element | null;
 };
 
 class Connector extends Component<ConnectorProps> {
@@ -125,15 +126,25 @@ class Connector extends Component<ConnectorProps> {
     }
 
     render(): JSX.Element {
-        const { connector, node, nodeId, cId } = this.props;
+        const { connector, node, nodeId, cId, createCustomConnectorComponent } = this.props;
+
+        // Connector content component creation follows two steps
+        let connectorContent: JSX.Element | null = null;
+        // 1. First, try to get custom provided connector content component
+        if (createCustomConnectorComponent) {
+            connectorContent = createCustomConnectorComponent(this.props);
+        }
+        // 2. If no specific component is provided by the customer, use lib ones
+        if (!connectorContent) {
+            connectorContent = createConnectorComponent(this.props);
+        }
 
         return (
             <div
+                className="node-background"
                 ref={this.connectorRef}
                 style={{
                     position: "relative",
-                    paddingLeft: this.pinPxRadius * 2,
-                    paddingRight: this.pinPxRadius * 2,
                     paddingTop: 3
                 }}>
                 {[PinLayout.LEFT_PIN, PinLayout.BOTH_PINS].includes(connector.pinLayout) && (
@@ -154,7 +165,15 @@ class Connector extends Component<ConnectorProps> {
                     />
                 )}
 
-                <div style={{ overflow: "hidden" }}>{createConnectorComponent(this.props)}</div>
+                <div
+                    className="node-background"
+                    style={{
+                        overflow: "hidden",
+                        paddingLeft: this.pinPxRadius * 2,
+                        paddingRight: this.pinPxRadius * 2
+                    }}>
+                    {connectorContent}
+                </div>
             </div>
         );
     }

@@ -4,15 +4,14 @@ import { ThemeContext } from "../theme";
 
 export type HeaderProps = {
     node: NodeModel;
-    onMouseDown: (event: React.MouseEvent) => void;
 };
 
 export default function Header(props: HeaderProps): JSX.Element {
-    const { node, onMouseDown } = props;
+    const { node } = props;
     const { theme } = useContext(ThemeContext);
 
     return (
-        <div style={theme.node?.header} onMouseDown={onMouseDown}>
+        <div className="node-background node-header" style={theme.node?.header}>
             {node.name}
         </div>
     );

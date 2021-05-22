@@ -15,14 +15,12 @@ const defaultProps: BasicContextualMenuProps = {
     items: {
         delete_node: {
             name: "Delete selected node(s)",
-            description: "Delete selected node(s) and associated links",
             onClick: () => null,
             onMouseEnter: () => null,
             onMouseLeave: () => null
         },
         delete_links: {
             name: "Delete selected link(s)",
-            description: "Delete selected link(s)",
             onClick: () => null,
             onMouseEnter: () => null,
             onMouseLeave: () => null
