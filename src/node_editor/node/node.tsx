@@ -130,7 +130,8 @@ export class Node extends Component<NodeProps> {
                 className="node-background"
                 style={{ ...style, ...nodeCoreSelectionStyle }}
                 onMouseDown={this.onMouseDown}
-                id={`node_${nodeId}`}>
+                id={`node_${nodeId}`}
+            >
                 <Header node={node} />
                 {/* Node body (list of connectors) */}
                 <div style={theme?.node?.body}>

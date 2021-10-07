@@ -1,5 +1,5 @@
 import React from "react";
-import { mount } from "cypress-react-unit-test";
+import { mount } from "@cypress/react";
 import produce from "immer";
 import { NodeEditor, PinLayout } from "../../src/node_editor";
 import "../../src/index.css";
@@ -68,7 +68,7 @@ const SingleNodeNodeEditor = (): JSX.Element => {
     );
 
     return (
-        <div style={{ width: "100%", height: "100vh" }}>
+        <div style={{ width: "100%", height: "100vh" }} id="root">
             <NodeEditor
                 panZoomInfo={panZoomInfo}
                 onPanZoomInfo={setPanZoomInfo}
@@ -112,24 +112,31 @@ describe(`NodeEditor selection`, () => {
         link0Selected: boolean,
         link1Selected: boolean
     ) => {
-        cy.getReact("SingleNodeNodeEditor")
-            .getCurrentState()
-            .then((data) => {
-                if (
-                    _.some(data, { id: "0", type: "node" }) !== node0Selected ||
-                    _.some(data, { id: "1", type: "node" }) !== node1Selected ||
-                    _.some(data, { id: "0", type: "link" }) !== link0Selected ||
-                    _.some(data, { id: "1", type: "link" }) !== link1Selected
-                ) {
-                    throw new Error("Selection array not filled right");
-                }
-            });
+        cy.get("#link_0").should(
+            "have.css",
+            "stroke",
+            link0Selected ? "rgb(255, 255, 255)" : "rgba(170, 170, 170, 0.75)"
+        );
+        cy.get("#link_1").should(
+            "have.css",
+            "stroke",
+            link1Selected ? "rgb(255, 255, 255)" : "rgba(170, 170, 170, 0.75)"
+        );
+        cy.get("#node_0").should(
+            "have.css",
+            "box-shadow",
+            node0Selected ? "rgb(255, 255, 255) 0px 0px 0px 2px" : "none"
+        );
+        cy.get("#node_1").should(
+            "have.css",
+            "box-shadow",
+            node1Selected ? "rgb(255, 255, 255) 0px 0px 0px 2px" : "none"
+        );
     };
 
     // Test function declaration section
     beforeEach(() => {
         mount(<SingleNodeNodeEditor />);
-        cy.waitForReact();
     });
 
     it("Node item can be selected", () => {

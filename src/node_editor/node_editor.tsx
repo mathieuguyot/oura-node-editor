@@ -197,7 +197,8 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
                     <PanZoom
                         panZoomInfo={panZoomInfo}
                         onPanZoomInfo={onPanZoomInfo}
-                        onSelectItem={this.onSelectItem}>
+                        onSelectItem={this.onSelectItem}
+                    >
                         <LinkCanvas
                             links={links}
                             linksPositions={linksPositions}

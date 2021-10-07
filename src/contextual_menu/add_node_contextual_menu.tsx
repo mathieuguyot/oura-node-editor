@@ -41,7 +41,8 @@ const NodePrevisualizer = (props: NodePrevisualizerProps): JSX.Element => {
                 overflow: "hidden",
                 width: 200,
                 height: 200
-            }}>
+            }}
+        >
             <div style={{ position: "relative", width: "100%", height: "100%" }}>{nodeElem}</div>
         </div>
     );

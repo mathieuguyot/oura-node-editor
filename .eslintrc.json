@@ -1,6 +1,5 @@
 {
-    "extends": ["airbnb", "prettier", "plugin:react/recommended", "plugin:@typescript-eslint/recommended"],
-    "plugins": ["prettier"],
+    "extends": ["plugin:react/recommended", "plugin:@typescript-eslint/recommended"],
     "parser": "@typescript-eslint/parser",
     "settings": {
         "react": {
@@ -16,7 +15,6 @@
     },
     "rules": {
       "import/no-extraneous-dependencies": "off",
-      "prettier/prettier": ["error"],
       "no-shadow": "off", // Stack overflow : 63961803
       "@typescript-eslint/no-shadow": ["error"], // Stack overflow : 63961803
       "jsx-a11y/no-static-element-interactions": "off", // TODO: Maybe to remove this rule, check role thing later
@@ -33,6 +31,7 @@
       "react/jsx-closing-bracket-location": "off",
       "lines-between-class-members": "off",
       "react/jsx-indent": ["error", 4],
-      "react/jsx-indent-props": ["error", 4]
+      "react/jsx-indent-props": ["error", 4],
+      "jsxBracketSameLine": 0
     }
 }

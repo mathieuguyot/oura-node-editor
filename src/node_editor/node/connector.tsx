@@ -146,7 +146,8 @@ class Connector extends Component<ConnectorProps> {
                 style={{
                     position: "relative",
                     paddingTop: 3
-                }}>
+                }}
+            >
                 {[PinLayout.LEFT_PIN, PinLayout.BOTH_PINS].includes(connector.pinLayout) && (
                     <Pin
                         className={`node-${nodeId}-connector-${cId}-left`}
@@ -171,7 +172,8 @@ class Connector extends Component<ConnectorProps> {
                         overflow: "hidden",
                         paddingLeft: this.pinPxRadius * 2,
                         paddingRight: this.pinPxRadius * 2
-                    }}>
+                    }}
+                >
                     {connectorContent}
                 </div>
             </div>

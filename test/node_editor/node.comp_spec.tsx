@@ -1,5 +1,5 @@
 import React from "react";
-import { mount } from "cypress-react-unit-test";
+import { mount } from "@cypress/react";
 import produce from "immer";
 import { NodeEditor, LinkModel, PinLayout } from "../../src/node_editor";
 import "../../src/index.css";
@@ -53,7 +53,7 @@ const SingleNodeNodeEditor = (props: { initialZoom: number }): JSX.Element => {
     );
 
     return (
-        <div style={{ width: "100%", height: "100vh" }}>
+        <div style={{ width: "100%", height: "100vh" }} id="root">
             <NodeEditor
                 panZoomInfo={panZoomInfo}
                 onPanZoomInfo={setPanZoomInfo}

@@ -1,5 +1,6 @@
 {
-    "experimentalComponentTesting": true,
-    "componentFolder": "test",
-    "testFiles": "**/*.comp_spec.tsx"
+    "component": {
+        "componentFolder": "test",
+        "testFiles": "**/*.comp_spec.tsx"
+    }
 }

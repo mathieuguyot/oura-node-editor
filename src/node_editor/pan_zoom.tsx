@@ -99,7 +99,8 @@ export default class PanZoom extends React.Component<PanZoomInputProps, PanZoomI
                     height: "100%"
                 }}
                 onMouseDown={this.onMouseDown}
-                onMouseUp={this.onMouseUp}>
+                onMouseUp={this.onMouseUp}
+            >
                 <TransformWrapper
                     options={{
                         disabled: panDisabled,
@@ -125,7 +126,8 @@ export default class PanZoom extends React.Component<PanZoomInputProps, PanZoomI
                     positionY={panZoomInfo.topLeftCorner.y}
                     defaultScale={panZoomInfo.zoom}
                     defaultPositionX={panZoomInfo.topLeftCorner.x}
-                    defaultPositionY={panZoomInfo.topLeftCorner.y}>
+                    defaultPositionY={panZoomInfo.topLeftCorner.y}
+                >
                     <TransformComponent>
                         <div style={{ height: "100vh", width: "100vw" }}>{children}</div>
                     </TransformComponent>
