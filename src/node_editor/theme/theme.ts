@@ -7,7 +7,8 @@ export type Theme = {
         header?: CSS.Properties;
         body?: CSS.Properties;
         footer?: CSS.Properties;
-        pin?: CSS.Properties;
+        basePin?: CSS.Properties;
+        customPins?: { [contentType: string]: CSS.Properties }
     };
     link?: {
         selected?: CSS.Properties;

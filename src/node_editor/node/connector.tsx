@@ -151,6 +151,7 @@ class Connector extends Component<ConnectorProps> {
                 {[PinLayout.LEFT_PIN, PinLayout.BOTH_PINS].includes(connector.pinLayout) && (
                     <Pin
                         className={`node-${nodeId}-connector-${cId}-left`}
+                        contentType={connector.contentType}
                         pinPxRadius={this.pinPxRadius}
                         leftPinPosition={-this.pinPxRadius}
                         onMouseDown={(e) => this.onMouseDown(PinSide.LEFT, e)}
@@ -160,6 +161,7 @@ class Connector extends Component<ConnectorProps> {
                 {[PinLayout.RIGHT_PIN, PinLayout.BOTH_PINS].includes(connector.pinLayout) && (
                     <Pin
                         className={`node-${nodeId}-connector-${cId}-right`}
+                        contentType={connector.contentType}
                         pinPxRadius={this.pinPxRadius}
                         leftPinPosition={node.width - this.pinPxRadius}
                         onMouseDown={(e) => this.onMouseDown(PinSide.RIGHT, e)}

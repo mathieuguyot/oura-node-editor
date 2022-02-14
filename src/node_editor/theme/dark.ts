@@ -28,11 +28,17 @@ const darkTheme: Theme = {
             backgroundColor: "rgba(63, 63, 63, 0.75)",
             cursor: "ew-resize"
         },
-        pin: {
+        basePin: {
             backgroundColor: "rgba(199, 199, 41, 1)",
-            borderRadius: "10px 10px 10px 10px",
+            borderRadius: "5px 5px 5px 5px",
             cursor: "grab"
-        }
+        },
+        customPins: {
+            string: {
+                backgroundColor: "red",
+                transform: "rotate(45deg)",
+            }
+        },
     },
     link: {
         selected: {

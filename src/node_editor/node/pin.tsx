@@ -5,6 +5,7 @@ import { ThemeContext } from "../theme";
 
 type PinProps = {
     className: string;
+    contentType: string;
     leftPinPosition: number;
     pinPxRadius: number;
 
@@ -12,8 +13,13 @@ type PinProps = {
 };
 
 const Pin = (props: PinProps): JSX.Element => {
-    const { className, leftPinPosition, pinPxRadius, onMouseDown } = props;
+    const { className, contentType, leftPinPosition, pinPxRadius, onMouseDown } = props;
     const { theme } = useContext(ThemeContext);
+
+    let customStyle: CSS.Properties | undefined = undefined;
+    if(theme?.node?.customPins && theme?.node?.customPins[contentType]) {
+        customStyle = theme?.node?.customPins[contentType];
+    }
 
     const style: CSS.Properties = {
         ...{
@@ -23,7 +29,8 @@ const Pin = (props: PinProps): JSX.Element => {
             left: `${leftPinPosition}px`,
             top: `calc(50% - ${pinPxRadius}px)`
         },
-        ...theme?.node?.pin
+        ...theme?.node?.basePin,
+        ...customStyle
     };
 
     return <div className={className} style={style} onMouseDown={onMouseDown} />;
