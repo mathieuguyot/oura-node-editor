@@ -38,7 +38,7 @@ export default class NumberConnectorContent extends Component<ConnectorContentPr
         }
         return (
             <input
-                style={theme?.connectors?.string}
+                style={theme?.connectors?.number}
                 value={connector.data.value}
                 onChange={this.onChange}
                 placeholder={connector.name}

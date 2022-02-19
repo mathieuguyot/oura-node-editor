@@ -19,6 +19,7 @@ import Header from "./header";
 import Footer from "./footer";
 import { ThemeContext } from "../theme";
 import { ConnectorContentProps } from "../connector_content";
+import { PinLayout } from "..";
 
 export type NodeProps = {
     nodeId: string;
@@ -104,7 +105,10 @@ export class Node extends Component<NodeProps> {
     onPinPositionUpdate(cId: string, leftPinPos: PinPosition, rightPinPos: PinPosition): void {
         const { nodeId, node, onNodePinPositionsUpdate } = this.props;
         this.pinPositions[cId] = [leftPinPos, rightPinPos];
-        if (Object.keys(this.pinPositions).length === Object.keys(node.connectors).length) {
+        const connectableConnectorsLength = Object.keys(node.connectors).filter(name => {
+            return node.connectors[name].pinLayout !== PinLayout.NO_PINS
+        }).length;
+        if (Object.keys(this.pinPositions).length === connectableConnectorsLength) {
             onNodePinPositionsUpdate(nodeId, this.pinPositions);
         }
     }

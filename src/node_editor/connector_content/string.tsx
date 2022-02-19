@@ -22,7 +22,6 @@ export default class StringConnectorContent extends Component<ConnectorContentPr
     }
 
     onChange(event: React.FormEvent<HTMLTextAreaElement>): void {
-        console.log("ici");
         const { nodeId, cId, connector, onConnectorUpdate } = this.props;
         const newConnector = produce(connector, (draft: ConnectorModel) => {
             draft.data.value = event.currentTarget.value;
