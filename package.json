@@ -31,7 +31,7 @@
         "react-dom": "^17.0.2",
         "react-scripts": "^4.0.3",
         "react-zoom-pan-pinch": "^1.6.1",
-        "typescript": "^4.4.3"
+        "typescript": "^4.5.5"
     },
     "devDependencies": {
         "@cypress/react": "^5.10.1",

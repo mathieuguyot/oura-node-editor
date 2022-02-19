@@ -39,11 +39,11 @@ const NodePrevisualizer = (props: NodePrevisualizerProps): JSX.Element => {
                 position: "relative",
                 gridArea: "preview",
                 overflow: "hidden",
-                width: 200,
-                height: 200
+                width: "500px",
+                height: "500px",
             }}
         >
-            <div style={{ position: "relative", width: "100%", height: "100%" }}>{nodeElem}</div>
+            {nodeElem}
         </div>
     );
 };
@@ -85,8 +85,10 @@ export const AddNodeContextualMenu = (props: AddNodeContextualMenuProps): JSX.El
     }, [onMouseHover]);
 
     return (
-        <div onMouseLeave={onMouseLeaves} onMouseEnter={onMouseEnter}>
-            <BasicContextualMenu menuTitle="Add a new node" items={items} />
+        <div style={{display: "flex"}} onMouseLeave={onMouseLeaves} onMouseEnter={onMouseEnter}>
+            <div>
+                <BasicContextualMenu menuTitle="Add a new node" items={items} />
+            </div>
             <NodePrevisualizer
                 node={previsualizedNodeId ? nodesSchema[previsualizedNodeId] : null}
                 createCustomConnectorComponent={createCustomConnectorComponent}
