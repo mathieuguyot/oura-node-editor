@@ -59,6 +59,20 @@ const darkTheme: Theme = {
             color: "white",
             border: 0,
             outline: "none"
+        },
+        number: {
+            width: "100%",
+            backgroundColor: "#585858",
+            color: "white",
+            border: 0,
+            outline: "none"
+        },
+        select: {
+            width: "100%",
+            backgroundColor: "#585858",
+            color: "white",
+            border: 0,
+            outline: "none"
         }
     }
 };

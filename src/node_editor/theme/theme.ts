@@ -14,5 +14,5 @@ export type Theme = {
         selected?: CSS.Properties;
         unselected?: CSS.Properties;
     };
-    connectors?: { [cId: string]: unknown };
+    connectors?: { [cId: string]: CSS.Properties };
 };
