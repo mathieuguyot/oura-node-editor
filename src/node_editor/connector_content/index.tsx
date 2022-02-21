@@ -8,10 +8,11 @@ import CheckBox from "./check_box";
 import ErrorConnectorComponent from "./error";
 import NumberConnectorContent from "./number";
 import SelectConnectorContent from "./select";
+import ButtonConnectorContent from "./button";
 
 export type { ConnectorContentProps };
 export { ErrorConnectorComponent };
-
+    
 export function createConnectorComponent(props: ConnectorContentProps): JSX.Element {
     const { connector } = props;
     if (connector.contentType === "string") {
@@ -25,6 +26,9 @@ export function createConnectorComponent(props: ConnectorContentProps): JSX.Elem
     }
     if (connector.contentType === "select") {
         return <SelectConnectorContent {...props} />;
+    }
+    if (connector.contentType === "button") {
+        return <ButtonConnectorContent {...props} />;
     }
     // Defaut return connector name
     return <DefaultConnectorContent {...props} />;

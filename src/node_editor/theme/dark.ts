@@ -73,6 +73,13 @@ const darkTheme: Theme = {
             color: "white",
             border: 0,
             outline: "none"
+        },
+        button: {
+            width: "100%",
+            backgroundColor: "#585858",
+            color: "white",
+            border: 0,
+            outline: "none"
         }
     }
 };
