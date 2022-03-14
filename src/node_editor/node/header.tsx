@@ -6,12 +6,11 @@ export type HeaderProps = {
     node: NodeModel;
 };
 
-export default function Header(props: HeaderProps): JSX.Element {
-    const { node } = props;
+export default function Header({node}: HeaderProps): JSX.Element {
     const { theme } = useContext(ThemeContext);
 
     return (
-        <div className="node-background node-header" style={theme.node?.header}>
+        <div className="node-background node-header" style={{...theme.node?.header, ...node.theme?.header}}>
             {node.name}
         </div>
     );

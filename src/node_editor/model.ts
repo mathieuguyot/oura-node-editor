@@ -1,5 +1,7 @@
 /* eslint-disable no-bitwise */
 
+import { LinkTheme, NodeTheme } from "./theme/theme";
+
 export interface SelectionItem {
     id: string;
     type: string;
@@ -27,6 +29,7 @@ export interface LinkModel {
     outputPinId: string;
     outputPinSide: PinSide;
     linkType?: string;
+    theme?: LinkTheme;
 }
 
 export type LinkCollection = { [id: string]: LinkModel };
@@ -51,6 +54,7 @@ export interface NodeModel {
     position: XYPosition;
     width: number;
     connectors: ConnectorCollection;
+    theme?: NodeTheme;
 }
 
 export type NodeCollection = { [id: string]: NodeModel };

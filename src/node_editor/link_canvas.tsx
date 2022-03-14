@@ -34,7 +34,7 @@ export default function LinkCanvas(props: LinkCanvasProps): JSX.Element {
                 .map((key) =>
                     createLink({
                         linkId: key,
-                        linkType: links[key].linkType,
+                        link: links[key],
                         key,
                         linkPosition: linksPositions[key],
                         isLinkSelected: _.some(selectedItems, { id: key, type: "link" }),
@@ -44,7 +44,6 @@ export default function LinkCanvas(props: LinkCanvasProps): JSX.Element {
             {/* Render draggedLink if set */}
             {draggedLink &&
                 createLink({
-                    linkType: "bezier",
                     linkPosition: draggedLink,
                     isLinkSelected: false
                 })}

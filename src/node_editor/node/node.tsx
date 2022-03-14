@@ -127,8 +127,8 @@ export class Node extends Component<NodeProps> {
         };
 
         const nodeCoreSelectionStyle = isNodeSelected
-            ? theme?.node?.selected
-            : theme?.node?.unselected;
+            ? {...theme?.node?.selected, ...node?.theme?.selected}
+            : {...theme?.node?.unselected, ...node?.theme?.unselected};
         return (
             <div
                 className="node-background"
@@ -138,7 +138,7 @@ export class Node extends Component<NodeProps> {
             >
                 <Header node={node} />
                 {/* Node body (list of connectors) */}
-                <div style={theme?.node?.body}>
+                <div style={{...theme?.node?.body, ...node?.theme?.body}}>
                     {Object.keys(node.connectors).map((key) => (
                         <Connector
                             nodeId={nodeId}
@@ -155,7 +155,7 @@ export class Node extends Component<NodeProps> {
                         />
                     ))}
                 </div>
-                <Footer />
+                <Footer node={node} />
             </div>
         );
     }
