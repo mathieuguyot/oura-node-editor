@@ -1,5 +1,8 @@
 # oura-node-editor
 
+[![NPM](https://img.shields.io/npm/v/oura-node-editor.svg
+)](https://www.npmjs.com/package/oura-node-editor)
+
 A react component library that lets you create node based editors ! inspired by blender node editor.
 
 Warning: Project in an experimental state, API may change a lot and npm repository is not up to date (so pull the lib and link it to your project if you wish test it!)
