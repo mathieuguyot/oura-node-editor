@@ -27,3 +27,5 @@ Example project that use the lib: https://github.com/ouranos588/oura-canvas-crea
 
 ## Install
 `npm install oura-node-editor`
+
+License MIT © [Mathieu Guyot](https://github.com/mathieuguyot)
