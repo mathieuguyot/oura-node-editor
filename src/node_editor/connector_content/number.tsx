@@ -37,12 +37,16 @@ export default class NumberConnectorContent extends Component<ConnectorContentPr
             return <ErrorConnectorContent message={message} />;
         }
         return (
-            <input
-                style={theme?.connectors?.number}
-                value={connector.data.value}
-                onChange={this.onChange}
-                placeholder={connector.name}
-            />
+            <div style={{display: "flex"}}>
+                <div className="node-background" style={theme?.connectors?.leftText}>{ connector.name }</div>
+                <input
+                    disabled={"disabled" in connector.data ? connector.data.disabled : false}
+                    style={theme?.connectors?.number}
+                    value={connector.data.value}
+                    onChange={this.onChange}
+                    placeholder={connector.name}
+                />
+            </div>
         );
     }
 }

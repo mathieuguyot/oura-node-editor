@@ -22,15 +22,19 @@ const SelectConnectorContent = ({connector, nodeId, cId, onConnectorUpdate}: Con
     }, [onConnectorUpdate, nodeId, cId, connector]);
 
     return (
-        <select 
-            onChange={(event) => setSelectedValue(event.target.selectedIndex)}
-            style={theme?.connectors?.number}
-            defaultValue={connector.data.values[connector.data.selected_index]}
-        >
-            {connector.data.values.map((value: string) => {
-                return <option key={value} value={value}>{value}</option>
-            })}
-        </select>
+        <div style={{display: "flex"}}>
+            <div className="node-background" style={theme?.connectors?.leftText}>{ connector.name }</div>
+            <select 
+                onChange={(event) => setSelectedValue(event.target.selectedIndex)}
+                style={theme?.connectors?.select}
+                defaultValue={connector.data.values[connector.data.selected_index]}
+            >
+                {connector.data.values.map((value: string) => {
+                    return <option key={value} value={value}>{value}</option>
+                })}
+            </select>
+        </div>
+
     );
 }
 

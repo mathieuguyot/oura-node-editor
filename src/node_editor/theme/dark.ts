@@ -15,7 +15,8 @@ const darkTheme: Theme = {
             borderRadius: "10px 10px 0px 0px",
             height: "20px",
             cursor: "grab",
-            overflow: "hidden"
+            overflow: "hidden",
+            paddingLeft: "10px"
         },
         body: {
             color: "white",
@@ -53,6 +54,11 @@ const darkTheme: Theme = {
         }
     },
     connectors: {
+        leftText: {
+            width: "40%", 
+            textOverflow: "ellipsis", 
+            overflow: "hidden"
+        },
         string: {
             width: "100%",
             backgroundColor: "#585858",
@@ -61,18 +67,26 @@ const darkTheme: Theme = {
             outline: "none"
         },
         number: {
-            width: "100%",
+            width: "60%",
+            boxSizing: "border-box",
             backgroundColor: "#585858",
             color: "white",
             border: 0,
-            outline: "none"
+            outline: "none",
+            textAlign: "right",
+            borderRadius: "8px",
+            paddingRight: "5px"
         },
         select: {
-            width: "100%",
+            width: "60%",
             backgroundColor: "#585858",
+            boxSizing: "border-box",
             color: "white",
             border: 0,
-            outline: "none"
+            outline: "none",
+            textAlign: "right",
+            borderRadius: "8px",
+            paddingRight: "5px",
         },
         button: {
             width: "100%",

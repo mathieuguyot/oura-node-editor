@@ -47,6 +47,7 @@ type NodeEditorState = {
 
 class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
     private nodesPinPositions: { [nodeId: string]: NodePinPositions } = {};
+    private mainDivRef = React.createRef<HTMLDivElement>();
 
     constructor(props: NodeEditorProps) {
         super(props);
@@ -61,6 +62,8 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
         this.onCreateLink = this.onCreateLink.bind(this);
         this.onConnectorUpdate = this.onConnectorUpdate.bind(this);
         this.onNodeMove = this.onNodeMove.bind(this);
+        this.filterRenderedNodes = this.filterRenderedNodes.bind(this);
+        this.filterRenderedLinks = this.filterRenderedLinks.bind(this);
     }
 
     componentDidMount(): void {
@@ -186,40 +189,90 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
         }
     }
 
+    filterRenderedNodes(): NodeCollection  {
+        const { nodes, panZoomInfo } = this.props;
+        const mainDivRef = this.mainDivRef.current;
+        if(!mainDivRef) {
+            return nodes;
+        }
+        
+        const margin = 50;
+        const minX = -(panZoomInfo.topLeftCorner.x / panZoomInfo.zoom) - margin;
+        const minY = -(panZoomInfo.topLeftCorner.y / panZoomInfo.zoom) - margin;
+        const maxX = minX + (mainDivRef.offsetWidth / panZoomInfo.zoom) + (margin * 2);
+        const maxY = minY + (mainDivRef.offsetHeight / panZoomInfo.zoom) + (margin * 2);
+        const filteredNodes = {}; 
+
+        const valueInRange = (value: number, min: number, max: number) => (value >= min) && (value <= max);
+
+        Object.keys(nodes).forEach(key => {
+            const node = nodes[key];
+            const xOverlap = valueInRange(minX, node.position.x, node.position.x + node.width) ||
+                             valueInRange(node.position.x, minX, maxX);
+            const yOverlap = valueInRange(minY, node.position.y, node.position.y + 1000) ||
+                             valueInRange(node.position.y, minY, maxY);
+            if(xOverlap && yOverlap) {
+                filteredNodes[key] = node;
+            }
+        });
+
+        return filteredNodes;
+    }
+
+    filterRenderedLinks(renderedNodesKeys: string[]): LinkCollection {
+        const { links } = this.props;
+        
+        const filteredlinks = {}; 
+        Object.keys(links).forEach(key => {
+            const link = links[key];
+            if(renderedNodesKeys.includes(link.inputNodeId) || renderedNodesKeys.includes(link.outputNodeId)) {
+                filteredlinks[key] = link;
+            }
+        });
+
+        return filteredlinks;
+    }
+
     render(): JSX.Element {
-        const { nodes, links, selectedItems, panZoomInfo, theme } = this.props;
+        const { selectedItems, panZoomInfo, theme } = this.props;
         const { onPanZoomInfo, createCustomConnectorComponent } = this.props;
         const { draggedLink, linksPositions } = this.state;
 
+        const renderedNodes = this.filterRenderedNodes();
+        const renderedLinks = this.filterRenderedLinks(Object.keys(renderedNodes));
+        console.log(`rendered_nodes=${Object.keys(renderedNodes).length}, rendered_links=${Object.keys(renderedLinks).length}`)
+
         return (
             <ThemeContext.Provider value={theme || darkTheme}>
-                <BackGround panZoomInfo={panZoomInfo}>
-                    <PanZoom
-                        panZoomInfo={panZoomInfo}
-                        onPanZoomInfo={onPanZoomInfo}
-                        onSelectItem={this.onSelectItem}
-                    >
-                        <LinkCanvas
-                            links={links}
-                            linksPositions={linksPositions}
-                            draggedLink={draggedLink}
-                            selectedItems={selectedItems}
+                <div style={{width: "100%", height: "100%"}} ref={this.mainDivRef}>
+                    <BackGround panZoomInfo={panZoomInfo}>
+                        <PanZoom
+                            panZoomInfo={panZoomInfo}
+                            onPanZoomInfo={onPanZoomInfo}
                             onSelectItem={this.onSelectItem}
-                        />
-                        <NodeCanvas
-                            nodes={nodes}
-                            getZoom={this.getZoom}
-                            onNodeMove={this.onNodeMove}
-                            onCreateLink={this.onCreateLink}
-                            onUpdatePreviewLink={this.onUpdatePreviewLink}
-                            onConnectorUpdate={this.onConnectorUpdate}
-                            onNodePinPositionsUpdate={this.onNodePinPositionsUpdate}
-                            selectedItems={selectedItems}
-                            onSelectItem={this.onSelectItem}
-                            createCustomConnectorComponent={createCustomConnectorComponent}
-                        />
-                    </PanZoom>
-                </BackGround>
+                        >
+                            <LinkCanvas
+                                links={renderedLinks}
+                                linksPositions={linksPositions}
+                                draggedLink={draggedLink}
+                                selectedItems={selectedItems}
+                                onSelectItem={this.onSelectItem}
+                            />
+                            <NodeCanvas
+                                nodes={renderedNodes}
+                                getZoom={this.getZoom}
+                                onNodeMove={this.onNodeMove}
+                                onCreateLink={this.onCreateLink}
+                                onUpdatePreviewLink={this.onUpdatePreviewLink}
+                                onConnectorUpdate={this.onConnectorUpdate}
+                                onNodePinPositionsUpdate={this.onNodePinPositionsUpdate}
+                                selectedItems={selectedItems}
+                                onSelectItem={this.onSelectItem}
+                                createCustomConnectorComponent={createCustomConnectorComponent}
+                            />
+                        </PanZoom>
+                    </BackGround>
+                </div>
             </ThemeContext.Provider>
         );
     }
