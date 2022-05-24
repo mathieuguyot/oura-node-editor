@@ -8,12 +8,13 @@ type PinProps = {
     contentType: string;
     leftPinPosition: number;
     pinPxRadius: number;
+    pinColor?: string;
 
     onMouseDown: (event: React.MouseEvent) => void;
 };
 
 const Pin = (props: PinProps): JSX.Element => {
-    const { className, contentType, leftPinPosition, pinPxRadius, onMouseDown } = props;
+    const { className, contentType, leftPinPosition, pinPxRadius, pinColor, onMouseDown } = props;
     const { theme } = useContext(ThemeContext);
 
     let customStyle: CSS.Properties | undefined = undefined;
@@ -32,6 +33,10 @@ const Pin = (props: PinProps): JSX.Element => {
         ...theme?.node?.basePin,
         ...customStyle
     };
+
+    if(pinColor) {
+        style.backgroundColor = pinColor;
+    }
 
     return <div className={className} style={style} onMouseDown={onMouseDown} />;
 };

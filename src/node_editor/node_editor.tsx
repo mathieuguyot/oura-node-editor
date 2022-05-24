@@ -240,8 +240,7 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
 
         const renderedNodes = this.filterRenderedNodes();
         const renderedLinks = this.filterRenderedLinks(Object.keys(renderedNodes));
-        console.log(`rendered_nodes=${Object.keys(renderedNodes).length}, rendered_links=${Object.keys(renderedLinks).length}`)
-
+ 
         return (
             <ThemeContext.Provider value={theme || darkTheme}>
                 <div style={{width: "100%", height: "100%"}} ref={this.mainDivRef}>

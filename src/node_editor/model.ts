@@ -75,8 +75,12 @@ export interface ConnectorModel {
     name: string;
     pinLayout: PinLayout;
     contentType: string;
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: any;
+
+    leftPinColor?: string;
+    rightPinColor?: string;
 }
 
 export type PinPosition = XYPosition | null;

@@ -36,7 +36,7 @@ class Connector extends Component<ConnectorProps> {
     private leftPinPos: PinPosition = null;
     private rightPinPos: PinPosition = null;
 
-    private pinPxRadius = 7;
+    private pinPxRadius = 6;
 
     constructor(props: ConnectorProps) {
         super(props);
@@ -155,6 +155,7 @@ class Connector extends Component<ConnectorProps> {
                         pinPxRadius={this.pinPxRadius}
                         leftPinPosition={-this.pinPxRadius}
                         onMouseDown={(e) => this.onMouseDown(PinSide.LEFT, e)}
+                        pinColor={this.props.connector.leftPinColor}
                     />
                 )}
 
@@ -165,6 +166,7 @@ class Connector extends Component<ConnectorProps> {
                         pinPxRadius={this.pinPxRadius}
                         leftPinPosition={node.width - this.pinPxRadius}
                         onMouseDown={(e) => this.onMouseDown(PinSide.RIGHT, e)}
+                        pinColor={this.props.connector.rightPinColor}
                     />
                 )}
 

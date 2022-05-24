@@ -20,6 +20,7 @@ Example project that use the lib: https://github.com/ouranos588/oura-canvas-crea
 * The working sheet where nodes are displayed can be zoomed in and out and dragged
 * One or many nodes and links can be selected
 * It is possible to extend the existing theme or create your own
+* Node rendering is virtualized (eg. node are not rendered if not displayed on screen), which improves general performances
 
 ## Todo list:
 * high: write a documentation of the lib
