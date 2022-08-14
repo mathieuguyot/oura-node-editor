@@ -12,7 +12,8 @@ import {
     LinkCollection,
     SelectionItem,
     PinSide,
-    NodePinPositions
+    NodePinPositions,
+    CustomElementCollection
 } from "./model";
 import PanZoom from "./pan_zoom";
 import BackGround from "./background";
@@ -20,12 +21,16 @@ import LinkCanvas from "./link_canvas";
 import NodeCanvas from "./node_canvas";
 import { ThemeContext, darkTheme, ThemeContextType } from "./theme";
 import { ConnectorContentProps } from "./connector_content/common";
+import CustomElementCanvas from "./custom_element_canvas";
+import { CustomElementProps } from "./custom_elements/common";
 
 enableMapSet();
 
 type NodeEditorProps = {
     nodes: NodeCollection;
     links: LinkCollection;
+    customElements?: CustomElementCollection;
+
     panZoomInfo: PanZoomModel;
     selectedItems: Array<SelectionItem>;
     theme?: ThemeContextType;
@@ -37,7 +42,8 @@ type NodeEditorProps = {
     onPanZoomInfo: (panZoomInfo: PanZoomModel) => void;
     onSelectedItems: (selection: Array<SelectionItem>) => void;
 
-    createCustomConnectorComponent?(props: ConnectorContentProps): JSX.Element | null;
+    createCustomConnectorComponent?: (props: ConnectorContentProps) => JSX.Element | null;
+    createCustomElement?: (props: CustomElementProps) => JSX.Element | null;
 };
 
 type NodeEditorState = {
@@ -76,10 +82,9 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
 
     onSelectItem(selection: SelectionItem | null, shiftKey: boolean): void {
         const { selectedItems, onSelectedItems } = this.props;
-        if (!selection && !shiftKey) {
-            onSelectedItems([]);
-        } else if (selection && shiftKey && _.some(selectedItems, selection)) {
-            const newSelection = [...selectedItems];
+        let newSelection = [] as SelectionItem[];
+        if (selection && shiftKey && _.some(selectedItems, selection)) {
+            newSelection = [...selectedItems];
             let indexToDelete = -1;
             selectedItems.forEach((item, index) => {
                 if (item.id === selection.id && item.type === selection.type) {
@@ -89,15 +94,14 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
             if (indexToDelete !== -1) {
                 newSelection.splice(indexToDelete, 1);
             }
-            onSelectedItems(newSelection);
         } else if (selection && !_.some(selectedItems, selection)) {
-            let newSelection = [...selectedItems];
+            newSelection = [...selectedItems];
             if (!shiftKey) {
                 newSelection = [];
             }
             newSelection.push(selection);
-            onSelectedItems(newSelection);
         }
+        onSelectedItems(newSelection);
         if (!shiftKey && selection) {
             onSelectedItems([selection]);
         }
@@ -234,13 +238,13 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
     }
 
     render(): JSX.Element {
-        const { selectedItems, panZoomInfo, theme } = this.props;
-        const { onPanZoomInfo, createCustomConnectorComponent } = this.props;
+        const { selectedItems, panZoomInfo, theme, customElements } = this.props;
+        const { onPanZoomInfo, createCustomConnectorComponent, createCustomElement } = this.props;
         const { draggedLink, linksPositions } = this.state;
 
         const renderedNodes = this.filterRenderedNodes();
         const renderedLinks = this.filterRenderedLinks(Object.keys(renderedNodes));
- 
+
         return (
             <ThemeContext.Provider value={theme || darkTheme}>
                 <div style={{width: "100%", height: "100%"}} ref={this.mainDivRef}>
@@ -250,6 +254,12 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
                             onPanZoomInfo={onPanZoomInfo}
                             onSelectItem={this.onSelectItem}
                         >
+                            {customElements && <CustomElementCanvas
+                                customElements={customElements}
+                                onSelectItem={() => {}}
+                                selectedItems={[]}
+                                createCustomElement={createCustomElement}
+                            />}
                             <LinkCanvas
                                 links={renderedLinks}
                                 linksPositions={linksPositions}

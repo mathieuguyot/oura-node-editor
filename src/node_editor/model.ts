@@ -57,6 +57,15 @@ export interface NodeModel {
     theme?: NodeTheme;
 }
 
+export interface CustomElementsModel {
+    name: string;
+    type: string;
+    position: XYPosition;
+    data: any;
+}
+
+export type CustomElementCollection = { [id: string]: CustomElementsModel };
+
 export type NodeCollection = { [id: string]: NodeModel };
 
 export enum PinSide {
