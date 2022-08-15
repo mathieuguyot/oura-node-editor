@@ -5,7 +5,7 @@ import _ from "lodash";
 import ErrorConnectorContent from "./error";
 import { ConnectorContentProps } from "./common";
 import { ConnectorModel } from "../model";
-import { ThemeContext } from "../theme";
+import { ThemeContext, ThemeContextType } from "../theme";
 
 export default class StringConnectorContent extends Component<ConnectorContentProps> {
     private textAreaRef = React.createRef<HTMLTextAreaElement>();
@@ -41,7 +41,7 @@ export default class StringConnectorContent extends Component<ConnectorContentPr
     }
 
     render(): JSX.Element {
-        const { theme } = this.context;
+        const { theme } = this.context as ThemeContextType;
         const { connector } = this.props;
         if (!("value" in connector.data)) {
             const message = "'string' connector types must provide a string field named 'value'";

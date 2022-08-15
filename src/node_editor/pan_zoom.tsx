@@ -10,6 +10,7 @@ export interface PanZoomInputProps {
     panZoomInfo: PanZoomModel;
     onPanZoomInfo: (panZoomInfo: PanZoomModel) => void;
     onSelectItem: (selection: SelectionItem | null, shiftKey: boolean) => void;
+    children?: React.ReactNode;
 }
 
 export interface PanZoomInputState {
@@ -47,7 +48,7 @@ export default class PanZoom extends React.Component<PanZoomInputProps, PanZoomI
         // Check if mouse button down was on react-zoom-pan-pinch canvas
         let mouseDownOnPanCanvas = false;
         if (typeof target.className === "string") {
-            mouseDownOnPanCanvas = target.className.includes("react-transform-component");
+            mouseDownOnPanCanvas = target.className.includes("react-transform-wrapper");
         }
 
         // Disable pad interactions if mouse ckick is not left was not on link or react-zoom-pan-pinch canvas
@@ -62,24 +63,24 @@ export default class PanZoom extends React.Component<PanZoomInputProps, PanZoomI
         });
     }
 
-    onZoomChange(e: any): void {
+    onZoomChange(ref: any): void {
         const { onPanZoomInfo } = this.props;
-        onPanZoomInfo({ zoom: e.scale, topLeftCorner: { x: e.positionX, y: e.positionY } });
+        onPanZoomInfo({ zoom: ref.state.scale, topLeftCorner: { x: ref.state.positionX, y: ref.state.positionY } });
     }
 
-    onPanning(e: any): void {
+    onPanning(ref: any): void {
         const { onPanZoomInfo } = this.props;
-        onPanZoomInfo({ zoom: e.scale, topLeftCorner: { x: e.positionX, y: e.positionY } });
+        onPanZoomInfo({ zoom: ref.state.scale, topLeftCorner: { x: ref.state.positionX, y: ref.state.positionY }});
     }
 
-    onPanningStart(e: any): void {
-        this.panStartPosition = { x: e.positionX, y: e.positionY };
+    onPanningStart(ref: any): void {
+        this.panStartPosition = { x: ref.state.positionX, y: ref.state.positionY };
     }
 
-    onPanningStop(e: any): void {
+    onPanningStop(ref: any): void {
         const { onSelectItem } = this.props;
-        const panEndPosition = { x: e.positionX, y: e.positionY };
-        if (_.isEqual(this.panStartPosition, panEndPosition)) {
+        const panEndPosition = { x: ref.state.positionX, y: ref.state.positionY };
+        if (this.panStartPosition && this.panStartPosition.x === panEndPosition.x && this.panStartPosition.y === panEndPosition.y) {
             onSelectItem(null, this.shiftKey);
         }
     }
@@ -92,9 +93,7 @@ export default class PanZoom extends React.Component<PanZoomInputProps, PanZoomI
             <div
                 id="panzoom"
                 style={{
-                    position: "absolute",
-                    top: "0",
-                    left: "0",
+                    position: "relative",
                     width: "100%",
                     height: "100%"
                 }}
@@ -102,31 +101,26 @@ export default class PanZoom extends React.Component<PanZoomInputProps, PanZoomI
                 onMouseUp={this.onMouseUp}
             >
                 <TransformWrapper
-                    options={{
+                    limitToBounds={false}
+                    minScale={0.35}
+                    panning={{
+                        excluded: ["input", "select", "textarea"],
                         disabled: panDisabled,
-                        limitToBounds: false,
-                        minScale: 0.35,
-                        centerContent: false
-                    }}
-                    pan={{
-                        velocity: false
+                        velocityDisabled: true,
                     }}
                     doubleClick={{
                         disabled: true
                     }}
                     wheel={{
-                        step: 100
+                        step: 0.1
                     }}
                     onWheel={this.onZoomChange}
                     onPanningStart={this.onPanningStart}
                     onPanning={this.onPanning}
                     onPanningStop={this.onPanningStop}
-                    scale={panZoomInfo.zoom}
-                    positionX={panZoomInfo.topLeftCorner.x}
-                    positionY={panZoomInfo.topLeftCorner.y}
-                    defaultScale={panZoomInfo.zoom}
-                    defaultPositionX={panZoomInfo.topLeftCorner.x}
-                    defaultPositionY={panZoomInfo.topLeftCorner.y}
+                    initialScale={panZoomInfo.zoom}
+                    initialPositionX={panZoomInfo.topLeftCorner.x}
+                    initialPositionY={panZoomInfo.topLeftCorner.y}
                 >
                     <TransformComponent>
                         <div style={{ height: "100vh", width: "100vw" }}>{children}</div>

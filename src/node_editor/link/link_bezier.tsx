@@ -3,7 +3,7 @@ import * as _ from "lodash";
 
 import { XYPosition } from "../model";
 import { LinkProps } from "./common";
-import { ThemeContext } from "../theme";
+import { ThemeContext, ThemeContextType } from "../theme";
 
 const getCenter = (source: XYPosition, target: XYPosition): XYPosition => {
     const offsetX = Math.abs(target.x - source.x) / 2;
@@ -26,7 +26,7 @@ export default class BezierLink extends Component<LinkProps> {
     }
 
     render(): JSX.Element {
-        const { theme } = this.context;
+        const { theme } = this.context as ThemeContextType;
         const { linkId, linkPosition, isLinkSelected } = this.props;
         const sourceX = linkPosition.inputPinPosition.x;
         const sourceY = linkPosition.inputPinPosition.y;

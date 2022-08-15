@@ -29,9 +29,7 @@ const SelectConnectorContent = ({connector, nodeId, cId, onConnectorUpdate}: Con
                 style={theme?.connectors?.select}
                 defaultValue={connector.data.values[connector.data.selected_index]}
             >
-                {connector.data.values.map((value: string) => {
-                    return <option key={value} value={value}>{value}</option>
-                })}
+                {connector.data.values.map((value: string) => <option key={value} value={value}>{value}</option>)}
             </select>
         </div>
 

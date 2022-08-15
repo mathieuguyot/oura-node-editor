@@ -17,7 +17,7 @@ import Connector from "./connector";
 import DragWrapper from "../utils";
 import Header from "./header";
 import Footer from "./footer";
-import { ThemeContext } from "../theme";
+import { ThemeContext, ThemeContextType } from "../theme";
 import { ConnectorContentProps } from "../connector_content";
 import { PinLayout } from "..";
 
@@ -114,7 +114,7 @@ export class Node extends Component<NodeProps> {
     }
 
     render(): JSX.Element {
-        const { theme } = this.context;
+        const { theme } = this.context as ThemeContextType;
         const { nodeId, node, isNodeSelected } = this.props;
         const { onCreateLink, onUpdatePreviewLink, getZoom, onConnectorUpdate } = this.props;
         const { createCustomConnectorComponent } = this.props;

@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import * as _ from "lodash";
 
 import { LinkProps } from "./common";
-import { ThemeContext } from "../theme";
+import { ThemeContext, ThemeContextType } from "../theme";
 
 export default class LineLink extends Component<LinkProps> {
     shouldComponentUpdate(nextProps: LinkProps): boolean {
@@ -17,7 +17,7 @@ export default class LineLink extends Component<LinkProps> {
     }
 
     render(): JSX.Element {
-        const { theme } = this.context;
+        const { theme } = this.context as ThemeContextType;
         const { linkId, linkPosition, isLinkSelected } = this.props;
 
         const style = isLinkSelected ? 
