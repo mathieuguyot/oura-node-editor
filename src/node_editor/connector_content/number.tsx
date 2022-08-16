@@ -41,7 +41,6 @@ export default class NumberConnectorContent extends Component<ConnectorContentPr
                 <div className="node-background" style={theme?.connectors?.leftText}>{ connector.name }</div>
                 <input
                     disabled={"disabled" in connector.data ? connector.data.disabled : false}
-                    onClick={() => console.log("ici")}
                     style={theme?.connectors?.number}
                     value={connector.data.value}
                     onChange={this.onChange}
