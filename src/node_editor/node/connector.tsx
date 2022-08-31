@@ -89,14 +89,23 @@ class Connector extends Component<ConnectorProps> {
                         tag = (mouseUpEvent.target as Element).className.match(connectorRegex);
                     }
                 }
-                if (tag !== null) {
+                if (tag !== null && tag[3] === "left") {
+                    onCreateLink({
+                        inputNodeId: tag[1],
+                        inputPinId: tag[2],
+                        inputPinSide: PinSide.LEFT,
+                        outputNodeId: nodeId,
+                        outputPinId: cId,
+                        outputPinSide: PinSide.RIGHT
+                    });
+                } else if(tag !== null) {
                     onCreateLink({
                         inputNodeId: nodeId,
                         inputPinId: cId,
-                        inputPinSide: pinSide === PinSide.LEFT ? PinSide.LEFT : PinSide.RIGHT,
+                        inputPinSide: PinSide.LEFT,
                         outputNodeId: tag[1],
                         outputPinId: tag[2],
-                        outputPinSide: tag[3] === "left" ? PinSide.LEFT : PinSide.RIGHT,
+                        outputPinSide: PinSide.RIGHT,
                         linkType: "bezier"
                     });
                 }

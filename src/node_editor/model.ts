@@ -81,6 +81,8 @@ export interface ConnectorModel {
 
     leftPinColor?: string;
     rightPinColor?: string;
+    
+    isMultiInputAllowed?: boolean;
 }
 
 export type PinPosition = XYPosition | null;
