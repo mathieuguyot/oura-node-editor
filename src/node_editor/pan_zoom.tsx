@@ -104,7 +104,7 @@ export default class PanZoom extends React.Component<PanZoomInputProps, PanZoomI
                     limitToBounds={false}
                     minScale={0.35}
                     panning={{
-                        excluded: ["input", "select", "textarea", "button"],
+                        excluded: ["input", "select", "textarea", "button", "path"],
                         disabled: panDisabled,
                         velocityDisabled: true,
                     }}
