@@ -189,29 +189,32 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
         }
     }
 
-    filterRenderedNodes(): NodeCollection  {
+    filterRenderedNodes(): NodeCollection {
         const { nodes, panZoomInfo } = this.props;
         const mainDivRef = this.mainDivRef.current;
-        if(!mainDivRef) {
+        if (!mainDivRef) {
             return nodes;
         }
-        
+
         const margin = 50;
         const minX = -(panZoomInfo.topLeftCorner.x / panZoomInfo.zoom) - margin;
         const minY = -(panZoomInfo.topLeftCorner.y / panZoomInfo.zoom) - margin;
-        const maxX = minX + (mainDivRef.offsetWidth / panZoomInfo.zoom) + (margin * 2);
-        const maxY = minY + (mainDivRef.offsetHeight / panZoomInfo.zoom) + (margin * 2);
-        const filteredNodes = {}; 
+        const maxX = minX + mainDivRef.offsetWidth / panZoomInfo.zoom + margin * 2;
+        const maxY = minY + mainDivRef.offsetHeight / panZoomInfo.zoom + margin * 2;
+        const filteredNodes: NodeCollection = {};
 
-        const valueInRange = (value: number, min: number, max: number) => (value >= min) && (value <= max);
+        const valueInRange = (value: number, min: number, max: number) =>
+            value >= min && value <= max;
 
-        Object.keys(nodes).forEach(key => {
+        Object.keys(nodes).forEach((key) => {
             const node = nodes[key];
-            const xOverlap = valueInRange(minX, node.position.x, node.position.x + node.width) ||
-                             valueInRange(node.position.x, minX, maxX);
-            const yOverlap = valueInRange(minY, node.position.y, node.position.y + 1000) ||
-                             valueInRange(node.position.y, minY, maxY);
-            if(xOverlap && yOverlap) {
+            const xOverlap =
+                valueInRange(minX, node.position.x, node.position.x + node.width) ||
+                valueInRange(node.position.x, minX, maxX);
+            const yOverlap =
+                valueInRange(minY, node.position.y, node.position.y + 1000) ||
+                valueInRange(node.position.y, minY, maxY);
+            if (xOverlap && yOverlap) {
                 filteredNodes[key] = node;
             }
         });
@@ -221,11 +224,14 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
 
     filterRenderedLinks(renderedNodesKeys: string[]): LinkCollection {
         const { links } = this.props;
-        
-        const filteredlinks = {}; 
-        Object.keys(links).forEach(key => {
+
+        const filteredlinks: LinkCollection = {};
+        Object.keys(links).forEach((key) => {
             const link = links[key];
-            if(renderedNodesKeys.includes(link.inputNodeId) || renderedNodesKeys.includes(link.outputNodeId)) {
+            if (
+                renderedNodesKeys.includes(link.inputNodeId) ||
+                renderedNodesKeys.includes(link.outputNodeId)
+            ) {
                 filteredlinks[key] = link;
             }
         });
@@ -240,10 +246,10 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
 
         const renderedNodes = this.filterRenderedNodes();
         const renderedLinks = this.filterRenderedLinks(Object.keys(renderedNodes));
- 
+
         return (
             <ThemeContext.Provider value={theme || darkTheme}>
-                <div style={{width: "100%", height: "100%"}} ref={this.mainDivRef}>
+                <div style={{ width: "100%", height: "100%" }} ref={this.mainDivRef}>
                     <BackGround panZoomInfo={panZoomInfo}>
                         <PanZoom
                             panZoomInfo={panZoomInfo}

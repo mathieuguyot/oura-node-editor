@@ -36,9 +36,9 @@ export default class BezierLink extends Component<LinkProps> {
 
         const path = `M${sourceX},${sourceY} C${center.x},${sourceY} ${center.x},${targetY} ${targetX},${targetY}`;
 
-        const style = isLinkSelected ? 
-            {...theme?.link?.selected, ...this.props.link?.theme?.selected} : 
-            {...theme?.link?.unselected, ...this.props.link?.theme?.unselected};
+        const style = isLinkSelected
+            ? { ...theme?.link?.selected, ...this.props.link?.theme?.selected }
+            : { ...theme?.link?.unselected, ...this.props.link?.theme?.unselected };
 
         return (
             <path

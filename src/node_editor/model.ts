@@ -81,7 +81,7 @@ export interface ConnectorModel {
 
     leftPinColor?: string;
     rightPinColor?: string;
-    
+
     isMultiInputAllowed?: boolean;
 }
 

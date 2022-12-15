@@ -6,8 +6,13 @@ export type FooterProps = {
     node: NodeModel;
 };
 
-export default function Footer({node}: FooterProps): JSX.Element {
+export default function Footer({ node }: FooterProps): JSX.Element {
     const { theme } = useContext(ThemeContext);
 
-    return <div className="node-background node-footer" style={{...theme?.node?.footer, ...node?.theme?.footer}} />;
+    return (
+        <div
+            className="node-background node-footer"
+            style={{ ...theme?.node?.footer, ...node?.theme?.footer }}
+        />
+    );
 }
