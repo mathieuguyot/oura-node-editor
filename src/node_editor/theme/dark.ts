@@ -10,7 +10,7 @@ const darkTheme: Theme = {
             borderRadius: "10px 10px 10px 10px"
         },
         header: {
-            backgroundColor: "orange",
+            backgroundColor: "red",
             color: "white",
             borderRadius: "10px 10px 0px 0px",
             height: "20px",
@@ -55,8 +55,8 @@ const darkTheme: Theme = {
     },
     connectors: {
         leftText: {
-            width: "40%", 
-            textOverflow: "ellipsis", 
+            width: "40%",
+            textOverflow: "ellipsis",
             overflow: "hidden"
         },
         string: {

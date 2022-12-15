@@ -17,20 +17,23 @@ type MenuItemListProps = {
 const MenuItemList = (props: MenuItemListProps): JSX.Element => {
     const { items } = props;
     return (
-        <>
-            {Object.keys(items).map((key) => {
-                const item = items[key];
-                return (
-                    <MenuItem
-                        name={item.name}
-                        onClick={item.onClick}
-                        onMouseEnter={item.onMouseEnter}
-                        onMouseLeave={item.onMouseLeave}
-                        key={key}
-                    />
-                );
-            })}
-        </>
+        <div style={{ flex: 1, overflowY: "scroll" }}>
+            <div style={{ height: "460px" }}>
+                {Object.keys(items).map((key) => {
+                    const item = items[key];
+                    return (
+                        <MenuItem
+                            name={item.name}
+                            onClick={item.onClick}
+                            onMouseEnter={item.onMouseEnter}
+                            onMouseLeave={item.onMouseLeave}
+                            key={key}
+                        />
+                    );
+                })}
+            </div>
+
+        </div>
     );
 };
 

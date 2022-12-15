@@ -32,11 +32,11 @@ export const BasicContextualMenu = (props: BasicContextualMenuProps): JSX.Elemen
     });
 
     return (
-        <>
+        <div style={{ display: "flex", flexDirection: "column", overflow: "auto" }}>
             {menuTitle}
             <br />
             <input value={searchText} onChange={onChange} placeholder="Filter options" />
             <MenuItemList items={filteredItems} />
-        </>
+        </div>
     );
 };
