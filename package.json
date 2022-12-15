@@ -1,6 +1,6 @@
 {
   "name": "oura-node-editor",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "license": "MIT",
   "author": "Mathieu Guyot",
   "type": "module",
@@ -9,7 +9,7 @@
   ],
   "main": "./dist/oura-node-editor.umd.cjs",
   "module": "./dist/oura-node-editor.js",
-  "types": "./dist/oura-node-editor.d.ts",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build"
