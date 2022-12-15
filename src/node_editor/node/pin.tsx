@@ -18,7 +18,7 @@ const Pin = (props: PinProps): JSX.Element => {
     const { theme } = useContext(ThemeContext);
 
     let customStyle: CSS.Properties | undefined = undefined;
-    if(theme?.node?.customPins && theme?.node?.customPins[contentType]) {
+    if (theme?.node?.customPins && theme?.node?.customPins[contentType]) {
         customStyle = theme?.node?.customPins[contentType];
     }
 
@@ -34,7 +34,7 @@ const Pin = (props: PinProps): JSX.Element => {
         ...customStyle
     };
 
-    if(pinColor) {
+    if (pinColor) {
         style.backgroundColor = pinColor;
     }
 

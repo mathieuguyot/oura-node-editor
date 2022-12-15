@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import * as React from "react";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
-import _ from "lodash";
 
 import { PanZoomModel, SelectionItem, XYPosition } from "./model";
 
@@ -65,12 +64,18 @@ export default class PanZoom extends React.Component<PanZoomInputProps, PanZoomI
 
     onZoomChange(ref: any): void {
         const { onPanZoomInfo } = this.props;
-        onPanZoomInfo({ zoom: ref.state.scale, topLeftCorner: { x: ref.state.positionX, y: ref.state.positionY } });
+        onPanZoomInfo({
+            zoom: ref.state.scale,
+            topLeftCorner: { x: ref.state.positionX, y: ref.state.positionY }
+        });
     }
 
     onPanning(ref: any): void {
         const { onPanZoomInfo } = this.props;
-        onPanZoomInfo({ zoom: ref.state.scale, topLeftCorner: { x: ref.state.positionX, y: ref.state.positionY }});
+        onPanZoomInfo({
+            zoom: ref.state.scale,
+            topLeftCorner: { x: ref.state.positionX, y: ref.state.positionY }
+        });
     }
 
     onPanningStart(ref: any): void {
@@ -80,7 +85,11 @@ export default class PanZoom extends React.Component<PanZoomInputProps, PanZoomI
     onPanningStop(ref: any): void {
         const { onSelectItem } = this.props;
         const panEndPosition = { x: ref.state.positionX, y: ref.state.positionY };
-        if (this.panStartPosition && this.panStartPosition.x === panEndPosition.x && this.panStartPosition.y === panEndPosition.y) {
+        if (
+            this.panStartPosition &&
+            this.panStartPosition.x === panEndPosition.x &&
+            this.panStartPosition.y === panEndPosition.y
+        ) {
             onSelectItem(null, this.shiftKey);
         }
     }
@@ -106,7 +115,7 @@ export default class PanZoom extends React.Component<PanZoomInputProps, PanZoomI
                     panning={{
                         excluded: ["input", "select", "textarea", "button", "path"],
                         disabled: panDisabled,
-                        velocityDisabled: true,
+                        velocityDisabled: true
                     }}
                     doubleClick={{
                         disabled: true

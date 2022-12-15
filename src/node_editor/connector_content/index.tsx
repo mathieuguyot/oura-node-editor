@@ -13,16 +13,16 @@ import StringConnectorContent from "./string";
 
 export type { ConnectorContentProps };
 export { ErrorConnectorComponent };
-    
+
 export function createConnectorComponent(props: ConnectorContentProps): JSX.Element {
     const { connector } = props;
-    if(connector.contentType === "string") {
-        return <StringConnectorContent {...props} />
+    if (connector.contentType === "string") {
+        return <StringConnectorContent {...props} />;
     }
     if (connector.contentType === "text_area") {
         return <TextAreaConnectorContent {...props} />;
     }
-    if(connector.contentType === "number") {
+    if (connector.contentType === "number") {
         return <NumberConnectorContent {...props} />;
     }
     if (connector.contentType === "check_box") {

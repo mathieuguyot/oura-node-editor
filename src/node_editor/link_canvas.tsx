@@ -1,4 +1,4 @@
-import React, { CSSProperties } from "react";
+import { CSSProperties } from "react";
 import _ from "lodash";
 
 import createLink from "./link";

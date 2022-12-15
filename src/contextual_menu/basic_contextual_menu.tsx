@@ -14,12 +14,9 @@ export const BasicContextualMenu = (props: BasicContextualMenuProps): JSX.Elemen
 
     const [searchText, setSearchText] = React.useState<string>("");
 
-    const onChange = React.useCallback(
-        (event: React.FormEvent<HTMLInputElement>) => {
-            setSearchText(event.currentTarget.value);
-        },
-        [searchText]
-    );
+    const onChange = React.useCallback((event: React.FormEvent<HTMLInputElement>) => {
+        setSearchText(event.currentTarget.value);
+    }, []);
 
     const filteredItems = produce(items, (draft) => {
         Object.keys(items).forEach((id) => {

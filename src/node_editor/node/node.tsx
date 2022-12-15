@@ -105,8 +105,8 @@ export class Node extends Component<NodeProps> {
     onPinPositionUpdate(cId: string, leftPinPos: PinPosition, rightPinPos: PinPosition): void {
         const { nodeId, node, onNodePinPositionsUpdate } = this.props;
         this.pinPositions[cId] = [leftPinPos, rightPinPos];
-        const connectableConnectorsLength = Object.keys(node.connectors).filter(name => {
-            return node.connectors[name].pinLayout !== PinLayout.NO_PINS
+        const connectableConnectorsLength = Object.keys(node.connectors).filter((name) => {
+            return node.connectors[name].pinLayout !== PinLayout.NO_PINS;
         }).length;
         if (Object.keys(this.pinPositions).length === connectableConnectorsLength) {
             onNodePinPositionsUpdate(nodeId, this.pinPositions);
@@ -127,8 +127,8 @@ export class Node extends Component<NodeProps> {
         };
 
         const nodeCoreSelectionStyle = isNodeSelected
-            ? {...theme?.node?.selected, ...node?.theme?.selected}
-            : {...theme?.node?.unselected, ...node?.theme?.unselected};
+            ? { ...theme?.node?.selected, ...node?.theme?.selected }
+            : { ...theme?.node?.unselected, ...node?.theme?.unselected };
         return (
             <div
                 className="node-background"
@@ -138,7 +138,7 @@ export class Node extends Component<NodeProps> {
             >
                 <Header node={node} />
                 {/* Node body (list of connectors) */}
-                <div style={{...theme?.node?.body, ...node?.theme?.body}}>
+                <div style={{ ...theme?.node?.body, ...node?.theme?.body }}>
                     {Object.keys(node.connectors).map((key) => (
                         <Connector
                             nodeId={nodeId}

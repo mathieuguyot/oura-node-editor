@@ -37,9 +37,9 @@ const darkTheme: Theme = {
         customPins: {
             string: {
                 backgroundColor: "red",
-                transform: "rotate(45deg)",
+                transform: "rotate(45deg)"
             }
-        },
+        }
     },
     link: {
         selected: {
@@ -86,7 +86,7 @@ const darkTheme: Theme = {
             outline: "none",
             textAlign: "right",
             borderRadius: "8px",
-            paddingRight: "5px",
+            paddingRight: "5px"
         },
         button: {
             width: "100%",
@@ -107,7 +107,9 @@ function darkThemeBuildBackgroundStyle(panZoomInfo: PanZoomModel): CSS.Propertie
     };
 }
 
-export default {
+const exp = {
     theme: darkTheme,
     buildBackgroundStyle: darkThemeBuildBackgroundStyle
 };
+
+export default exp;

@@ -40,7 +40,7 @@ const NodePrevisualizer = (props: NodePrevisualizerProps): JSX.Element => {
                 gridArea: "preview",
                 overflow: "hidden",
                 width: "500px",
-                height: "500px",
+                height: "500px"
             }}
         >
             {nodeElem}
@@ -85,7 +85,7 @@ export const AddNodeContextualMenu = (props: AddNodeContextualMenuProps): JSX.El
     }, [onMouseHover]);
 
     return (
-        <div style={{display: "flex"}} onMouseLeave={onMouseLeaves} onMouseEnter={onMouseEnter}>
+        <div style={{ display: "flex" }} onMouseLeave={onMouseLeaves} onMouseEnter={onMouseEnter}>
             <div>
                 <BasicContextualMenu menuTitle="Add a new node" items={items} />
             </div>

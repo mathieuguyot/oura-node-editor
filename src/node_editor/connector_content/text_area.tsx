@@ -30,7 +30,7 @@ export default class TextAreaConnectorContent extends Component<ConnectorContent
     }
 
     onMouseUp() {
-        if(this.textAreaRef.current) {
+        if (this.textAreaRef.current) {
             const { nodeId, cId, connector, onConnectorUpdate } = this.props;
             const height = this.textAreaRef.current.style.height;
             const newConnector = produce(connector, (draft: ConnectorModel) => {
@@ -50,8 +50,13 @@ export default class TextAreaConnectorContent extends Component<ConnectorContent
         const height = "height" in connector.data ? connector.data.height : 100;
         return (
             <textarea
-                ref= {this.textAreaRef}
-                style={{height: height, whiteSpace: "pre", resize: "vertical", ...theme?.connectors?.string}}
+                ref={this.textAreaRef}
+                style={{
+                    height: height,
+                    whiteSpace: "pre",
+                    resize: "vertical",
+                    ...theme?.connectors?.string
+                }}
                 value={connector.data.value}
                 onChange={this.onChange}
                 onMouseUp={this.onMouseUp}

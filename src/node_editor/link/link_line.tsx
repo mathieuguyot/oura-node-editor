@@ -20,9 +20,9 @@ export default class LineLink extends Component<LinkProps> {
         const { theme } = this.context as ThemeContextType;
         const { linkId, linkPosition, isLinkSelected } = this.props;
 
-        const style = isLinkSelected ? 
-            {...theme?.link?.selected, ...this.props.link?.theme?.selected} : 
-            {...theme?.link?.unselected, ...this.props.link?.theme?.unselected};
+        const style = isLinkSelected
+            ? { ...theme?.link?.selected, ...this.props.link?.theme?.selected }
+            : { ...theme?.link?.unselected, ...this.props.link?.theme?.unselected };
 
         return (
             <line

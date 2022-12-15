@@ -20,7 +20,7 @@ export default class NumberConnectorContent extends Component<ConnectorContentPr
 
     onChange(event: React.FormEvent<HTMLInputElement>): void {
         const { nodeId, cId, connector, onConnectorUpdate } = this.props;
-        if(isNaN(Number(event.currentTarget.value))) {
+        if (isNaN(Number(event.currentTarget.value))) {
             return;
         }
         const newConnector = produce(connector, (draft: ConnectorModel) => {
@@ -37,8 +37,10 @@ export default class NumberConnectorContent extends Component<ConnectorContentPr
             return <ErrorConnectorContent message={message} />;
         }
         return (
-            <div style={{display: "flex"}}>
-                <div className="node-background" style={theme?.connectors?.leftText}>{ connector.name }</div>
+            <div style={{ display: "flex" }}>
+                <div className="node-background" style={theme?.connectors?.leftText}>
+                    {connector.name}
+                </div>
                 <input
                     disabled={"disabled" in connector.data ? connector.data.disabled : false}
                     style={theme?.connectors?.number}

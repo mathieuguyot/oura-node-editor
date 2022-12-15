@@ -32,7 +32,6 @@ const MenuItemList = (props: MenuItemListProps): JSX.Element => {
                     );
                 })}
             </div>
-
         </div>
     );
 };

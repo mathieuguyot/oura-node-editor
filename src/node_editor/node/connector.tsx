@@ -98,7 +98,7 @@ class Connector extends Component<ConnectorProps> {
                         outputPinId: cId,
                         outputPinSide: PinSide.RIGHT
                     });
-                } else if(tag !== null) {
+                } else if (tag !== null) {
                     onCreateLink({
                         inputNodeId: nodeId,
                         inputPinId: cId,
