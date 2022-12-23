@@ -11,7 +11,7 @@ export default function Header({ node }: HeaderProps): JSX.Element {
 
     return (
         <div
-            className="node-background node-header"
+            className="node-background node-header bg-primary font-bold"
             style={{ ...theme.node?.header, ...node.theme?.header }}
         >
             {node.name}

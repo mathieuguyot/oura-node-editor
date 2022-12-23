@@ -34,16 +34,17 @@ export default class StringConnectorContent extends Component<ConnectorContentPr
             return <ErrorConnectorContent message={message} />;
         }
         return (
-            <div style={{ display: "flex" }}>
-                <div className="node-background" style={theme?.connectors?.leftText}>
-                    {connector.name}
-                </div>
+            <div className="form-control w-full">
+                <label className="label" style={{ paddingBottom: 0, paddingTop: 0 }}>
+                    <span className="label-text text-xs">{connector.name}</span>
+                </label>
                 <input
-                    disabled={"disabled" in connector.data ? connector.data.disabled : false}
-                    style={theme?.connectors?.number}
+                    type="text"
+                    className="input input-bordered input-primary input-xs w-full focus:outline-0"
                     value={connector.data.value}
                     onChange={this.onChange}
                     placeholder={connector.name}
+                    disabled={"disabled" in connector.data ? connector.data.disabled : false}
                 />
             </div>
         );

@@ -10,6 +10,7 @@ import SelectConnectorContent from "./select";
 import ButtonConnectorContent from "./button";
 import TextAreaConnectorContent from "./text_area";
 import StringConnectorContent from "./string";
+import RangeConnectorContent from "./range";
 
 export type { ConnectorContentProps };
 export { ErrorConnectorComponent };
@@ -33,6 +34,9 @@ export function createConnectorComponent(props: ConnectorContentProps): JSX.Elem
     }
     if (connector.contentType === "button") {
         return <ButtonConnectorContent {...props} />;
+    }
+    if (connector.contentType == "range") {
+        return <RangeConnectorContent {...props} />;
     }
     // Defaut return connector name
     return <DefaultConnectorContent {...props} />;

@@ -29,13 +29,13 @@ const SelectConnectorContent = ({
     }
 
     return (
-        <div style={{ display: "flex" }}>
-            <div className="node-background" style={theme?.connectors?.leftText}>
-                {connector.name}
-            </div>
+        <div className="form-control w-full">
+            <label className="label" style={{ paddingBottom: 0, paddingTop: 0 }}>
+                <span className="label-text text-xs">{connector.name}</span>
+            </label>
             <select
+                className="input input-bordered input-primary input-xs w-full focus:outline-0"
                 onChange={(event) => setSelectedValue(event.target.selectedIndex)}
-                style={theme?.connectors?.select}
                 defaultValue={connector.data.values[connector.data.selected_index]}
             >
                 {connector.data.values.map((value: string) => (

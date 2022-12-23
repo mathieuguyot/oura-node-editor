@@ -35,10 +35,10 @@ const Pin = (props: PinProps): JSX.Element => {
     };
 
     if (pinColor) {
-        style.backgroundColor = pinColor;
+        //style.backgroundColor = pinColor;
     }
 
-    return <div className={className} style={style} onMouseDown={onMouseDown} />;
+    return <div className={className + " bg-primary"} style={style} onMouseDown={onMouseDown} />;
 };
 
 export default Pin;

@@ -13,7 +13,10 @@ const ButtonConnectorContent = ({ connector, node }: ConnectorContentProps): JSX
     }
 
     return (
-        <button style={theme?.connectors?.button} onClick={() => connector.data.onClick(node)}>
+        <button
+            className="btn btn-primary btn-xs w-full"
+            onClick={() => connector.data.onClick(node)}
+        >
             {connector.data.label}
         </button>
     );

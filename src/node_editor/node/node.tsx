@@ -131,14 +131,14 @@ export class Node extends Component<NodeProps> {
             : { ...theme?.node?.unselected, ...node?.theme?.unselected };
         return (
             <div
-                className="node-background"
+                className={"node-background"}
                 style={{ ...style, ...nodeCoreSelectionStyle }}
                 onMouseDown={this.onMouseDown}
                 id={`node_${nodeId}`}
             >
                 <Header node={node} />
                 {/* Node body (list of connectors) */}
-                <div style={{ ...theme?.node?.body, ...node?.theme?.body }}>
+                <div className="bg-base-300" style={{ ...theme?.node?.body, ...node?.theme?.body }}>
                     {Object.keys(node.connectors).map((key) => (
                         <Connector
                             nodeId={nodeId}

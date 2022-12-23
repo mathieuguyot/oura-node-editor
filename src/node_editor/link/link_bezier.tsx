@@ -45,6 +45,7 @@ export default class BezierLink extends Component<LinkProps> {
                 id={`link_${linkId}`}
                 d={path}
                 style={style}
+                className={isLinkSelected ? "stroke-primary-focus" : "stroke-primary"}
                 onClick={this.onSelectLink.bind(this)}
             />
         );

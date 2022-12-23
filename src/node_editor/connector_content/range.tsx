@@ -7,7 +7,7 @@ import { ConnectorContentProps } from "./common";
 import { ConnectorModel } from "../model";
 import { ThemeContext, ThemeContextType } from "../theme";
 
-export default class NumberConnectorContent extends Component<ConnectorContentProps> {
+export default class RangeConnectorContent extends Component<ConnectorContentProps> {
     constructor(props: ConnectorContentProps) {
         super(props);
 
@@ -32,7 +32,11 @@ export default class NumberConnectorContent extends Component<ConnectorContentPr
     render(): JSX.Element {
         const { theme } = this.context as ThemeContextType;
         const { connector } = this.props;
-        if (!("value" in connector.data)) {
+        if (
+            !("value" in connector.data) ||
+            !("min" in connector.data) ||
+            !("max" in connector.data)
+        ) {
             const message = "'number' connector types must provide a string field named 'value'";
             return <ErrorConnectorContent message={message} />;
         }
@@ -42,15 +46,16 @@ export default class NumberConnectorContent extends Component<ConnectorContentPr
                     <span className="label-text text-xs">{connector.name}</span>
                 </label>
                 <input
-                    className="input input-bordered input-primary input-xs w-full focus:outline-0"
-                    disabled={"disabled" in connector.data ? connector.data.disabled : false}
+                    type="range"
+                    min={connector.data.min}
+                    max={connector.data.max}
                     value={connector.data.value}
                     onChange={this.onChange}
-                    placeholder={connector.name}
+                    className="range range-primary range-xs"
                 />
             </div>
         );
     }
 }
 
-NumberConnectorContent.contextType = ThemeContext;
+RangeConnectorContent.contextType = ThemeContext;

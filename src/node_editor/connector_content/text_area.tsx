@@ -49,19 +49,24 @@ export default class TextAreaConnectorContent extends Component<ConnectorContent
         }
         const height = "height" in connector.data ? connector.data.height : 100;
         return (
-            <textarea
-                ref={this.textAreaRef}
-                style={{
-                    height: height,
-                    whiteSpace: "pre",
-                    resize: "vertical",
-                    ...theme?.connectors?.string
-                }}
-                value={connector.data.value}
-                onChange={this.onChange}
-                onMouseUp={this.onMouseUp}
-                placeholder={connector.name}
-            />
+            <div className="form-control w-full">
+                <label className="label" style={{ paddingBottom: 0, paddingTop: 0 }}>
+                    <span className="label-text text-xs">{connector.name}</span>
+                </label>
+                <textarea
+                    ref={this.textAreaRef}
+                    style={{
+                        height: height,
+                        whiteSpace: "pre",
+                        resize: "vertical"
+                    }}
+                    className="textarea textarea-primary focus:outline-0 w-full"
+                    value={connector.data.value}
+                    onChange={this.onChange}
+                    onMouseUp={this.onMouseUp}
+                    placeholder={connector.name}
+                />
+            </div>
         );
     }
 }

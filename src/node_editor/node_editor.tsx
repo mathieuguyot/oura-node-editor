@@ -20,6 +20,7 @@ import LinkCanvas from "./link_canvas";
 import NodeCanvas from "./node_canvas";
 import { ThemeContext, darkTheme, ThemeContextType } from "./theme";
 import { ConnectorContentProps } from "./connector_content/common";
+import "../index.css";
 
 enableMapSet();
 
@@ -63,7 +64,6 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
         this.onConnectorUpdate = this.onConnectorUpdate.bind(this);
         this.onNodeMove = this.onNodeMove.bind(this);
         this.filterRenderedNodes = this.filterRenderedNodes.bind(this);
-        this.filterRenderedLinks = this.filterRenderedLinks.bind(this);
     }
 
     componentDidMount(): void {
@@ -222,30 +222,12 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
         return filteredNodes;
     }
 
-    filterRenderedLinks(renderedNodesKeys: string[]): LinkCollection {
-        const { links } = this.props;
-
-        const filteredlinks: LinkCollection = {};
-        Object.keys(links).forEach((key) => {
-            const link = links[key];
-            if (
-                renderedNodesKeys.includes(link.inputNodeId) ||
-                renderedNodesKeys.includes(link.outputNodeId)
-            ) {
-                filteredlinks[key] = link;
-            }
-        });
-
-        return filteredlinks;
-    }
-
     render(): JSX.Element {
-        const { selectedItems, panZoomInfo, theme } = this.props;
+        const { selectedItems, panZoomInfo, theme, links, nodes } = this.props;
         const { onPanZoomInfo, createCustomConnectorComponent } = this.props;
         const { draggedLink, linksPositions } = this.state;
 
-        const renderedNodes = this.filterRenderedNodes();
-        const renderedLinks = this.filterRenderedLinks(Object.keys(renderedNodes));
+        //const renderedNodes = this.filterRenderedNodes();
 
         return (
             <ThemeContext.Provider value={theme || darkTheme}>
@@ -257,14 +239,14 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
                             onSelectItem={this.onSelectItem}
                         >
                             <LinkCanvas
-                                links={renderedLinks}
+                                links={links}
                                 linksPositions={linksPositions}
                                 draggedLink={draggedLink}
                                 selectedItems={selectedItems}
                                 onSelectItem={this.onSelectItem}
                             />
                             <NodeCanvas
-                                nodes={renderedNodes}
+                                nodes={nodes}
                                 getZoom={this.getZoom}
                                 onNodeMove={this.onNodeMove}
                                 onCreateLink={this.onCreateLink}

@@ -153,8 +153,7 @@ class Connector extends Component<ConnectorProps> {
                 className="node-background"
                 ref={this.connectorRef}
                 style={{
-                    position: "relative",
-                    paddingTop: 3
+                    position: "relative"
                 }}
             >
                 {[PinLayout.LEFT_PIN, PinLayout.BOTH_PINS].includes(connector.pinLayout) && (
