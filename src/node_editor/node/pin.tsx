@@ -28,17 +28,18 @@ const Pin = (props: PinProps): JSX.Element => {
             width: `${pinPxRadius * 2}px`,
             height: `${pinPxRadius * 2}px`,
             left: `${leftPinPosition}px`,
-            top: `calc(50% - ${pinPxRadius}px)`
+            top: `calc(50% - ${pinPxRadius}px)`,
+            border: "2px solid hsl(var(--p))"
         },
         ...theme?.node?.basePin,
         ...customStyle
     };
 
     if (pinColor) {
-        //style.backgroundColor = pinColor;
+        style.backgroundColor = pinColor;
     }
 
-    return <div className={className + " bg-primary"} style={style} onMouseDown={onMouseDown} />;
+    return <div className={className} style={style} onMouseDown={onMouseDown} />;
 };
 
 export default Pin;

@@ -27,15 +27,15 @@ class CheckBox extends Component<ConnectorContentProps> {
             return <ErrorConnectorContent message={message} />;
         }
         return (
-            <label className="label">
+            <label className="label" style={{ justifyContent: "flex-start" }}>
                 <input
                     tabIndex={-1}
                     checked={connector.data.value}
                     onChange={this.onChange}
                     type="checkbox"
-                    className="checkbox checkbox-xs checkbox-primary"
+                    className="checkbox checkbox-xs checkbox-primary focus:outline-0"
                 />
-                {connector.name}
+                <p style={{ paddingLeft: 3 }}>{connector.name}</p>
             </label>
         );
     }

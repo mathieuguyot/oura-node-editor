@@ -116,6 +116,7 @@ export class Node extends Component<NodeProps> {
     render(): JSX.Element {
         const { theme } = this.context as ThemeContextType;
         const { nodeId, node, isNodeSelected } = this.props;
+        console.log(`render ${nodeId} ${node.name}`);
         const { onCreateLink, onUpdatePreviewLink, getZoom, onConnectorUpdate } = this.props;
         const { createCustomConnectorComponent } = this.props;
 

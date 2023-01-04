@@ -29,7 +29,8 @@ const darkTheme: Theme = {
         },
         basePin: {
             borderRadius: "5px 5px 5px 5px",
-            cursor: "grab"
+            cursor: "grab",
+            backgroundColor: "red"
         },
         customPins: {}
     },

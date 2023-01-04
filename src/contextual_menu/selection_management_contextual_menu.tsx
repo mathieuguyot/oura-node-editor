@@ -13,13 +13,15 @@ export const SelectionManagementContextualMenu = (
 ): JSX.Element => {
     const { onMouseHover, onDeleteSelection } = props;
 
-    const items: { [id: string]: MenuItemProps } = {};
-    items.delete_selection = {
-        name: "Delete selection",
-        onClick: () => {
-            onDeleteSelection();
+    const items: { [id: string]: [MenuItemProps] } = {};
+    items.actions = [
+        {
+            name: "Delete selection",
+            onClick: () => {
+                onDeleteSelection();
+            }
         }
-    };
+    ];
 
     const onMouseEnter = React.useCallback(() => {
         onMouseHover(true);

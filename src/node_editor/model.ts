@@ -55,6 +55,8 @@ export interface NodeModel {
     width: number;
     connectors: ConnectorCollection;
     theme?: NodeTheme;
+    category?: string;
+    description?: string;
 }
 
 export type NodeCollection = { [id: string]: NodeModel };

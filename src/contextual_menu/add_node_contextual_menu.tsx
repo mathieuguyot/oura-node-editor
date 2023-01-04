@@ -39,7 +39,7 @@ const NodePrevisualizer = (props: NodePrevisualizerProps): JSX.Element => {
                 position: "relative",
                 gridArea: "preview",
                 overflow: "hidden",
-                width: "500px",
+                width: "600px",
                 height: "500px"
             }}
         >
@@ -60,10 +60,11 @@ export const AddNodeContextualMenu = (props: AddNodeContextualMenuProps): JSX.El
 
     const [previsualizedNodeId, setPrevisualizedNodeId] = React.useState<string>("");
 
-    const items: { [id: string]: MenuItemProps } = {};
+    const items: { [id: string]: [MenuItemProps] } = {};
     Object.keys(nodesSchema).forEach((id) => {
-        items[id] = {
+        const newItem = {
             name: nodesSchema[id].name,
+            category: nodesSchema[id].category,
             onMouseEnter: () => {
                 setPrevisualizedNodeId(id);
             },
@@ -74,6 +75,14 @@ export const AddNodeContextualMenu = (props: AddNodeContextualMenuProps): JSX.El
                 onNodeSelection(id);
             }
         };
+        const categoryName = nodesSchema[id].category
+            ? (nodesSchema[id].category as string)
+            : "no category";
+        if (categoryName in items) {
+            items[categoryName].push(newItem);
+        } else {
+            items[categoryName] = [newItem];
+        }
     });
 
     const onMouseEnter = React.useCallback(() => {
@@ -85,8 +94,8 @@ export const AddNodeContextualMenu = (props: AddNodeContextualMenuProps): JSX.El
     }, [onMouseHover]);
 
     return (
-        <div style={{ display: "flex" }} onMouseLeave={onMouseLeaves} onMouseEnter={onMouseEnter}>
-            <div>
+        <div className="flex" onMouseLeave={onMouseLeaves} onMouseEnter={onMouseEnter}>
+            <div className="bg-primary">
                 <BasicContextualMenu menuTitle="Add a new node" items={items} />
             </div>
             <NodePrevisualizer

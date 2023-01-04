@@ -4,35 +4,42 @@ import { MenuItemProps } from "./common";
 const MenuItem = (props: MenuItemProps): JSX.Element => {
     const { name, onClick, onMouseEnter, onMouseLeave } = props;
     return (
-        <div onClick={onClick} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+        <li onClick={onClick} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
             {name}
-        </div>
+        </li>
     );
 };
 
 type MenuItemListProps = {
-    items: { [id: string]: MenuItemProps };
+    items: { [id: string]: [MenuItemProps] };
 };
 
 const MenuItemList = (props: MenuItemListProps): JSX.Element => {
     const { items } = props;
     return (
-        <div style={{ flex: 1, overflowY: "scroll" }}>
-            <div style={{ height: "460px" }}>
-                {Object.keys(items).map((key) => {
-                    const item = items[key];
-                    return (
-                        <MenuItem
-                            name={item.name}
-                            onClick={item.onClick}
-                            onMouseEnter={item.onMouseEnter}
-                            onMouseLeave={item.onMouseLeave}
-                            key={key}
-                        />
-                    );
-                })}
-            </div>
-        </div>
+        <ul
+            className="menu menu-compact bg-base-300 w-56 p-2"
+            style={{ height: 452, flexWrap: "initial", overflow: "scroll" }}
+        >
+            {Object.keys(items).map((categoryName) => {
+                return (
+                    <div key={categoryName}>
+                        <li className="menu-title">
+                            <span>{categoryName}</span>
+                        </li>
+                        {items[categoryName].map((item) => (
+                            <MenuItem
+                                name={item.name}
+                                onClick={item.onClick}
+                                onMouseEnter={item.onMouseEnter}
+                                onMouseLeave={item.onMouseLeave}
+                                key={item.name}
+                            />
+                        ))}
+                    </div>
+                );
+            })}
+        </ul>
     );
 };
 
