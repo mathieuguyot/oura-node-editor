@@ -21,9 +21,9 @@ export const BasicContextualMenu = (props: BasicContextualMenuProps): JSX.Elemen
     const filteredItems = produce(items, (draft) => {
         Object.keys(items).forEach((id) => {
             const newItems = draft[id].filter(
-                (item) => searchText == "" || item.name.toLowerCase().includes(searchText)
+                (item) => searchText === "" || item.name.toLowerCase().includes(searchText)
             );
-            if (newItems.length == 0) {
+            if (newItems.length === 0) {
                 delete draft[id];
             } else {
                 draft[id] = newItems as any;

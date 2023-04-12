@@ -1,11 +1,7 @@
-import { useContext } from "react";
 import ErrorConnectorContent from "./error";
 import { ConnectorContentProps } from "./common";
-import { ThemeContext } from "..";
 
 const ButtonConnectorContent = ({ connector, node }: ConnectorContentProps): JSX.Element => {
-    const { theme } = useContext(ThemeContext);
-
     if (!("label" in connector.data) || !("onClick" in connector.data)) {
         const message =
             "'button' connector types must provide a string field named 'label' and a callback 'onClick'";

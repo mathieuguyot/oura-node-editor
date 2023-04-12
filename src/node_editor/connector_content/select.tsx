@@ -1,7 +1,7 @@
-import { useCallback, useContext } from "react";
+import { useCallback } from "react";
 import ErrorConnectorContent from "./error";
 import { ConnectorContentProps } from "./common";
-import { ConnectorModel, ThemeContext } from "..";
+import { ConnectorModel } from "..";
 import produce from "immer";
 
 const SelectConnectorContent = ({
@@ -10,8 +10,6 @@ const SelectConnectorContent = ({
     cId,
     onConnectorUpdate
 }: ConnectorContentProps): JSX.Element => {
-    const { theme } = useContext(ThemeContext);
-
     const setSelectedValue = useCallback(
         (selected_index: number) => {
             const newConnector = produce(connector, (draft: ConnectorModel) => {

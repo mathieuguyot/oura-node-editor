@@ -35,7 +35,7 @@ export function createConnectorComponent(props: ConnectorContentProps): JSX.Elem
     if (connector.contentType === "button") {
         return <ButtonConnectorContent {...props} />;
     }
-    if (connector.contentType == "range") {
+    if (connector.contentType === "range") {
         return <RangeConnectorContent {...props} />;
     }
     // Defaut return connector name
