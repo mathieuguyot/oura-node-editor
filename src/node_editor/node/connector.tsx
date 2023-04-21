@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import _ from "lodash";
 
 import {
@@ -12,8 +12,8 @@ import {
     LinkPositionModel
 } from "../model";
 import { createConnectorComponent, ConnectorContentProps } from "../connector_content";
-import DragWrapper from "../utils";
 import Pin from "./pin";
+import { useDrag } from "../utils/drag";
 
 type ConnectorProps = {
     nodeId: string;
@@ -29,168 +29,167 @@ type ConnectorProps = {
     createCustomConnectorComponent?(props: ConnectorContentProps): JSX.Element | null;
 };
 
-class Connector extends Component<ConnectorProps> {
-    private dragWrapper: DragWrapper = new DragWrapper();
-    private connectorRef = React.createRef<HTMLDivElement>();
+const PIN_RADIUS_PX = 6;
 
-    private leftPinPos: PinPosition = null;
-    private rightPinPos: PinPosition = null;
+export default function Connector(props: ConnectorProps) {
+    const {
+        nodeId,
+        cId,
+        node,
+        connector,
+        getZoom,
+        onPinPositionUpdate,
+        onCreateLink,
+        onUpdatePreviewLink,
+        createCustomConnectorComponent
+    } = props;
 
-    private pinPxRadius = 6;
+    const [leftPinPos, setLeftPinPos] = useState<PinPosition | null>(null);
+    const [rightPinPos, setRightPinPos] = useState<PinPosition | null>(null);
+    const connectorRef = useRef<HTMLDivElement>(null);
 
-    constructor(props: ConnectorProps) {
-        super(props);
+    const getConnectorPinPosition = useCallback(
+        (pinSide: PinSide) => {
+            if (
+                !connectorRef ||
+                !connectorRef.current ||
+                connector.pinLayout === PinLayout.NO_PINS ||
+                (pinSide === PinSide.LEFT && connector.pinLayout === PinLayout.RIGHT_PIN) ||
+                (pinSide === PinSide.RIGHT && connector.pinLayout === PinLayout.LEFT_PIN)
+            ) {
+                return null;
+            }
 
-        this.onMouseDown = this.onMouseDown.bind(this);
-        this.onPinPositionUpdate = this.onPinPositionUpdate.bind(this);
-    }
+            return {
+                x: pinSide === PinSide.RIGHT ? node.width + node.position.x : node.position.x,
+                y:
+                    node.position.y +
+                    connectorRef.current.offsetTop +
+                    connectorRef.current.offsetHeight / 2
+            };
+        },
+        [connector.pinLayout, node.position.x, node.position.y, node.width]
+    );
 
-    componentDidMount(): void {
-        this.onPinPositionUpdate();
-    }
-
-    componentDidUpdate(): void {
-        this.onPinPositionUpdate();
-    }
-
-    onPinPositionUpdate(): void {
-        const { cId, onPinPositionUpdate } = this.props;
-        const leftPinPos = this.getConnectorPinPosition(PinSide.LEFT);
-        const rightPinPos = this.getConnectorPinPosition(PinSide.RIGHT);
-        if (!_.isEqual(leftPinPos, this.leftPinPos) || !_.isEqual(rightPinPos, this.rightPinPos)) {
-            this.leftPinPos = leftPinPos;
-            this.leftPinPos = rightPinPos;
-            onPinPositionUpdate(cId, leftPinPos, rightPinPos);
+    useEffect(() => {
+        const newLeftPinPos = getConnectorPinPosition(PinSide.LEFT);
+        const newRightPinPos = getConnectorPinPosition(PinSide.RIGHT);
+        if (!_.isEqual(leftPinPos, newLeftPinPos) || !_.isEqual(rightPinPos, newRightPinPos)) {
+            setLeftPinPos(newLeftPinPos);
+            setRightPinPos(newRightPinPos);
+            onPinPositionUpdate(cId, newLeftPinPos, newRightPinPos);
         }
+    }, [cId, getConnectorPinPosition, leftPinPos, onPinPositionUpdate, rightPinPos]);
+
+    // Connector content component creation follows two steps
+    let connectorContent: JSX.Element | null = null;
+    // 1. First, try to get custom provided connector content component
+    if (createCustomConnectorComponent) {
+        connectorContent = createCustomConnectorComponent(props);
+    }
+    // 2. If no specific component is provided by the customer, use lib ones
+    if (!connectorContent) {
+        connectorContent = createConnectorComponent(props);
     }
 
-    onMouseDown(pinSide: PinSide, event: React.MouseEvent): void {
-        const { nodeId, cId, getZoom, onUpdatePreviewLink, onCreateLink } = this.props;
-        const pinPosition = this.getConnectorPinPosition(pinSide);
-        if (pinPosition && onUpdatePreviewLink && onCreateLink) {
-            const onMouseMoveCb = (initialPos: XYPosition, finalPos: XYPosition) => {
+    const onMouseMoveCb = useCallback(
+        (initialPos: XYPosition, finalPos: XYPosition) => {
+            if (onUpdatePreviewLink)
                 onUpdatePreviewLink({
                     linkId: "preview",
                     outputPinPosition: finalPos,
                     inputPinPosition: initialPos
                 });
-            };
+        },
+        [onUpdatePreviewLink]
+    );
 
-            const onMouseUpCb = (
-                _iPos: XYPosition,
-                _fPos: XYPosition,
-                mouseUpEvent: MouseEvent
-            ) => {
-                const connectorRegex = /node-(.+)-connector-(.+)-(left|right)/;
-                let tag: RegExpMatchArray | null = null;
-                if (mouseUpEvent.target) {
-                    const { className } = mouseUpEvent.target as Element;
-                    if (typeof className === "string") {
-                        tag = (mouseUpEvent.target as Element).className.match(connectorRegex);
-                    }
+    const onMouseUpCb = useCallback(
+        (_iPos: XYPosition, _fPos: XYPosition, mouseUpEvent: MouseEvent) => {
+            if (!onCreateLink || !onUpdatePreviewLink) {
+                return;
+            }
+            const connectorRegex = /node-(.+)-connector-(.+)-(left|right)/;
+            let tag: RegExpMatchArray | null = null;
+            if (mouseUpEvent.target) {
+                const { className } = mouseUpEvent.target as Element;
+                if (typeof className === "string") {
+                    tag = (mouseUpEvent.target as Element).className.match(connectorRegex);
                 }
-                if (tag !== null && tag[3] === "left") {
-                    onCreateLink({
-                        inputNodeId: tag[1],
-                        inputPinId: tag[2],
-                        inputPinSide: PinSide.LEFT,
-                        outputNodeId: nodeId,
-                        outputPinId: cId,
-                        outputPinSide: PinSide.RIGHT
-                    });
-                } else if (tag !== null) {
-                    onCreateLink({
-                        inputNodeId: nodeId,
-                        inputPinId: cId,
-                        inputPinSide: PinSide.LEFT,
-                        outputNodeId: tag[1],
-                        outputPinId: tag[2],
-                        outputPinSide: PinSide.RIGHT,
-                        linkType: "bezier"
-                    });
-                }
-                onUpdatePreviewLink(undefined);
-            };
+            }
+            if (tag !== null && tag[3] === "left") {
+                onCreateLink({
+                    inputNodeId: tag[1],
+                    inputPinId: tag[2],
+                    inputPinSide: PinSide.LEFT,
+                    outputNodeId: nodeId,
+                    outputPinId: cId,
+                    outputPinSide: PinSide.RIGHT
+                });
+            } else if (tag !== null) {
+                onCreateLink({
+                    inputNodeId: nodeId,
+                    inputPinId: cId,
+                    inputPinSide: PinSide.LEFT,
+                    outputNodeId: tag[1],
+                    outputPinId: tag[2],
+                    outputPinSide: PinSide.RIGHT,
+                    linkType: "bezier"
+                });
+            }
+            onUpdatePreviewLink(undefined);
+        },
+        [cId, nodeId, onCreateLink, onUpdatePreviewLink]
+    );
 
-            this.dragWrapper.onMouseDown(event, pinPosition, getZoom, onMouseMoveCb, onMouseUpCb);
-        }
-    }
+    const { onMouseDown } = useDrag(getZoom, onMouseMoveCb, onMouseUpCb);
 
-    getConnectorPinPosition(pinSide: PinSide): PinPosition {
-        const { connector, node } = this.props;
-        const connectorRef = this.connectorRef.current;
-        if (
-            !connectorRef ||
-            connector.pinLayout === PinLayout.NO_PINS ||
-            (pinSide === PinSide.LEFT && connector.pinLayout === PinLayout.RIGHT_PIN) ||
-            (pinSide === PinSide.RIGHT && connector.pinLayout === PinLayout.LEFT_PIN)
-        ) {
-            return null;
-        }
+    return (
+        <div
+            className="node-background"
+            ref={connectorRef}
+            style={{
+                position: "relative"
+            }}
+        >
+            {[PinLayout.LEFT_PIN, PinLayout.BOTH_PINS].includes(connector.pinLayout) && (
+                <Pin
+                    className={`node-${nodeId}-connector-${cId}-left`}
+                    contentType={connector.contentType}
+                    pinPxRadius={PIN_RADIUS_PX}
+                    leftPinPosition={-PIN_RADIUS_PX}
+                    onMouseDown={(e) => {
+                        const pinPos = getConnectorPinPosition(PinSide.LEFT);
+                        if (pinPos) onMouseDown(e, pinPos);
+                    }}
+                    pinColor={connector.leftPinColor}
+                />
+            )}
 
-        return {
-            x: pinSide === PinSide.RIGHT ? node.width + node.position.x : node.position.x,
-            y: node.position.y + connectorRef.offsetTop + connectorRef.offsetHeight / 2
-        };
-    }
+            {[PinLayout.RIGHT_PIN, PinLayout.BOTH_PINS].includes(connector.pinLayout) && (
+                <Pin
+                    className={`node-${nodeId}-connector-${cId}-right`}
+                    contentType={connector.contentType}
+                    pinPxRadius={PIN_RADIUS_PX}
+                    leftPinPosition={node.width - PIN_RADIUS_PX}
+                    onMouseDown={(e) => {
+                        const pinPos = getConnectorPinPosition(PinSide.RIGHT);
+                        if (pinPos) onMouseDown(e, pinPos);
+                    }}
+                    pinColor={connector.rightPinColor}
+                />
+            )}
 
-    render(): JSX.Element {
-        const { connector, node, nodeId, cId, createCustomConnectorComponent } = this.props;
-
-        // Connector content component creation follows two steps
-        let connectorContent: JSX.Element | null = null;
-        // 1. First, try to get custom provided connector content component
-        if (createCustomConnectorComponent) {
-            connectorContent = createCustomConnectorComponent(this.props);
-        }
-        // 2. If no specific component is provided by the customer, use lib ones
-        if (!connectorContent) {
-            connectorContent = createConnectorComponent(this.props);
-        }
-
-        return (
             <div
                 className="node-background"
-                ref={this.connectorRef}
                 style={{
-                    position: "relative"
+                    overflow: "hidden",
+                    paddingLeft: PIN_RADIUS_PX * 2,
+                    paddingRight: PIN_RADIUS_PX * 2
                 }}
             >
-                {[PinLayout.LEFT_PIN, PinLayout.BOTH_PINS].includes(connector.pinLayout) && (
-                    <Pin
-                        className={`node-${nodeId}-connector-${cId}-left`}
-                        contentType={connector.contentType}
-                        pinPxRadius={this.pinPxRadius}
-                        leftPinPosition={-this.pinPxRadius}
-                        onMouseDown={(e) => this.onMouseDown(PinSide.LEFT, e)}
-                        pinColor={this.props.connector.leftPinColor}
-                    />
-                )}
-
-                {[PinLayout.RIGHT_PIN, PinLayout.BOTH_PINS].includes(connector.pinLayout) && (
-                    <Pin
-                        className={`node-${nodeId}-connector-${cId}-right`}
-                        contentType={connector.contentType}
-                        pinPxRadius={this.pinPxRadius}
-                        leftPinPosition={node.width - this.pinPxRadius}
-                        onMouseDown={(e) => this.onMouseDown(PinSide.RIGHT, e)}
-                        pinColor={this.props.connector.rightPinColor}
-                    />
-                )}
-
-                <div
-                    className="node-background"
-                    style={{
-                        overflow: "hidden",
-                        paddingLeft: this.pinPxRadius * 2,
-                        paddingRight: this.pinPxRadius * 2
-                    }}
-                >
-                    {connectorContent}
-                </div>
+                {connectorContent}
             </div>
-        );
-    }
+        </div>
+    );
 }
-
-export default Connector;

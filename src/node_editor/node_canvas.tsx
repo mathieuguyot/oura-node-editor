@@ -1,4 +1,4 @@
-import React from "react";
+import { useCallback, useState } from "react";
 import _ from "lodash";
 
 import {
@@ -28,93 +28,97 @@ export interface NodeCanvasProps {
     createCustomConnectorComponent?(props: ConnectorContentProps): JSX.Element | null;
 }
 
-export default class NodeEditor extends React.Component<NodeCanvasProps> {
-    private lastSettedSelection: SelectionItem | undefined;
+export default function NodeCanvas({
+    nodes,
+    selectedItems,
+    onSelectItem,
+    onUpdatePreviewLink,
+    getZoom,
+    onNodeMove,
+    onCreateLink,
+    onConnectorUpdate,
+    onNodePinPositionsUpdate,
+    createCustomConnectorComponent
+}: NodeCanvasProps) {
+    const [lastSettedSelection, setLastSettedSelection] = useState<SelectionItem | undefined>();
 
-    constructor(props: NodeCanvasProps) {
-        super(props);
-
-        this.onNodeMoveStart = this.onNodeMoveStart.bind(this);
-        this.onNodeMove = this.onNodeMove.bind(this);
-        this.onNodeMoveEnd = this.onNodeMoveEnd.bind(this);
-    }
-
-    onNodeMoveStart(id: string, shiftKey: boolean): void {
-        const { selectedItems, onSelectItem } = this.props;
-        const selection = { id, type: "node" };
-        let alreadySelected = false;
-        selectedItems.forEach((item) => {
-            if (item.id === selection.id && item.type === selection.type) {
-                alreadySelected = true;
+    const onNodeMoveStart = useCallback(
+        (id: string, shiftKey: boolean) => {
+            const selection = { id, type: "node" };
+            let alreadySelected = false;
+            selectedItems.forEach((item) => {
+                if (item.id === selection.id && item.type === selection.type) {
+                    alreadySelected = true;
+                }
+            });
+            if (alreadySelected) {
+                return;
             }
-        });
-        if (alreadySelected) {
-            return;
-        }
-        this.lastSettedSelection = selection;
-        selectedItems.forEach((item) => {
-            if (item.id === id && item.type === "node") {
-                this.lastSettedSelection = undefined;
+            let newLastSettedSelection: SelectionItem | undefined = selection;
+            selectedItems.forEach((item) => {
+                if (item.id === id && item.type === "node") {
+                    newLastSettedSelection = undefined;
+                }
+            });
+            if (shiftKey && newLastSettedSelection) {
+                setLastSettedSelection(newLastSettedSelection);
+                onSelectItem(selection, shiftKey);
             }
-        });
-        if (shiftKey && this.lastSettedSelection) {
-            onSelectItem(selection, shiftKey);
-        }
-        if (!shiftKey) {
-            onSelectItem(selection, shiftKey);
-        }
-    }
-
-    onNodeMove(offsetX: number, offsetY: number, offsetWidth: number): void {
-        const { selectedItems } = this.props;
-        // Move each selected node
-        selectedItems.forEach((item) => {
-            if (item.type === "node") {
-                const { nodes, onNodeMove } = this.props;
-                const newX = nodes[item.id].position.x + offsetX;
-                const newY = nodes[item.id].position.y + offsetY;
-                const newWidth = nodes[item.id].width + offsetWidth;
-                onNodeMove(item.id, newX, newY, newWidth > 100 ? newWidth : 100);
+            if (!shiftKey) {
+                setLastSettedSelection(newLastSettedSelection);
+                onSelectItem(selection, shiftKey);
             }
-        });
-    }
+        },
+        [onSelectItem, selectedItems]
+    );
 
-    onNodeMoveEnd(id: string, wasNodeMoved: boolean, shiftKey: boolean): void {
-        const { onSelectItem } = this.props;
-        const selection = { id, type: "node" };
-        if (!wasNodeMoved && !shiftKey) {
-            onSelectItem(selection, shiftKey);
-        } else if (!wasNodeMoved && shiftKey && !_.isEqual(selection, this.lastSettedSelection)) {
-            onSelectItem(selection, shiftKey);
-        }
-        this.lastSettedSelection = undefined;
-    }
+    const onNodeMoveInternal = useCallback(
+        (offsetX: number, offsetY: number, offsetWidth: number) => {
+            // Move each selected node
+            selectedItems.forEach((item) => {
+                if (item.type === "node") {
+                    const newX = nodes[item.id].position.x + offsetX;
+                    const newY = nodes[item.id].position.y + offsetY;
+                    const newWidth = nodes[item.id].width + offsetWidth;
+                    onNodeMove(item.id, newX, newY, newWidth > 100 ? newWidth : 100);
+                }
+            });
+        },
+        [nodes, onNodeMove, selectedItems]
+    );
 
-    render(): JSX.Element {
-        const { nodes, selectedItems } = this.props;
-        const { getZoom, onCreateLink, onUpdatePreviewLink, onNodePinPositionsUpdate } = this.props;
-        const { onConnectorUpdate, createCustomConnectorComponent } = this.props;
+    const onNodeMoveEnd = useCallback(
+        (id: string, wasNodeMoved: boolean, shiftKey: boolean) => {
+            const selection = { id, type: "node" };
+            if (!wasNodeMoved && !shiftKey) {
+                onSelectItem(selection, shiftKey);
+            } else if (!wasNodeMoved && shiftKey && !_.isEqual(selection, lastSettedSelection)) {
+                onSelectItem(selection, shiftKey);
+            }
+            setLastSettedSelection(undefined);
+        },
+        [lastSettedSelection, onSelectItem]
+    );
 
-        return (
-            <>
-                {Object.keys(nodes).map((key) => (
-                    <Node
-                        nodeId={key}
-                        key={key}
-                        node={nodes[key]}
-                        isNodeSelected={_.some(selectedItems, { id: key, type: "node" })}
-                        getZoom={getZoom}
-                        onNodeMoveStart={this.onNodeMoveStart}
-                        onNodeMove={this.onNodeMove}
-                        onNodeMoveEnd={this.onNodeMoveEnd}
-                        onCreateLink={onCreateLink}
-                        onUpdatePreviewLink={onUpdatePreviewLink}
-                        onNodePinPositionsUpdate={onNodePinPositionsUpdate}
-                        onConnectorUpdate={onConnectorUpdate}
-                        createCustomConnectorComponent={createCustomConnectorComponent}
-                    />
-                ))}
-            </>
-        );
-    }
+    return (
+        <>
+            {Object.keys(nodes).map((key) => (
+                <Node
+                    nodeId={key}
+                    key={key}
+                    node={nodes[key]}
+                    isNodeSelected={_.some(selectedItems, { id: key, type: "node" })}
+                    getZoom={getZoom}
+                    onNodeMoveStart={onNodeMoveStart}
+                    onNodeMove={onNodeMoveInternal}
+                    onNodeMoveEnd={onNodeMoveEnd}
+                    onCreateLink={onCreateLink}
+                    onUpdatePreviewLink={onUpdatePreviewLink}
+                    onNodePinPositionsUpdate={onNodePinPositionsUpdate}
+                    onConnectorUpdate={onConnectorUpdate}
+                    createCustomConnectorComponent={createCustomConnectorComponent}
+                />
+            ))}
+        </>
+    );
 }

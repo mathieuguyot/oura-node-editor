@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useState } from "react";
 import { XYPosition } from "../model";
 
 type MouseMoveCb = (
@@ -8,66 +9,62 @@ type MouseMoveCb = (
 ) => void;
 type MouseUpCb = (initialPos: XYPosition, finalPos: XYPosition, event: MouseEvent) => void;
 
-/* onMouse(down|move|up) events wrapper helping to simplify computations of drag motions */
-export default class DragWrapper {
-    private onMouseMoveCb: MouseMoveCb = () => null;
-    private onMouseUpCb: MouseUpCb = () => null;
-    private initialPos: XYPosition = { x: 0, y: 0 };
-    private finalPos: XYPosition = { x: 0, y: 0 };
-    private tmpPos: XYPosition = { x: 0, y: 0 };
-    private getZoom = () => 1;
-    private targetClassName = "";
-    private lastZoom = 0;
+/* useDrag custom hook helping to simplify computations of drag motions */
+export function useDrag(getZoom: () => number, onMouseMoveCb: MouseMoveCb, onMouseUpCb: MouseUpCb) {
+    const [initialPos, setInitialPos] = useState<XYPosition>({ x: 0, y: 0 });
+    const [finalPos, setFinalPos] = useState<XYPosition>({ x: 0, y: 0 });
+    const [tmpPos, setTmpPos] = useState<XYPosition>({ x: 0, y: 0 });
+    const [lastZoom, setLastZoom] = useState<number>(0);
+    const [mouseDown, setMouseDown] = useState<boolean>(false);
 
-    constructor() {
-        this.onMouseMove = this.onMouseMove.bind(this);
-        this.onMouseUp = this.onMouseUp.bind(this);
-    }
+    const onMouseDown = useCallback(
+        (event: React.MouseEvent, initialPos: XYPosition) => {
+            setInitialPos(initialPos);
+            setFinalPos(initialPos);
+            const zoom = getZoom();
+            setTmpPos({ x: event.pageX / zoom, y: event.pageY / zoom });
+            setLastZoom(zoom);
+            setMouseDown(true);
+        },
+        [getZoom]
+    );
 
-    onMouseDown(
-        event: React.MouseEvent,
-        initialPos: XYPosition,
-        getZoom: () => number,
-        onMouseMove: MouseMoveCb,
-        onMouseUp: MouseUpCb
-    ): void {
-        window.addEventListener("mousemove", this.onMouseMove);
-        window.addEventListener("mouseup", this.onMouseUp);
-        this.getZoom = getZoom;
-        this.initialPos = initialPos;
-        this.finalPos = { x: initialPos.x, y: initialPos.y };
-        const zoom = getZoom();
-        this.lastZoom = zoom;
-        this.tmpPos = { x: event.pageX / zoom, y: event.pageY / zoom };
-        this.onMouseMoveCb = onMouseMove;
-        this.onMouseUpCb = onMouseUp;
-    }
+    const onMouseMove = useCallback(
+        (event: MouseEvent) => {
+            const zoom = getZoom();
+            const offsetPos = {
+                x: event.pageX / lastZoom - tmpPos.x,
+                y: event.pageY / lastZoom - tmpPos.y
+            };
+            const newFinalPos = { x: finalPos.x + offsetPos.x, y: finalPos.y + offsetPos.y };
+            setFinalPos(newFinalPos);
+            const newTmpPos = { x: event.pageX / zoom, y: event.pageY / zoom };
+            setTmpPos(newTmpPos);
+            const targetClassName = (event.target as Element).className;
+            onMouseMoveCb({ ...initialPos }, { ...newFinalPos }, offsetPos, targetClassName);
+            setLastZoom(zoom);
+        },
+        [finalPos.x, finalPos.y, getZoom, initialPos, lastZoom, onMouseMoveCb, tmpPos.x, tmpPos.y]
+    );
 
-    private onMouseMove(event: MouseEvent) {
-        const zoom = this.getZoom();
-        const offsetPos = {
-            x: event.pageX / this.lastZoom - this.tmpPos.x,
-            y: event.pageY / this.lastZoom - this.tmpPos.y
-        };
-        this.finalPos.x += offsetPos.x;
-        this.finalPos.y += offsetPos.y;
-        this.tmpPos = { x: event.pageX / zoom, y: event.pageY / zoom };
-        const targetClassName = (event.target as Element).className;
-        if (typeof targetClassName === "string") {
-            this.targetClassName = targetClassName;
+    const onMouseUp = useCallback(
+        (event: MouseEvent) => {
+            setMouseDown(false);
+            onMouseUpCb({ ...initialPos }, { ...finalPos }, event);
+        },
+        [finalPos, initialPos, onMouseUpCb]
+    );
+
+    useEffect(() => {
+        if (mouseDown) {
+            window.addEventListener("mousemove", onMouseMove);
+            window.addEventListener("mouseup", onMouseUp);
         }
-        this.onMouseMoveCb(
-            { ...this.initialPos },
-            { ...this.finalPos },
-            offsetPos,
-            this.targetClassName
-        );
-        this.lastZoom = zoom;
-    }
+        return () => {
+            window.removeEventListener("mousemove", onMouseMove);
+            window.removeEventListener("mouseup", onMouseUp);
+        };
+    }, [mouseDown, onMouseMove, onMouseUp]);
 
-    private onMouseUp(event: MouseEvent) {
-        window.removeEventListener("mousemove", this.onMouseMove);
-        window.removeEventListener("mouseup", this.onMouseUp);
-        this.onMouseUpCb({ ...this.initialPos }, { ...this.finalPos }, event);
-    }
+    return { onMouseDown };
 }

@@ -1,5 +1,5 @@
-import React, { Component } from "react";
-import { produce, enableMapSet } from "immer";
+import { useCallback, useEffect, useState } from "react";
+import { produce, enableMapSet, setAutoFreeze } from "immer";
 import _ from "lodash";
 
 import {
@@ -23,6 +23,7 @@ import { ConnectorContentProps } from "./connector_content/common";
 import "../index.css";
 
 enableMapSet();
+setAutoFreeze(false);
 
 type NodeEditorProps = {
     nodes: NodeCollection;
@@ -41,124 +42,42 @@ type NodeEditorProps = {
     createCustomConnectorComponent?(props: ConnectorContentProps): JSX.Element | null;
 };
 
-type NodeEditorState = {
-    linksPositions: { [linkId: string]: LinkPositionModel };
-    draggedLink?: LinkPositionModel;
-};
+function NodeEditor(props: NodeEditorProps) {
+    const {
+        nodes,
+        links,
+        panZoomInfo,
+        selectedItems,
+        theme,
+        onNodeMove,
+        onCreateLink,
+        onConnectorUpdate,
+        onPanZoomInfo,
+        onSelectedItems,
+        createCustomConnectorComponent
+    } = props;
+    const [linksPositions, setLinksPositions] = useState<{ [linkId: string]: LinkPositionModel }>(
+        {}
+    );
+    const [nodesPinPositions, setNodesPinPositions] = useState<{
+        [nodeId: string]: NodePinPositions;
+    }>({});
+    const [draggedLink, setDraggedLink] = useState<LinkPositionModel | undefined>();
 
-class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
-    private nodesPinPositions: { [nodeId: string]: NodePinPositions } = {};
-    private mainDivRef = React.createRef<HTMLDivElement>();
-
-    constructor(props: NodeEditorProps) {
-        super(props);
-        this.state = {
-            linksPositions: {}
-        };
-
-        this.getZoom = this.getZoom.bind(this);
-        this.onUpdatePreviewLink = this.onUpdatePreviewLink.bind(this);
-        this.onNodePinPositionsUpdate = this.onNodePinPositionsUpdate.bind(this);
-        this.onSelectItem = this.onSelectItem.bind(this);
-        this.onCreateLink = this.onCreateLink.bind(this);
-        this.onConnectorUpdate = this.onConnectorUpdate.bind(this);
-        this.onNodeMove = this.onNodeMove.bind(this);
-        this.filterRenderedNodes = this.filterRenderedNodes.bind(this);
-    }
-
-    componentDidMount(): void {
-        this.updateLinkPositions();
-    }
-
-    componentDidUpdate(): void {
-        this.updateLinkPositions();
-    }
-
-    onSelectItem(selection: SelectionItem | null, shiftKey: boolean): void {
-        const { selectedItems, onSelectedItems } = this.props;
-        if (!selection && !shiftKey) {
-            onSelectedItems([]);
-        } else if (selection && shiftKey && _.some(selectedItems, selection)) {
-            const newSelection = [...selectedItems];
-            let indexToDelete = -1;
-            selectedItems.forEach((item, index) => {
-                if (item.id === selection.id && item.type === selection.type) {
-                    indexToDelete = index;
-                }
-            });
-            if (indexToDelete !== -1) {
-                newSelection.splice(indexToDelete, 1);
-            }
-            onSelectedItems(newSelection);
-        } else if (selection && !_.some(selectedItems, selection)) {
-            let newSelection = [...selectedItems];
-            if (!shiftKey) {
-                newSelection = [];
-            }
-            newSelection.push(selection);
-            onSelectedItems(newSelection);
-        }
-        if (!shiftKey && selection) {
-            onSelectedItems([selection]);
-        }
-    }
-
-    onUpdatePreviewLink(previewLink?: LinkPositionModel): void {
-        this.setState({
-            draggedLink: previewLink
-        });
-    }
-
-    onNodePinPositionsUpdate(nodeId: string, pinPositions: NodePinPositions): void {
-        this.nodesPinPositions[nodeId] = pinPositions;
-    }
-
-    onCreateLink(link: LinkModel): void {
-        const { onCreateLink } = this.props;
-        if (
-            onCreateLink &&
-            link.inputPinSide !== link.outputPinSide &&
-            link.inputNodeId !== link.outputNodeId
-        ) {
-            onCreateLink(link);
-        }
-    }
-
-    onNodeMove(id: string, newX: number, newY: number, newWidth: number): void {
-        const { onNodeMove } = this.props;
-        if (onNodeMove) {
-            onNodeMove(id, newX, newY, newWidth);
-        }
-    }
-
-    onConnectorUpdate(nodeId: string, cId: string, connector: ConnectorModel): void {
-        const { onConnectorUpdate } = this.props;
-        if (onConnectorUpdate) {
-            onConnectorUpdate(nodeId, cId, connector);
-        }
-    }
-
-    getZoom(): number {
-        const { panZoomInfo } = this.props;
-        return panZoomInfo.zoom;
-    }
-
-    updateLinkPositions(): void {
-        const { links } = this.props;
-        const { linksPositions } = this.state;
+    useEffect(() => {
         let redrawPinPosition = false;
         const newLinksPositions = produce(linksPositions, (draft) => {
             // Create or update position of all links positions that need so
             Object.keys(links).forEach((key) => {
                 const link = links[key];
                 if (
-                    link.inputNodeId in this.nodesPinPositions === false ||
-                    link.outputNodeId in this.nodesPinPositions === false
+                    link.inputNodeId in nodesPinPositions === false ||
+                    link.outputNodeId in nodesPinPositions === false
                 ) {
                     return;
                 }
-                const iNPins = this.nodesPinPositions[link.inputNodeId][link.inputPinId];
-                const oNPins = this.nodesPinPositions[link.outputNodeId][link.outputPinId];
+                const iNPins = nodesPinPositions[link.inputNodeId][link.inputPinId];
+                const oNPins = nodesPinPositions[link.outputNodeId][link.outputPinId];
                 if (iNPins && oNPins) {
                     const inputPinPosition = iNPins[link.inputPinSide === PinSide.LEFT ? 0 : 1];
                     const outputPinPosition = oNPins[link.outputPinSide === PinSide.LEFT ? 0 : 1];
@@ -183,86 +102,102 @@ class NodeEditor extends Component<NodeEditorProps, NodeEditorState> {
             });
         });
         if (redrawPinPosition) {
-            this.setState({
-                linksPositions: newLinksPositions
-            });
+            setLinksPositions(newLinksPositions);
         }
-    }
+    }, [linksPositions, nodesPinPositions, links, nodes]);
 
-    filterRenderedNodes(): NodeCollection {
-        const { nodes, panZoomInfo } = this.props;
-        const mainDivRef = this.mainDivRef.current;
-        if (!mainDivRef) {
-            return nodes;
-        }
-
-        const margin = 50;
-        const minX = -(panZoomInfo.topLeftCorner.x / panZoomInfo.zoom) - margin;
-        const minY = -(panZoomInfo.topLeftCorner.y / panZoomInfo.zoom) - margin;
-        const maxX = minX + mainDivRef.offsetWidth / panZoomInfo.zoom + margin * 2;
-        const maxY = minY + mainDivRef.offsetHeight / panZoomInfo.zoom + margin * 2;
-        const filteredNodes: NodeCollection = {};
-
-        const valueInRange = (value: number, min: number, max: number) =>
-            value >= min && value <= max;
-
-        Object.keys(nodes).forEach((key) => {
-            const node = nodes[key];
-            const xOverlap =
-                valueInRange(minX, node.position.x, node.position.x + node.width) ||
-                valueInRange(node.position.x, minX, maxX);
-            const yOverlap =
-                valueInRange(minY, node.position.y, node.position.y + 1000) ||
-                valueInRange(node.position.y, minY, maxY);
-            if (xOverlap && yOverlap) {
-                filteredNodes[key] = node;
+    const onSelectItem = useCallback(
+        (selection: SelectionItem | null, shiftKey: boolean) => {
+            if (!selection && !shiftKey) {
+                onSelectedItems([]);
+            } else if (selection && shiftKey && _.some(selectedItems, selection)) {
+                const newSelection = [...selectedItems];
+                let indexToDelete = -1;
+                selectedItems.forEach((item, index) => {
+                    if (item.id === selection.id && item.type === selection.type) {
+                        indexToDelete = index;
+                    }
+                });
+                if (indexToDelete !== -1) {
+                    newSelection.splice(indexToDelete, 1);
+                }
+                onSelectedItems(newSelection);
+            } else if (selection && !_.some(selectedItems, selection)) {
+                let newSelection = [...selectedItems];
+                if (!shiftKey) {
+                    newSelection = [];
+                }
+                newSelection.push(selection);
+                onSelectedItems(newSelection);
             }
-        });
+            if (!shiftKey && selection) {
+                onSelectedItems([selection]);
+            }
+        },
+        [onSelectedItems, selectedItems]
+    );
 
-        return filteredNodes;
-    }
+    const onNodePinPositionsUpdate = useCallback(
+        (nodeId: string, pinPositions: NodePinPositions) => {
+            setNodesPinPositions((nodesPinPos) => {
+                return produce(nodesPinPos, (draft) => {
+                    draft[nodeId] = pinPositions;
+                });
+            });
+        },
+        []
+    );
 
-    render(): JSX.Element {
-        const { selectedItems, panZoomInfo, theme, links, nodes } = this.props;
-        const { onPanZoomInfo, createCustomConnectorComponent } = this.props;
-        const { draggedLink, linksPositions } = this.state;
+    const localOnCreateLink = useCallback(
+        (link: LinkModel) => {
+            if (
+                onCreateLink &&
+                link.inputPinSide !== link.outputPinSide &&
+                link.inputNodeId !== link.outputNodeId
+            ) {
+                onCreateLink(link);
+            }
+        },
+        [onCreateLink]
+    );
 
-        //const renderedNodes = this.filterRenderedNodes();
-
-        return (
-            <ThemeContext.Provider value={theme || darkTheme}>
-                <div style={{ width: "100%", height: "100%" }} ref={this.mainDivRef}>
-                    <BackGround panZoomInfo={panZoomInfo}>
-                        <PanZoom
-                            panZoomInfo={panZoomInfo}
-                            onPanZoomInfo={onPanZoomInfo}
-                            onSelectItem={this.onSelectItem}
-                        >
-                            <LinkCanvas
-                                links={links}
-                                linksPositions={linksPositions}
-                                draggedLink={draggedLink}
-                                selectedItems={selectedItems}
-                                onSelectItem={this.onSelectItem}
-                            />
-                            <NodeCanvas
-                                nodes={nodes}
-                                getZoom={this.getZoom}
-                                onNodeMove={this.onNodeMove}
-                                onCreateLink={this.onCreateLink}
-                                onUpdatePreviewLink={this.onUpdatePreviewLink}
-                                onConnectorUpdate={this.onConnectorUpdate}
-                                onNodePinPositionsUpdate={this.onNodePinPositionsUpdate}
-                                selectedItems={selectedItems}
-                                onSelectItem={this.onSelectItem}
-                                createCustomConnectorComponent={createCustomConnectorComponent}
-                            />
-                        </PanZoom>
-                    </BackGround>
-                </div>
-            </ThemeContext.Provider>
-        );
-    }
+    return (
+        <ThemeContext.Provider value={theme || darkTheme}>
+            <div style={{ width: "100%", height: "100%" }}>
+                <BackGround panZoomInfo={panZoomInfo}>
+                    <PanZoom
+                        panZoomInfo={panZoomInfo}
+                        onPanZoomInfo={onPanZoomInfo}
+                        onSelectItem={onSelectItem}
+                    >
+                        <LinkCanvas
+                            links={links}
+                            linksPositions={linksPositions}
+                            draggedLink={draggedLink}
+                            selectedItems={selectedItems}
+                            onSelectItem={onSelectItem}
+                        />
+                        <NodeCanvas
+                            nodes={nodes}
+                            getZoom={() => {
+                                return panZoomInfo.zoom;
+                            }}
+                            onNodeMove={onNodeMove ? onNodeMove : () => {}}
+                            onCreateLink={localOnCreateLink}
+                            onUpdatePreviewLink={(p) => {
+                                setDraggedLink(p);
+                            }}
+                            onConnectorUpdate={onConnectorUpdate ? onConnectorUpdate : () => {}}
+                            onNodePinPositionsUpdate={onNodePinPositionsUpdate}
+                            selectedItems={selectedItems}
+                            onSelectItem={onSelectItem}
+                            createCustomConnectorComponent={createCustomConnectorComponent}
+                        />
+                    </PanZoom>
+                </BackGround>
+            </div>
+        </ThemeContext.Provider>
+    );
 }
 
 export default NodeEditor;

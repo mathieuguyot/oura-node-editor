@@ -1,41 +1,32 @@
-import React, { Component } from "react";
-import * as _ from "lodash";
+import { useContext } from "react";
 
 import { LinkProps } from "./common";
-import { ThemeContext, ThemeContextType } from "../theme";
+import { ThemeContext } from "../theme";
 
-export default class LineLink extends Component<LinkProps> {
-    shouldComponentUpdate(nextProps: LinkProps): boolean {
-        return !_.isEqual(this.props, nextProps);
-    }
+export default function LineLink({
+    isLinkSelected,
+    linkPosition,
+    link,
+    linkId,
+    onSelectLink
+}: LinkProps) {
+    const { theme } = useContext(ThemeContext);
 
-    onSelectLink(event: React.MouseEvent): void {
-        const { linkId, onSelectLink } = this.props;
-        if (onSelectLink && linkId) {
-            onSelectLink(linkId, event.shiftKey);
-        }
-    }
+    const style = isLinkSelected
+        ? { ...theme?.link?.selected, ...link?.theme?.selected }
+        : { ...theme?.link?.unselected, ...link?.theme?.unselected };
 
-    render(): JSX.Element {
-        const { theme } = this.context as ThemeContextType;
-        const { linkId, linkPosition, isLinkSelected } = this.props;
-
-        const style = isLinkSelected
-            ? { ...theme?.link?.selected, ...this.props.link?.theme?.selected }
-            : { ...theme?.link?.unselected, ...this.props.link?.theme?.unselected };
-
-        return (
-            <line
-                id={`link_${linkId}`}
-                x1={linkPosition.inputPinPosition.x}
-                y1={linkPosition.inputPinPosition.y}
-                x2={linkPosition.outputPinPosition.x}
-                y2={linkPosition.outputPinPosition.y}
-                style={style}
-                onClick={this.onSelectLink.bind(this)}
-            />
-        );
-    }
+    return (
+        <line
+            id={`link_${linkId}`}
+            x1={linkPosition.inputPinPosition.x}
+            y1={linkPosition.inputPinPosition.y}
+            x2={linkPosition.outputPinPosition.x}
+            y2={linkPosition.outputPinPosition.y}
+            style={style}
+            onClick={(e) => {
+                if (onSelectLink && linkId) onSelectLink(linkId, e.shiftKey);
+            }}
+        />
+    );
 }
-
-LineLink.contextType = ThemeContext;

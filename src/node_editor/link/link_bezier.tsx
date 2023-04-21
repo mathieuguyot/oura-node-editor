@@ -1,9 +1,8 @@
-import React, { Component } from "react";
-import * as _ from "lodash";
+import { useContext } from "react";
 
 import { XYPosition } from "../model";
 import { LinkProps } from "./common";
-import { ThemeContext, ThemeContextType } from "../theme";
+import { ThemeContext } from "../theme";
 
 const getCenter = (source: XYPosition, target: XYPosition): XYPosition => {
     const offsetX = Math.abs(target.x - source.x) / 2;
@@ -13,43 +12,34 @@ const getCenter = (source: XYPosition, target: XYPosition): XYPosition => {
     return { x: xCenter, y: yCenter };
 };
 
-export default class BezierLink extends Component<LinkProps> {
-    shouldComponentUpdate(nextProps: LinkProps): boolean {
-        return !_.isEqual(this.props, nextProps);
-    }
+export default function BezierLink({
+    isLinkSelected,
+    linkPosition,
+    link,
+    linkId,
+    onSelectLink
+}: LinkProps) {
+    const { theme } = useContext(ThemeContext);
+    const sourceX = linkPosition.inputPinPosition.x;
+    const sourceY = linkPosition.inputPinPosition.y;
+    const targetX = linkPosition.outputPinPosition.x;
+    const targetY = linkPosition.outputPinPosition.y;
+    const center = getCenter(linkPosition.inputPinPosition, linkPosition.outputPinPosition);
 
-    onSelectLink(event: React.MouseEvent): void {
-        const { linkId, onSelectLink } = this.props;
-        if (onSelectLink && linkId) {
-            onSelectLink(linkId, event.shiftKey);
-        }
-    }
+    const path = `M${sourceX},${sourceY} C${center.x},${sourceY} ${center.x},${targetY} ${targetX},${targetY}`;
+    const style = isLinkSelected
+        ? { ...theme?.link?.selected, ...link?.theme?.selected }
+        : { ...theme?.link?.unselected, ...link?.theme?.unselected };
 
-    render(): JSX.Element {
-        const { theme } = this.context as ThemeContextType;
-        const { linkId, linkPosition, isLinkSelected } = this.props;
-        const sourceX = linkPosition.inputPinPosition.x;
-        const sourceY = linkPosition.inputPinPosition.y;
-        const targetX = linkPosition.outputPinPosition.x;
-        const targetY = linkPosition.outputPinPosition.y;
-        const center = getCenter(linkPosition.inputPinPosition, linkPosition.outputPinPosition);
-
-        const path = `M${sourceX},${sourceY} C${center.x},${sourceY} ${center.x},${targetY} ${targetX},${targetY}`;
-
-        const style = isLinkSelected
-            ? { ...theme?.link?.selected, ...this.props.link?.theme?.selected }
-            : { ...theme?.link?.unselected, ...this.props.link?.theme?.unselected };
-
-        return (
-            <path
-                id={`link_${linkId}`}
-                d={path}
-                style={style}
-                className={isLinkSelected ? "stroke-primary-focus" : "stroke-primary"}
-                onClick={this.onSelectLink.bind(this)}
-            />
-        );
-    }
+    return (
+        <path
+            id={`link_${linkId}`}
+            d={path}
+            style={style}
+            className={isLinkSelected ? "stroke-primary-focus" : "stroke-primary"}
+            onClick={(e) => {
+                if (onSelectLink && linkId) onSelectLink(linkId, e.shiftKey);
+            }}
+        />
+    );
 }
-
-BezierLink.contextType = ThemeContext;
