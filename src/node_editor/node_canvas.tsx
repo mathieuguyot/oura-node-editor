@@ -24,6 +24,7 @@ export interface NodeCanvasProps {
     onCreateLink?: (link: LinkModel) => void;
     onConnectorUpdate: (nodeId: string, cId: string, connector: ConnectorModel) => void;
     onNodePinPositionsUpdate: (nodeId: string, pinPositions: NodePinPositions) => void;
+    onNodeHeightUpdate: (nodeId: string, height: number) => void;
 
     createCustomConnectorComponent?(props: ConnectorContentProps): JSX.Element | null;
 }
@@ -38,7 +39,8 @@ export default function NodeCanvas({
     onCreateLink,
     onConnectorUpdate,
     onNodePinPositionsUpdate,
-    createCustomConnectorComponent
+    createCustomConnectorComponent,
+    onNodeHeightUpdate
 }: NodeCanvasProps) {
     const [lastSettedSelection, setLastSettedSelection] = useState<SelectionItem | undefined>();
 
@@ -117,6 +119,7 @@ export default function NodeCanvas({
                     onNodePinPositionsUpdate={onNodePinPositionsUpdate}
                     onConnectorUpdate={onConnectorUpdate}
                     createCustomConnectorComponent={createCustomConnectorComponent}
+                    onNodeHeightUpdate={onNodeHeightUpdate}
                 />
             ))}
         </>

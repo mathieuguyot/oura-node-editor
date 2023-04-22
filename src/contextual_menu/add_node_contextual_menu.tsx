@@ -27,6 +27,7 @@ const NodePrevisualizer = (props: NodePrevisualizerProps): JSX.Element => {
                 node={displayedNode}
                 onConnectorUpdate={() => null}
                 onNodePinPositionsUpdate={() => null}
+                onNodeHeightUpdate={() => null}
                 createCustomConnectorComponent={createCustomConnectorComponent}
             />
         ) : null;

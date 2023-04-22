@@ -12,7 +12,8 @@ import {
     LinkCollection,
     SelectionItem,
     PinSide,
-    NodePinPositions
+    NodePinPositions,
+    XYPosition
 } from "./model";
 import PanZoom from "./pan_zoom";
 import BackGround from "./background";
@@ -61,6 +62,9 @@ function NodeEditor(props: NodeEditorProps) {
     );
     const [nodesPinPositions, setNodesPinPositions] = useState<{
         [nodeId: string]: NodePinPositions;
+    }>({});
+    const [nodesHeights, setNodesHeights] = useState<{
+        [nodeId: string]: number;
     }>({});
     const [draggedLink, setDraggedLink] = useState<LinkPositionModel | undefined>();
 
@@ -148,6 +152,33 @@ function NodeEditor(props: NodeEditorProps) {
         []
     );
 
+    const onNodeHeightUpdate = useCallback((nodeId: string, height: number) => {
+        setNodesHeights((nodesHeights) => {
+            return produce(nodesHeights, (draft) => {
+                draft[nodeId] = height;
+            });
+        });
+    }, []);
+
+    const onRectSelection = useCallback(
+        (topLeft: XYPosition, width: number, height: number) => {
+            const selection: Array<SelectionItem> = [];
+            Object.keys(nodes).forEach((key) => {
+                const node = nodes[key];
+                if (
+                    topLeft.y < node.position.x + node.width &&
+                    topLeft.y + width > node.position.x &&
+                    topLeft.x < node.position.y + nodesHeights[key] &&
+                    height + topLeft.x > node.position.y
+                ) {
+                    selection.push({ id: key, type: "node" });
+                }
+            });
+            onSelectedItems(selection);
+        },
+        [nodes, nodesHeights, onSelectedItems]
+    );
+
     const localOnCreateLink = useCallback(
         (link: LinkModel) => {
             if (
@@ -169,6 +200,7 @@ function NodeEditor(props: NodeEditorProps) {
                         panZoomInfo={panZoomInfo}
                         onPanZoomInfo={onPanZoomInfo}
                         onSelectItem={onSelectItem}
+                        onRectSelection={onRectSelection}
                     >
                         <LinkCanvas
                             links={links}
@@ -192,6 +224,7 @@ function NodeEditor(props: NodeEditorProps) {
                             selectedItems={selectedItems}
                             onSelectItem={onSelectItem}
                             createCustomConnectorComponent={createCustomConnectorComponent}
+                            onNodeHeightUpdate={onNodeHeightUpdate}
                         />
                     </PanZoom>
                 </BackGround>

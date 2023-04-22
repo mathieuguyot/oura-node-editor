@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-no-bind */
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import CSS from "csstype";
 
 import {
@@ -37,11 +37,13 @@ export type NodeProps = {
     onConnectorUpdate: (nodeId: string, cId: string, connector: ConnectorModel) => void;
     onCreateLink?: (link: LinkModel) => void;
     onUpdatePreviewLink?: (previewLink?: LinkPositionModel) => void;
+    onNodeHeightUpdate: (nodeId: string, height: number) => void;
 
     createCustomConnectorComponent?(props: ConnectorContentProps): JSX.Element | null;
 };
 
 export function Node(props: NodeProps) {
+    const nodeDivRef = useRef<HTMLDivElement | null>(null);
     const {
         nodeId,
         node,
@@ -54,9 +56,9 @@ export function Node(props: NodeProps) {
         onConnectorUpdate,
         onCreateLink,
         onUpdatePreviewLink,
-        createCustomConnectorComponent
+        createCustomConnectorComponent,
+        onNodeHeightUpdate
     } = props;
-
     const [pinPositions, setPinPositions] = useState<NodePinPositions>({});
     const onPinPositionUpdate = useCallback(
         (cId: string, leftPinPos: PinPosition, rightPinPos: PinPosition) => {
@@ -73,10 +75,16 @@ export function Node(props: NodeProps) {
         const connectableConnectorsLength = Object.keys(node.connectors).filter((name) => {
             return node.connectors[name].pinLayout !== PinLayout.NO_PINS;
         }).length;
-        if (Object.keys(pinPositions).length === connectableConnectorsLength) {
+        if (
+            Object.keys(pinPositions).length === connectableConnectorsLength &&
+            nodeDivRef &&
+            nodeDivRef.current
+        ) {
+            const height = nodeDivRef.current.getBoundingClientRect().height;
             onNodePinPositionsUpdate(nodeId, pinPositions);
+            onNodeHeightUpdate(nodeId, height);
         }
-    }, [node.connectors, nodeId, onNodePinPositionsUpdate, pinPositions]);
+    }, [node.connectors, nodeId, onNodeHeightUpdate, onNodePinPositionsUpdate, pinPositions]);
 
     const [className, setClassName] = useState<string>("");
     const onMouseMoveCb = useCallback(
@@ -146,6 +154,7 @@ export function Node(props: NodeProps) {
             style={{ ...style, ...nodeCoreSelectionStyle }}
             onMouseDown={localOnMouseDown}
             id={`node_${nodeId}`}
+            ref={nodeDivRef}
         >
             <Header node={node} />
             {/* Node body (list of connectors) */}
