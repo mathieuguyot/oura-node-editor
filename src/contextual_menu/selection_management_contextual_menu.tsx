@@ -13,7 +13,7 @@ export const SelectionManagementContextualMenu = (
 ): JSX.Element => {
     const { onMouseHover, onDeleteSelection } = props;
 
-    const items: { [id: string]: [MenuItemProps] } = {};
+    const items: { [id: string]: MenuItemProps[] } = {};
     items.actions = [
         {
             name: "Delete selection",

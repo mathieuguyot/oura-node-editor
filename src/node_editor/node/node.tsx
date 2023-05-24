@@ -111,6 +111,10 @@ export function Node(props: NodeProps) {
 
     const localOnMouseDown = useCallback(
         (event: React.MouseEvent) => {
+            // Left mouse button only trigger node move
+            if (event.button !== 0) {
+                return;
+            }
             if (!onNodeMoveStart || !onNodeMove || !onNodeMoveEnd) {
                 return;
             }

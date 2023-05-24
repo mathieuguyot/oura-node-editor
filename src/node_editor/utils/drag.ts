@@ -10,7 +10,12 @@ type MouseMoveCb = (
 type MouseUpCb = (initialPos: XYPosition, finalPos: XYPosition, event: MouseEvent) => void;
 
 /* useDrag custom hook helping to simplify computations of drag motions */
-export function useDrag(getZoom: () => number, onMouseMoveCb: MouseMoveCb, onMouseUpCb: MouseUpCb) {
+export function useDrag(
+    getZoom: () => number,
+    onMouseMoveCb: MouseMoveCb,
+    onMouseUpCb: MouseUpCb,
+    switchAxis: boolean = false
+) {
     const [initialPos, setInitialPos] = useState<XYPosition>({ x: 0, y: 0 });
     const [finalPos, setFinalPos] = useState<XYPosition>({ x: 0, y: 0 });
     const [tmpPos, setTmpPos] = useState<XYPosition>({ x: 0, y: 0 });
@@ -36,7 +41,10 @@ export function useDrag(getZoom: () => number, onMouseMoveCb: MouseMoveCb, onMou
                 x: event.pageX / lastZoom - tmpPos.x,
                 y: event.pageY / lastZoom - tmpPos.y
             };
-            const newFinalPos = { x: finalPos.x + offsetPos.x, y: finalPos.y + offsetPos.y };
+            const newFinalPos = {
+                x: finalPos.x + (switchAxis ? offsetPos.y : offsetPos.x),
+                y: finalPos.y + (switchAxis ? offsetPos.x : offsetPos.y)
+            };
             setFinalPos(newFinalPos);
             const newTmpPos = { x: event.pageX / zoom, y: event.pageY / zoom };
             setTmpPos(newTmpPos);
@@ -44,7 +52,17 @@ export function useDrag(getZoom: () => number, onMouseMoveCb: MouseMoveCb, onMou
             onMouseMoveCb({ ...initialPos }, { ...newFinalPos }, offsetPos, targetClassName);
             setLastZoom(zoom);
         },
-        [finalPos.x, finalPos.y, getZoom, initialPos, lastZoom, onMouseMoveCb, tmpPos.x, tmpPos.y]
+        [
+            finalPos.x,
+            finalPos.y,
+            getZoom,
+            initialPos,
+            lastZoom,
+            onMouseMoveCb,
+            switchAxis,
+            tmpPos.x,
+            tmpPos.y
+        ]
     );
 
     const onMouseUp = useCallback(

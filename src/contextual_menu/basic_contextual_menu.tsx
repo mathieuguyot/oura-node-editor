@@ -6,7 +6,7 @@ import MenuItemList from "./menu_item_list";
 
 export type BasicContextualMenuProps = {
     menuTitle: string;
-    items: { [id: string]: [MenuItemProps] };
+    items: { [id: string]: MenuItemProps[] };
 };
 
 export const BasicContextualMenu = (props: BasicContextualMenuProps): JSX.Element => {

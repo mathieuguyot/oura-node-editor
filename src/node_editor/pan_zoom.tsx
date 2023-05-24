@@ -18,33 +18,28 @@ export interface PanZoomInputProps {
 // Can't use state for this are callbacks in TransformWrapper aren't updated :|
 // Not that important since two node editor won't likelly be moved at the same time :)
 let isMouseDownOnLinkCanvas: boolean = false;
+let leftMouseButton = false;
 let isMouseDownOnPanCanvas: boolean = false;
 let panStartPosition: XYPosition | null = null;
 let rectActivated = false;
 let shiftKey = false;
 
-interface SectionRectProps {
-    rectStartPos: XYPosition;
-    rectEndPos: XYPosition;
-}
+type SelectionRectProps = {
+    topX: number;
+    topY: number;
+    width: number;
+    height: number;
+};
 
-// GOOD TOP LEFT
-// top: -rectStartPos.y / zoom,
-// left: -rectStartPos.x / zoom,
-
-function SelectionRect({ rectEndPos, rectStartPos }: SectionRectProps) {
-    const width = rectEndPos.x - rectStartPos.x;
-    const height = rectEndPos.y - rectStartPos.y;
-    const minX = rectStartPos.x;
-    const minY = rectStartPos.y;
+function SelectionRect({ topX, topY, width, height }: SelectionRectProps) {
     return (
         <div
             style={{
                 position: "relative",
                 width: width,
                 height: height,
-                top: minX,
-                left: minY,
+                top: topX,
+                left: topY,
                 border: "1px solid rgba(0,0,0,0.6)",
                 backgroundColor: "rgba(0,0,0,0.4)"
             }}
@@ -61,19 +56,26 @@ export default function PanZoom({
 }: PanZoomInputProps) {
     const [panDisabled, setPanDisabled] = useState(false);
 
-    const [startRectPosition, setStartRectPosition] = useState<XYPosition | null>(null);
-    const [currentRectPosition, setCurrentRectPosition] = useState<XYPosition | null>(null);
+    const [selectionRect, setSelectionRect] = useState<SelectionRectProps | null>(null);
 
     const onMouseMoveCb = useCallback(
         (initialPos: XYPosition, finalPos: XYPosition) => {
             if (rectActivated) {
-                setStartRectPosition({
+                const rectPosStart = {
                     x: initialPos.x - panZoomInfo.topLeftCorner.y / panZoomInfo.zoom,
                     y: initialPos.y - panZoomInfo.topLeftCorner.x / panZoomInfo.zoom
-                });
-                setCurrentRectPosition({
+                };
+
+                const rectPosEnd = {
                     x: finalPos.x - panZoomInfo.topLeftCorner.y / panZoomInfo.zoom,
                     y: finalPos.y - panZoomInfo.topLeftCorner.x / panZoomInfo.zoom
+                };
+
+                setSelectionRect({
+                    topX: Math.min(rectPosStart.x, rectPosEnd.x),
+                    topY: Math.min(rectPosStart.y, rectPosEnd.y),
+                    width: Math.abs(rectPosEnd.y - rectPosStart.y),
+                    height: Math.abs(rectPosEnd.x - rectPosStart.x)
                 });
             }
         },
@@ -89,14 +91,15 @@ export default function PanZoom({
             return panZoomInfo.zoom;
         },
         onMouseMoveCb,
-        onMouseUpCb
+        onMouseUpCb,
+        true
     );
 
     const onMouseDown = useCallback(
         (e: React.MouseEvent) => {
             // Register shift key status
             shiftKey = e.shiftKey;
-
+            leftMouseButton = e.button === 0;
             const target = e.target as HTMLTextAreaElement;
             // Check if mouse button down was on link_canvas
             isMouseDownOnLinkCanvas = false;
@@ -127,16 +130,17 @@ export default function PanZoom({
     const onMouseUp = useCallback(
         (e: React.MouseEvent) => {
             shiftKey = e.shiftKey;
-            if (rectActivated && startRectPosition && currentRectPosition) {
-                const width = Math.abs(startRectPosition.x - currentRectPosition.x);
-                const height = Math.abs(startRectPosition.y - currentRectPosition.y);
-                onRectSelection(startRectPosition, width, height);
+            if (rectActivated && selectionRect) {
+                onRectSelection(
+                    { x: selectionRect.topX, y: selectionRect.topY },
+                    selectionRect.width,
+                    selectionRect.height
+                );
             }
-            setStartRectPosition(null);
-            setCurrentRectPosition(null);
+            setSelectionRect(null);
             setPanDisabled(false);
         },
-        [currentRectPosition, onRectSelection, startRectPosition]
+        [selectionRect, onRectSelection]
     );
 
     const onZoomChange = useCallback(
@@ -167,6 +171,7 @@ export default function PanZoom({
         (ref: any) => {
             const panEndPosition = { x: ref.state.positionX, y: ref.state.positionY };
             if (
+                leftMouseButton &&
                 !rectActivated &&
                 (isMouseDownOnLinkCanvas || isMouseDownOnPanCanvas) &&
                 panStartPosition &&
@@ -217,12 +222,7 @@ export default function PanZoom({
                 <TransformComponent>
                     <div style={{ height: "100vh", width: "100vw" }}>
                         {children}
-                        {currentRectPosition && startRectPosition && (
-                            <SelectionRect
-                                rectEndPos={currentRectPosition}
-                                rectStartPos={startRectPosition}
-                            />
-                        )}
+                        {selectionRect && <SelectionRect {...selectionRect} />}
                     </div>
                 </TransformComponent>
             </TransformWrapper>

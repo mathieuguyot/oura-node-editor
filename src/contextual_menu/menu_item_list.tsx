@@ -11,7 +11,7 @@ const MenuItem = (props: MenuItemProps): JSX.Element => {
 };
 
 type MenuItemListProps = {
-    items: { [id: string]: [MenuItemProps] };
+    items: { [id: string]: MenuItemProps[] };
 };
 
 const MenuItemList = (props: MenuItemListProps): JSX.Element => {
