@@ -161,11 +161,12 @@ function NodeEditor(props: NodeEditorProps) {
     }, []);
 
     const onRectSelection = useCallback(
-        (topLeft: XYPosition, width: number, height: number) => {
-            const selection: Array<SelectionItem> = [];
+        (topLeft: XYPosition, width: number, height: number, shiftKey: boolean) => {
+            const selection: Array<SelectionItem> = shiftKey ? [...selectedItems] : [];
             Object.keys(nodes).forEach((key) => {
                 const node = nodes[key];
                 if (
+                    !selection.map((s) => s.id).includes(key) &&
                     topLeft.y < node.position.x + node.width &&
                     topLeft.y + width > node.position.x &&
                     topLeft.x < node.position.y + nodesHeights[key] &&
@@ -176,7 +177,7 @@ function NodeEditor(props: NodeEditorProps) {
             });
             onSelectedItems(selection);
         },
-        [nodes, nodesHeights, onSelectedItems]
+        [nodes, nodesHeights, selectedItems, onSelectedItems]
     );
 
     const localOnCreateLink = useCallback(

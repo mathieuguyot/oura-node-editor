@@ -11,7 +11,12 @@ export interface PanZoomInputProps {
     panZoomInfo: PanZoomModel;
     onPanZoomInfo: (panZoomInfo: PanZoomModel) => void;
     onSelectItem: (selection: SelectionItem | null, shiftKey: boolean) => void;
-    onRectSelection: (topLeft: XYPosition, width: number, height: number) => void;
+    onRectSelection: (
+        topLeft: XYPosition,
+        width: number,
+        height: number,
+        shiftKey: boolean
+    ) => void;
     children?: React.ReactNode;
 }
 
@@ -134,7 +139,8 @@ export default function PanZoom({
                 onRectSelection(
                     { x: selectionRect.topX, y: selectionRect.topY },
                     selectionRect.width,
-                    selectionRect.height
+                    selectionRect.height,
+                    shiftKey
                 );
             }
             setSelectionRect(null);
