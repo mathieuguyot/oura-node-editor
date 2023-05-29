@@ -27,12 +27,12 @@ const SelectConnectorContent = ({
     }
 
     return (
-        <div className="form-control w-full">
-            <label className="label" style={{ paddingBottom: 0, paddingTop: 0 }}>
-                <span className="label-text text-xs">{connector.name}</span>
+        <div className="one-form-control one-w-full">
+            <label className="one-label" style={{ paddingBottom: 0, paddingTop: 0 }}>
+                <span className="one-label-text one-text-xs">{connector.name}</span>
             </label>
             <select
-                className="input input-bordered input-primary input-xs w-full focus:outline-0"
+                className="one-preflight  one-input one-input-bordered one-input-primary one-input-xs one-w-full focus:one-outline-0"
                 onChange={(event) => setSelectedValue(event.target.selectedIndex)}
                 defaultValue={connector.data.values[connector.data.selected_index]}
             >

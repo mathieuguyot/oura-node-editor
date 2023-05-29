@@ -39,9 +39,9 @@ export default function TextAreaConnectorContent({
     }
     const height = "height" in connector.data ? connector.data.height : 100;
     return (
-        <div className="form-control w-full">
-            <label className="label" style={{ paddingBottom: 0, paddingTop: 0 }}>
-                <span className="label-text text-xs">{connector.name}</span>
+        <div className="one-form-control one-w-full">
+            <label className="one-label" style={{ paddingBottom: 0, paddingTop: 0 }}>
+                <span className="one-label-text one-text-xs">{connector.name}</span>
             </label>
             <textarea
                 ref={textAreaRef}
@@ -50,7 +50,7 @@ export default function TextAreaConnectorContent({
                     whiteSpace: "pre",
                     resize: "vertical"
                 }}
-                className="textarea textarea-primary focus:outline-0 w-full"
+                className="one-preflight  one-textarea one-textarea-primary focus:one-outline-0"
                 value={connector.data.value}
                 onChange={onChange}
                 onMouseUp={onMouseUp}

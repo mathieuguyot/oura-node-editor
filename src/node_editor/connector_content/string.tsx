@@ -26,13 +26,13 @@ export default function StringConnectorContent({
         return <ErrorConnectorContent message={message} />;
     }
     return (
-        <div className="form-control w-full">
+        <div className="one-form-control one-w-full">
             <label className="label" style={{ paddingBottom: 0, paddingTop: 0 }}>
                 <span className="label-text text-xs">{connector.name}</span>
             </label>
             <input
                 type="text"
-                className="input input-bordered input-primary input-xs w-full focus:outline-0"
+                className="one-preflight  one-input one-input-bordered one-input-primary one-input-xs focus:one-outline-0"
                 value={connector.data.value}
                 onChange={onChange}
                 placeholder={connector.name}

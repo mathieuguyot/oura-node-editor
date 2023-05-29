@@ -18,13 +18,13 @@ const MenuItemList = (props: MenuItemListProps): JSX.Element => {
     const { items } = props;
     return (
         <ul
-            className="menu menu-compact bg-base-300 w-56 p-2"
+            className="one-menu one-menu-compact one-bg-base-300 one-w-56 one-p-2"
             style={{ height: 452, flexWrap: "initial", overflow: "scroll" }}
         >
             {Object.keys(items).map((categoryName) => {
                 return (
                     <div key={categoryName}>
-                        <li className="menu-title">
+                        <li className="one-menu-title">
                             <span>{categoryName}</span>
                         </li>
                         {items[categoryName].map((item) => (

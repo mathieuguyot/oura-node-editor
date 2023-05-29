@@ -29,12 +29,12 @@ export default function NumberConnectorContent({
         return <ErrorConnectorContent message={message} />;
     }
     return (
-        <div className="form-control w-full">
+        <div className="one-form-control one-w-full">
             <label className="label" style={{ paddingBottom: 0, paddingTop: 0 }}>
-                <span className="label-text text-xs">{connector.name}</span>
+                <span className="one-label-text one-text-xs">{connector.name}</span>
             </label>
             <input
-                className="input input-bordered input-primary input-xs w-full focus:outline-0"
+                className="one-preflight  one-input one-input-bordered one-input-primary one-input-xs focus:one-outline-0"
                 disabled={"disabled" in connector.data ? connector.data.disabled : false}
                 value={connector.data.value}
                 onChange={onChange}

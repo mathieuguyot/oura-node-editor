@@ -29,9 +29,9 @@ export default function RangeConnectorContent({
         return <ErrorConnectorContent message={message} />;
     }
     return (
-        <div className="form-control w-full">
-            <label className="label" style={{ paddingBottom: 0, paddingTop: 0 }}>
-                <span className="label-text text-xs">{connector.name}</span>
+        <div className="one-form-control one-w-full">
+            <label className="one-label" style={{ paddingBottom: 0, paddingTop: 0 }}>
+                <span className="one-label-text one-text-xs">{connector.name}</span>
             </label>
             <input
                 type="range"
@@ -39,7 +39,8 @@ export default function RangeConnectorContent({
                 max={connector.data.max}
                 value={connector.data.value}
                 onChange={onChange}
-                className="range range-primary range-xs"
+                className="one-preflight  one-range one-range-primary one-range-xs"
+                style={{ border: "0px" }}
             />
         </div>
     );

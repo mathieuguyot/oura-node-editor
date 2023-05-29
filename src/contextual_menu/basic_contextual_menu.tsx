@@ -33,9 +33,9 @@ export const BasicContextualMenu = (props: BasicContextualMenuProps): JSX.Elemen
 
     return (
         <div style={{ display: "flex", flexDirection: "column", overflow: "auto" }}>
-            <div className="font-bold">{menuTitle}</div>
+            <div className="one-font-bold">{menuTitle}</div>
             <input
-                className="input w-full max-w-xs input-xs focus:outline-0"
+                className="one-input one-w-full one-max-w-xs one-input-xs focus:one-outline-0"
                 style={{ borderRadius: 0 }}
                 value={searchText}
                 onChange={onChange}

@@ -95,8 +95,8 @@ export const AddNodeContextualMenu = (props: AddNodeContextualMenuProps): JSX.El
     }, [onMouseHover]);
 
     return (
-        <div className="flex" onMouseLeave={onMouseLeaves} onMouseEnter={onMouseEnter}>
-            <div className="bg-primary">
+        <div className="one-flex" onMouseLeave={onMouseLeaves} onMouseEnter={onMouseEnter}>
+            <div className="one-bg-primary">
                 <BasicContextualMenu menuTitle="Add a new node" items={items} />
             </div>
             <NodePrevisualizer

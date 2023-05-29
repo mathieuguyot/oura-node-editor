@@ -1,10 +1,6 @@
 import React, { useEffect } from "react";
 import { NodeEditor, useNodeEditor } from "oura-node-editor";
 
-// This create a conflict and artefacts with regular docusaurus component...
-// https://github.com/vitejs/vite/issues/1579
-import "oura-node-editor/dist/style.css";
-
 const nodesStub = {
     "2528811a-3c8f-425e-939e-16dc4c185b82": {
         name: "rectangle",

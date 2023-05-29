@@ -11,7 +11,7 @@ export default function Footer({ node }: FooterProps): JSX.Element {
 
     return (
         <div
-            className="node-background node-footer bg-base-300"
+            className="node-background one-node-footer one-bg-base-300"
             style={{ ...theme?.node?.footer, ...node?.theme?.footer }}
         />
     );

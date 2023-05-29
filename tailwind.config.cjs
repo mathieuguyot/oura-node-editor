@@ -4,5 +4,9 @@ module.exports = {
     theme: {
         extend: {}
     },
-    plugins: [require("daisyui")]
+    prefix: "one-",
+    plugins: [require("daisyui")],
+    corePlugins: {
+        preflight: false
+    }
 };

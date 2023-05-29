@@ -2,32 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-input:focus-within ~ label,
-input:not(:placeholder-shown) ~ label {
-    @apply transform scale-75 -translate-y-6;
-}
-
-input:focus-within ~ label {
-    @apply text-blue-500;
-}
-
-.outline input:focus-within ~ label,
-.outline input:not(:placeholder-shown) ~ label {
-    @apply transform scale-75 -translate-y-4 z-0 ml-3 px-1 py-0;
-}
-
-body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
-        "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-code {
-    font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
-}
-
 .noselect {
     -webkit-touch-callout: none; /* iOS Safari */
     -webkit-user-select: none; /* Safari */
@@ -36,4 +10,21 @@ code {
     -ms-user-select: none; /* Internet Explorer/Edge */
     user-select: none; /* Non-prefixed version, currently
                                   supported by Chrome, Edge, Opera and Firefox */
+}
+
+.one-preflight button,
+input,
+optgroup,
+select,
+textarea {
+    font-family: inherit;
+    font-feature-settings: inherit;
+    font-variation-settings: inherit;
+    font-size: 100%;
+    font-weight: inherit;
+    line-height: inherit;
+    color: inherit;
+    margin: 0;
+    padding: 0;
+    border: 1px solid hsl(var(--p));
 }
