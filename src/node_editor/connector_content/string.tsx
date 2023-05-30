@@ -32,7 +32,7 @@ export default function StringConnectorContent({
             </label>
             <input
                 type="text"
-                className="one-preflight  one-input one-input-bordered one-input-primary one-input-xs focus:one-outline-0"
+                className="one-preflight  one-input one-input-bordered one-input-primary one-input-xs focus:one-outline-0 one-text-base-content"
                 value={connector.data.value}
                 onChange={onChange}
                 placeholder={connector.name}

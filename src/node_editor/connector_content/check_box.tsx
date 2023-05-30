@@ -25,7 +25,7 @@ export default function CheckBox(props: ConnectorContentProps) {
                 checked={props.connector.data.value}
                 onChange={onChange}
                 type="checkbox"
-                className="one-preflight  one-checkbox one-checkbox-xs one-checkbox-primary focus:one-outline-0"
+                className="one-preflight  one-checkbox one-checkbox-xs one-checkbox-primary focus:one-outline-0 one-text-base-content"
             />
             <p className="one-preflight" style={{ paddingLeft: 3 }}>
                 {props.connector.name}

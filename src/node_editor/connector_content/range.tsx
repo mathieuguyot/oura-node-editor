@@ -39,7 +39,7 @@ export default function RangeConnectorContent({
                 max={connector.data.max}
                 value={connector.data.value}
                 onChange={onChange}
-                className="one-preflight  one-range one-range-primary one-range-xs"
+                className="one-preflight  one-range one-range-primary one-range-xs one-text-base-content"
                 style={{ border: "0px" }}
             />
         </div>

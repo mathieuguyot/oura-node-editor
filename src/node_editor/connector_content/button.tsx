@@ -10,7 +10,7 @@ const ButtonConnectorContent = ({ connector, node }: ConnectorContentProps): JSX
 
     return (
         <button
-            className="one-preflight one-btn one-btn-primary one-btn-xs one-w-full"
+            className="one-preflight one-btn one-btn-primary one-btn-xs one-w-full one-text-primary-content"
             onClick={() => connector.data.onClick(node)}
             style={{ border: "0px", marginBottom: "2px" }}
         >

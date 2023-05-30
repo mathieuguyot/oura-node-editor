@@ -50,7 +50,7 @@ export default function TextAreaConnectorContent({
                     whiteSpace: "pre",
                     resize: "vertical"
                 }}
-                className="one-preflight  one-textarea one-textarea-primary focus:one-outline-0"
+                className="one-preflight  one-textarea one-textarea-primary focus:one-outline-0 one-text-base-content"
                 value={connector.data.value}
                 onChange={onChange}
                 onMouseUp={onMouseUp}

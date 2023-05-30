@@ -32,7 +32,7 @@ const SelectConnectorContent = ({
                 <span className="one-label-text one-text-xs">{connector.name}</span>
             </label>
             <select
-                className="one-preflight  one-input one-input-bordered one-input-primary one-input-xs one-w-full focus:one-outline-0"
+                className="one-preflight  one-input one-input-bordered one-input-primary one-input-xs one-w-full focus:one-outline-0 one-text-base-content"
                 onChange={(event) => setSelectedValue(event.target.selectedIndex)}
                 defaultValue={connector.data.values[connector.data.selected_index]}
             >
