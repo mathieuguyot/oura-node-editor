@@ -25,7 +25,8 @@ export default function RangeConnectorContent({
     );
 
     if (!("value" in connector.data) || !("min" in connector.data) || !("max" in connector.data)) {
-        const message = "'number' connector types must provide a string field named 'value'";
+        const message =
+            "'range' connector types must provide a numbers fields called 'value', 'min' and 'max'";
         return <ErrorConnectorContent message={message} />;
     }
     return (

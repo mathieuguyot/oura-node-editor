@@ -11,7 +11,6 @@ import {
     NodeCollection,
     LinkCollection,
     SelectionItem,
-    PinSide,
     NodePinPositions,
     XYPosition
 } from "./model";
@@ -75,16 +74,16 @@ function NodeEditor(props: NodeEditorProps) {
             Object.keys(links).forEach((key) => {
                 const link = links[key];
                 if (
-                    link.inputNodeId in nodesPinPositions === false ||
-                    link.outputNodeId in nodesPinPositions === false
+                    link.leftNodeId in nodesPinPositions === false ||
+                    link.rightNodeId in nodesPinPositions === false
                 ) {
                     return;
                 }
-                const iNPins = nodesPinPositions[link.inputNodeId][link.inputPinId];
-                const oNPins = nodesPinPositions[link.outputNodeId][link.outputPinId];
+                const iNPins = nodesPinPositions[link.leftNodeId][link.leftNodeConnectorId];
+                const oNPins = nodesPinPositions[link.rightNodeId][link.rightNodeConnectorId];
                 if (iNPins && oNPins) {
-                    const inputPinPosition = iNPins[link.inputPinSide === PinSide.LEFT ? 0 : 1];
-                    const outputPinPosition = oNPins[link.outputPinSide === PinSide.LEFT ? 0 : 1];
+                    const inputPinPosition = iNPins[0];
+                    const outputPinPosition = oNPins[1];
                     if (inputPinPosition && outputPinPosition) {
                         if (
                             !(key in draft) ||
@@ -182,11 +181,7 @@ function NodeEditor(props: NodeEditorProps) {
 
     const localOnCreateLink = useCallback(
         (link: LinkModel) => {
-            if (
-                onCreateLink &&
-                link.inputPinSide !== link.outputPinSide &&
-                link.inputNodeId !== link.outputNodeId
-            ) {
+            if (onCreateLink && link.leftNodeId !== link.rightNodeId) {
                 onCreateLink(link);
             }
         },

@@ -22,13 +22,10 @@ export function arePositionEquals(rPos: XYPosition, lPos: XYPosition): boolean {
 }
 
 export interface LinkModel {
-    inputNodeId: string;
-    inputPinId: string;
-    inputPinSide: PinSide;
-    outputNodeId: string;
-    outputPinId: string;
-    outputPinSide: PinSide;
-    linkType?: string;
+    leftNodeId: string;
+    leftNodeConnectorId: string;
+    rightNodeId: string;
+    rightNodeConnectorId: string;
     theme?: LinkTheme;
 }
 
@@ -60,11 +57,6 @@ export interface NodeModel {
 }
 
 export type NodeCollection = { [id: string]: NodeModel };
-
-export enum PinSide {
-    LEFT,
-    RIGHT
-}
 
 export enum PinLayout {
     NO_PINS,

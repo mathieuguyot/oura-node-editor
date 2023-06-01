@@ -1,8 +1,18 @@
 import { useContext } from "react";
 
-import { XYPosition } from "../model";
-import { LinkProps } from "./common";
+import { XYPosition, LinkModel, LinkPositionModel } from "../model";
 import { ThemeContext } from "../theme";
+
+export type LinkProps = {
+    linkId?: string;
+    linkPosition: LinkPositionModel;
+    link?: LinkModel;
+
+    isLinkSelected: boolean;
+    onSelectLink?: (linkId: string, shiftKey: boolean) => void;
+
+    key?: string;
+};
 
 const getCenter = (source: XYPosition, target: XYPosition): XYPosition => {
     const offsetX = Math.abs(target.x - source.x) / 2;

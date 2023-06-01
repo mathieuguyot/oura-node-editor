@@ -7,7 +7,6 @@ import {
     XYPosition,
     NodeModel,
     LinkModel,
-    PinSide,
     PinPosition,
     LinkPositionModel
 } from "../model";
@@ -49,19 +48,18 @@ export default function Connector(props: ConnectorProps) {
     const connectorRef = useRef<HTMLDivElement>(null);
 
     const getConnectorPinPosition = useCallback(
-        (pinSide: PinSide) => {
+        (isLeftPin: boolean) => {
             if (
                 !connectorRef ||
                 !connectorRef.current ||
                 connector.pinLayout === PinLayout.NO_PINS ||
-                (pinSide === PinSide.LEFT && connector.pinLayout === PinLayout.RIGHT_PIN) ||
-                (pinSide === PinSide.RIGHT && connector.pinLayout === PinLayout.LEFT_PIN)
+                (isLeftPin && connector.pinLayout === PinLayout.RIGHT_PIN) ||
+                (!isLeftPin && connector.pinLayout === PinLayout.LEFT_PIN)
             ) {
                 return null;
             }
-
             return {
-                x: pinSide === PinSide.RIGHT ? node.width + node.position.x : node.position.x,
+                x: !isLeftPin ? node.width + node.position.x : node.position.x,
                 y:
                     node.position.y +
                     connectorRef.current.offsetTop +
@@ -72,8 +70,8 @@ export default function Connector(props: ConnectorProps) {
     );
 
     useEffect(() => {
-        const newLeftPinPos = getConnectorPinPosition(PinSide.LEFT);
-        const newRightPinPos = getConnectorPinPosition(PinSide.RIGHT);
+        const newLeftPinPos = getConnectorPinPosition(true);
+        const newRightPinPos = getConnectorPinPosition(false);
         if (!_.isEqual(leftPinPos, newLeftPinPos) || !_.isEqual(rightPinPos, newRightPinPos)) {
             setLeftPinPos(newLeftPinPos);
             setRightPinPos(newRightPinPos);
@@ -104,6 +102,7 @@ export default function Connector(props: ConnectorProps) {
         [onUpdatePreviewLink]
     );
 
+    const [isDragFromLeftPin, setIsDragFromLeftPin] = useState(false);
     const onMouseUpCb = useCallback(
         (_iPos: XYPosition, _fPos: XYPosition, mouseUpEvent: MouseEvent) => {
             if (!onCreateLink || !onUpdatePreviewLink) {
@@ -117,29 +116,29 @@ export default function Connector(props: ConnectorProps) {
                     tag = (mouseUpEvent.target as Element).className.match(connectorRegex);
                 }
             }
-            if (tag !== null && tag[3] === "left") {
+            if (
+                (isDragFromLeftPin && tag && tag[3] === "left") ||
+                (!isDragFromLeftPin && tag && tag[3] === "right")
+            ) {
+                console.log("ici");
+            } else if (tag !== null && tag[3] === "left") {
                 onCreateLink({
-                    inputNodeId: tag[1],
-                    inputPinId: tag[2],
-                    inputPinSide: PinSide.LEFT,
-                    outputNodeId: nodeId,
-                    outputPinId: cId,
-                    outputPinSide: PinSide.RIGHT
+                    leftNodeId: tag[1],
+                    leftNodeConnectorId: tag[2],
+                    rightNodeId: nodeId,
+                    rightNodeConnectorId: cId
                 });
             } else if (tag !== null) {
                 onCreateLink({
-                    inputNodeId: nodeId,
-                    inputPinId: cId,
-                    inputPinSide: PinSide.LEFT,
-                    outputNodeId: tag[1],
-                    outputPinId: tag[2],
-                    outputPinSide: PinSide.RIGHT,
-                    linkType: "bezier"
+                    leftNodeId: nodeId,
+                    leftNodeConnectorId: cId,
+                    rightNodeId: tag[1],
+                    rightNodeConnectorId: tag[2]
                 });
             }
             onUpdatePreviewLink(undefined);
         },
-        [cId, nodeId, onCreateLink, onUpdatePreviewLink]
+        [cId, nodeId, isDragFromLeftPin, onCreateLink, onUpdatePreviewLink]
     );
 
     const { onMouseDown } = useDrag(getZoom, onMouseMoveCb, onMouseUpCb);
@@ -159,7 +158,8 @@ export default function Connector(props: ConnectorProps) {
                     pinPxRadius={PIN_RADIUS_PX}
                     leftPinPosition={-PIN_RADIUS_PX}
                     onMouseDown={(e) => {
-                        const pinPos = getConnectorPinPosition(PinSide.LEFT);
+                        setIsDragFromLeftPin(true);
+                        const pinPos = getConnectorPinPosition(true);
                         if (pinPos) onMouseDown(e, pinPos);
                     }}
                     pinColor={connector.leftPinColor}
@@ -173,7 +173,8 @@ export default function Connector(props: ConnectorProps) {
                     pinPxRadius={PIN_RADIUS_PX}
                     leftPinPosition={node.width - PIN_RADIUS_PX}
                     onMouseDown={(e) => {
-                        const pinPos = getConnectorPinPosition(PinSide.RIGHT);
+                        setIsDragFromLeftPin(false);
+                        const pinPos = getConnectorPinPosition(false);
                         if (pinPos) onMouseDown(e, pinPos);
                     }}
                     pinColor={connector.rightPinColor}

@@ -18,11 +18,12 @@
         "@docusaurus/core": "2.4.1",
         "@docusaurus/preset-classic": "2.4.1",
         "@mdx-js/react": "^1.6.22",
+        "@monaco-editor/react": "^4.5.1",
         "clsx": "^1.2.1",
+        "oura-node-editor": "file:..",
         "prism-react-renderer": "^1.3.5",
         "react": "file:../node_modules/react",
-        "react-dom": "file:../node_modules/react-dom",
-        "oura-node-editor": "file:.."
+        "react-dom": "file:../node_modules/react-dom"
     },
     "devDependencies": {
         "@docusaurus/module-type-aliases": "2.4.1",

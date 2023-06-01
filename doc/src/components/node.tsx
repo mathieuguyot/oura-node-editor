@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { NodeEditor, useNodeEditor } from "oura-node-editor";
 
 const nodesStub = {
@@ -67,20 +67,16 @@ const nodesStub = {
 
 const linkStub = {
     "433c4ede-7181-43fd-9249-000614bcb858": {
-        inputNodeId: "2528811a-3c8f-425e-939e-16dc4c185b82",
-        inputPinId: "1",
-        inputPinSide: 0,
-        outputNodeId: "bbbb9f7e-5769-478a-85a3-1097a675ba17",
-        outputPinId: "0",
-        outputPinSide: 1
+        leftNodeId: "2528811a-3c8f-425e-939e-16dc4c185b82",
+        leftNodeConnectorId: "1",
+        rightNodeId: "bbbb9f7e-5769-478a-85a3-1097a675ba17",
+        rightNodeConnectorId: "0"
     },
     "77468d68-7eeb-4bce-ae3e-15585af52a02": {
-        inputNodeId: "2528811a-3c8f-425e-939e-16dc4c185b82",
-        inputPinId: "2",
-        inputPinSide: 0,
-        outputNodeId: "bbbb9f7e-5769-478a-85a3-1097a675ba17",
-        outputPinId: "0",
-        outputPinSide: 1
+        leftNodeId: "2528811a-3c8f-425e-939e-16dc4c185b82",
+        leftNodeConnectorId: "2",
+        rightNodeId: "bbbb9f7e-5769-478a-85a3-1097a675ba17",
+        rightNodeConnectorId: "0"
     }
 };
 
@@ -103,6 +99,13 @@ export default function IntroNodeEditor() {
         setNodes(nodesStub);
         setLinks(linkStub);
     }, [setLinks, setNodes]);
+
+    // const mainDivRef = useRef<HTMLDivElement | null>(null);
+    // useEffect(() => {
+    //     if (mainDivRef && mainDivRef.current) {
+    //         mainDivRef.current.setAttribute("data-theme", "fantasy");
+    //     }
+    // }, [mainDivRef]);
 
     return (
         <div style={{ width: "100%", height: "100vh", zIndex: 1000 }}>

@@ -1,8 +1,8 @@
 import { CSSProperties } from "react";
 import _ from "lodash";
 
-import createLink from "./link";
 import { LinkCollection, LinkPositionModel, SelectionItem } from "./model";
+import BezierLink from "./link/link_bezier";
 
 export interface LinkCanvasProps {
     links: LinkCollection;
@@ -31,22 +31,20 @@ export default function LinkCanvas(props: LinkCanvasProps): JSX.Element {
             {/* Render all links */}
             {Object.keys(links)
                 .filter((key) => key in linksPositions)
-                .map((key) =>
-                    createLink({
-                        linkId: key,
-                        link: links[key],
-                        key,
-                        linkPosition: linksPositions[key],
-                        isLinkSelected: _.some(selectedItems, { id: key, type: "link" }),
-                        onSelectLink: (id, shiftKey) => onSelectItem({ id, type: "link" }, shiftKey)
-                    })
-                )}
+                .map((key) => (
+                    <BezierLink
+                        linkId={key}
+                        link={links[key]}
+                        key={key}
+                        linkPosition={linksPositions[key]}
+                        isLinkSelected={_.some(selectedItems, { id: key, type: "link" })}
+                        onSelectLink={(id, shiftKey) =>
+                            onSelectItem({ id, type: "link" }, shiftKey)
+                        }
+                    />
+                ))}
             {/* Render draggedLink if set */}
-            {draggedLink &&
-                createLink({
-                    linkPosition: draggedLink,
-                    isLinkSelected: false
-                })}
+            {draggedLink && <BezierLink linkPosition={draggedLink} isLinkSelected={false} />}
         </svg>
     );
 }
