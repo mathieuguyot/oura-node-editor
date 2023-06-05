@@ -19,17 +19,21 @@ export default function CheckBox(props: ConnectorContentProps) {
     }
 
     return (
-        <label className="one-label one-preflight" style={{ justifyContent: "flex-start" }}>
+        <div
+            className="one-label one-preflight node-background"
+            style={{ justifyContent: "flex-start" }}
+        >
             <input
                 tabIndex={-1}
                 checked={props.connector.data.value}
                 onChange={onChange}
                 type="checkbox"
+                disabled={props.connector.data.disabled}
                 className="one-preflight  one-checkbox one-checkbox-xs one-checkbox-primary focus:one-outline-0 one-text-base-content"
             />
-            <p className="one-preflight" style={{ paddingLeft: 3 }}>
+            <div className="one-preflight" style={{ paddingLeft: 3 }}>
                 {props.connector.name}
-            </p>
-        </label>
+            </div>
+        </div>
     );
 }

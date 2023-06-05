@@ -59,6 +59,7 @@ export default function PanZoom({
     children,
     onRectSelection
 }: PanZoomInputProps) {
+    const divRef = React.useRef<HTMLDivElement | null>(null);
     const [panDisabled, setPanDisabled] = useState(false);
 
     const [selectionRect, setSelectionRect] = useState<SelectionRectProps | null>(null);
@@ -102,6 +103,9 @@ export default function PanZoom({
 
     const onMouseDown = useCallback(
         (e: React.MouseEvent) => {
+            if (!divRef || !divRef.current) {
+                return;
+            }
             // Register shift key status
             shiftKey = e.shiftKey;
             leftMouseButton = e.button === 0;
@@ -123,9 +127,10 @@ export default function PanZoom({
             );
             if (e.altKey === true) {
                 rectActivated = true;
+                const element = divRef.current.getBoundingClientRect();
                 drag.onMouseDown(e, {
-                    y: e.pageX / panZoomInfo.zoom,
-                    x: e.pageY / panZoomInfo.zoom
+                    y: (e.clientX - element.left) / panZoomInfo.zoom,
+                    x: (e.clientY - element.top) / panZoomInfo.zoom
                 });
             }
         },
@@ -194,6 +199,7 @@ export default function PanZoom({
 
     return (
         <div
+            ref={divRef}
             id="panzoom"
             style={{
                 position: "relative",

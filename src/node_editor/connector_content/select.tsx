@@ -34,7 +34,7 @@ const SelectConnectorContent = ({
             <select
                 className="one-preflight  one-input one-input-bordered one-input-primary one-input-xs one-w-full focus:one-outline-0 one-text-base-content"
                 onChange={(event) => setSelectedValue(event.target.selectedIndex)}
-                defaultValue={connector.data.values[connector.data.selected_index]}
+                value={connector.data.values[connector.data.selected_index]}
             >
                 {connector.data.values.map((value: string) => (
                     <option key={value} value={value}>
