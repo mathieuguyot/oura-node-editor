@@ -10,6 +10,11 @@ module.exports = {
         preflight: false
     },
     daisyui: {
-        base: false
+        base: false,
+        themes: [
+            "light",
+            "dark",
+            "nord",
+          ]
     }
 };

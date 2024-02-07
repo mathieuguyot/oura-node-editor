@@ -29,7 +29,7 @@ export default function NumberConnectorContent({
         return <ErrorConnectorContent message={message} />;
     }
     return (
-        <div className="one-form-control one-w-full">
+        <div className="one-form-control one-w-full">   
             <label className="label" style={{ paddingBottom: 0, paddingTop: 0 }}>
                 <span className="one-label-text one-text-xs">{connector.name}</span>
             </label>

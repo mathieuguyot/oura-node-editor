@@ -29,7 +29,7 @@ const Pin = (props: PinProps): JSX.Element => {
             height: `${pinPxRadius * 2}px`,
             left: `${leftPinPosition}px`,
             top: `calc(50% - ${pinPxRadius}px)`,
-            border: "1.5px solid hsl(var(--p))",
+            border: "1.5px solid oklch(var(--p))",
             boxSizing: "border-box"
         },
         ...theme?.node?.basePin,

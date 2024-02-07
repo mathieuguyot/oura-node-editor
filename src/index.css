@@ -26,5 +26,5 @@ textarea {
     color: inherit;
     margin: 0;
     padding: 0;
-    border: 1px solid hsl(var(--p));
+    border: 1px solid oklch(var(--p));
 }
