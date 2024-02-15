@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { NodeEditor, useNodeEditor } from "oura-node-editor";
 import Editor from "@monaco-editor/react";
-import { useColorMode } from "@docusaurus/preset-classic/node_modules/@docusaurus/theme-common";
+import { useColorMode } from "@docusaurus/theme-common";
 
 const defaultNode = {
     name: "rectangle",
