@@ -6,7 +6,7 @@ import SingleNodePlayground from "@site/src/components/singleNodePlayground";
 
 # Introduction
 
-React-node-editor is a React component library allowing you the creation of node based editors. Node based editors are used to create and edit [node graph architecture](https://en.wikipedia.org/wiki/Node_graph_architecture).
+Oura-node-editor is a React component library allowing you the creation of node based editors. Node based editors are used to create and edit [node graph architecture](https://en.wikipedia.org/wiki/Node_graph_architecture).
 This architecture relies on atomic functional units called **nodes**. Each node can have a state, inputs and outputs. Those inputs and outputs can be connected together using **links**. By doing so, it is possible to model business logic, 3d materials and shaders, programming logic, among many other things.
 
 Today, node based editors are used in various software to achieve many tasks:
@@ -17,9 +17,24 @@ Today, node based editors are used in various software to achieve many tasks:
 -   Creating a variety of domain specific langages
 -   Creating cool and strange creative coding stuff!
 
+## Another node editor ?
+
+Many react UI libs allows to charts and somehow node editors.
+Oura-node-editor is focus on those objectives:
+
+- Be easy to setup and use
+- Be highly modulable allowing users to create custom node and custom node connectors (more on that later)
+- Be highly efficient and allowing to render hundreds of nodes
+- Have many themes to be fit every projects
+
+## Experimental project
+
+This project is an experimental one. As a result, many design choices can be updated
+The documentation is also far from complete as of today !
+
 ## Anatomy of a node
 
-A node in react-node-editor have several properties:
+A node in oura-node-editor have several properties:
 
 ```typescript
 export interface NodeModel {
