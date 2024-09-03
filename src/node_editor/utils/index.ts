@@ -1,3 +1,3 @@
-import DragWrapper from "./drag";
+import { useDrag } from "./drag";
 
-export default DragWrapper;
+export { useDrag };
