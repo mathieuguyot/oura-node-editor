@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { NodeEditor, useNodeEditor } from "oura-node-editor";
 
 const nodesStub = {
@@ -99,13 +99,6 @@ export default function IntroNodeEditor() {
         setNodes(nodesStub);
         setLinks(linkStub);
     }, [setLinks, setNodes]);
-
-    // const mainDivRef = useRef<HTMLDivElement | null>(null);
-    // useEffect(() => {
-    //     if (mainDivRef && mainDivRef.current) {
-    //         mainDivRef.current.setAttribute("data-theme", "fantasy");
-    //     }
-    // }, [mainDivRef]);
 
     return (
         <div style={{ width: "100%", height: "100vh", zIndex: 1000 }}>
