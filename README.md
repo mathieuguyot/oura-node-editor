@@ -4,10 +4,14 @@
 
 A react component library that lets you create node based editors ! inspired by blender node editor.
 
+Try me: [oura-canvas-creator](https://mathieuguyot.github.io/oura-canvas-creator/) !
+
+[Documentation](https://mathieuguyot.github.io/oura-node-editor/docs/introduction)
+
 Warning: Project in an experimental state, API may change a lot and npm repository is not up to date (so pull the lib and link it to your project if you wish test it!)
 
 ![canvas editor](doc/img/canvas-editor.png)
-Example project that use the lib: https://github.com/ouranos588/oura-canvas-creator
+Example project that use the lib:
 
 ## current features:
 
@@ -21,14 +25,6 @@ Example project that use the lib: https://github.com/ouranos588/oura-canvas-crea
 -   One or many nodes and links can be selected
 -   It is possible to extend the existing theme or create your own
 -   Node rendering is virtualized (eg. node are not rendered if not displayed on screen), which improves general performances
-
-## Todo list:
-
--   high: write a documentation of the lib
--   high: add a storybook
--   medium: update, extract or replace of react-zoom-pan-pinch library to get rid of warnings
--   medium: check tests and add some
--   low: enhance theme
 
 ## Install
 

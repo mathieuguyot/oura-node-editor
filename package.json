@@ -37,5 +37,8 @@
         "vite-plugin-css-injected-by-js": "^3.4.0",
         "vite-plugin-dts": "^3.7.2",
         "vite-plugin-eslint": "^1.8.1"
+    },
+    "publishConfig": {
+        "registry": "https://registry.npmjs.org/"
     }
 }
