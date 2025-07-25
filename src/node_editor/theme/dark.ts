@@ -8,7 +8,7 @@ const radius = 5;
 const darkTheme: Theme = {
     node: {
         selected: {
-            boxShadow: "0px 0px 0px 2px oklch(var(--pf))",
+            boxShadow: "0px 0px 4px 4px oklch(var(--a))",
             borderRadius: `${radius}px ${radius}px ${radius}px ${radius}px`
         },
         unselected: {},
@@ -36,12 +36,11 @@ const darkTheme: Theme = {
     },
     link: {
         selected: {
-            //stroke: "white",
+            stroke: "oklch(var(--a))",
             strokeWidth: "3px",
-            fill: "none"
+            fill: "1px"
         },
         unselected: {
-            //stroke: "rgba(170, 170, 170, 0.75)",
             strokeWidth: "3px",
             fill: "none"
         }
