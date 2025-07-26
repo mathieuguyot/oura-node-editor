@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import { JSX, useContext } from "react";
 import CSS from "csstype";
 
 import { PanZoomModel } from "./model";

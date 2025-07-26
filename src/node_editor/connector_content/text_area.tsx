@@ -1,5 +1,5 @@
 import React, { useCallback, useRef } from "react";
-import produce from "immer";
+import { produce } from "immer";
 
 import ErrorConnectorContent from "./error";
 import { ConnectorContentProps } from "./common";
@@ -39,9 +39,9 @@ export default function TextAreaConnectorContent({
     }
     const height = "height" in connector.data ? connector.data.height : 100;
     return (
-        <div className="one-form-control one-w-full">
-            <label className="one-label" style={{ paddingBottom: 0, paddingTop: 0 }}>
-                <span className="one-label-text one-text-xs">{connector.name}</span>
+        <div className="one:form-control one:w-full">
+            <label className="one:label" style={{ paddingBottom: 0, paddingTop: 0 }}>
+                <span className="one:label-text one:text-xs">{connector.name}</span>
             </label>
             <textarea
                 ref={textAreaRef}
@@ -51,7 +51,7 @@ export default function TextAreaConnectorContent({
                     resize: "vertical"
                 }}
                 disabled={connector.data.disabled}
-                className="one-preflight  one-textarea one-textarea-primary focus:one-outline-0 one-text-base-content"
+                className="one:preflight  one:textarea one:textarea-primary focus:one:outline-0 one:text-base-content"
                 value={connector.data.value}
                 onChange={onChange}
                 onMouseUp={onMouseUp}

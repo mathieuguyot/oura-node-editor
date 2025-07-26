@@ -1,4 +1,4 @@
-import React from "react";
+import { JSX, useRef, useState, useCallback } from "react";
 
 import { Node, NodeModel, NodeCollection, ConnectorContentProps } from "../node_editor";
 import { MenuItemProps } from "./common";
@@ -11,7 +11,7 @@ type NodePrevisualizerProps = {
 
 const NodePrevisualizer = (props: NodePrevisualizerProps): JSX.Element => {
     const { node, createCustomConnectorComponent } = props;
-    const previewDivRef = React.useRef<HTMLHeadingElement>(null);
+    const previewDivRef = useRef<HTMLHeadingElement>(null);
 
     let nodeElem: JSX.Element | null = null;
     if (node && previewDivRef && previewDivRef.current) {
@@ -59,7 +59,7 @@ export type AddNodeContextualMenuProps = {
 export const AddNodeContextualMenu = (props: AddNodeContextualMenuProps): JSX.Element => {
     const { nodesSchema, onNodeSelection, createCustomConnectorComponent, onMouseHover } = props;
 
-    const [previsualizedNodeId, setPrevisualizedNodeId] = React.useState<string>("");
+    const [previsualizedNodeId, setPrevisualizedNodeId] = useState<string>("");
 
     const items: { [id: string]: [MenuItemProps] } = {};
     Object.keys(nodesSchema).forEach((id) => {
@@ -86,17 +86,17 @@ export const AddNodeContextualMenu = (props: AddNodeContextualMenuProps): JSX.El
         }
     });
 
-    const onMouseEnter = React.useCallback(() => {
+    const onMouseEnter = useCallback(() => {
         onMouseHover(true);
     }, [onMouseHover]);
 
-    const onMouseLeaves = React.useCallback(() => {
+    const onMouseLeaves = useCallback(() => {
         onMouseHover(false);
     }, [onMouseHover]);
 
     return (
-        <div className="one-flex" onMouseLeave={onMouseLeaves} onMouseEnter={onMouseEnter}>
-            <div className="one-bg-primary">
+        <div className="one:flex" onMouseLeave={onMouseLeaves} onMouseEnter={onMouseEnter}>
+            <div className="one:bg-primary">
                 <BasicContextualMenu menuTitle="Add a new node" items={items} />
             </div>
             <NodePrevisualizer

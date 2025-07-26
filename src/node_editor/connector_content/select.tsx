@@ -1,8 +1,8 @@
-import { useCallback } from "react";
+import { JSX, useCallback } from "react";
 import ErrorConnectorContent from "./error";
 import { ConnectorContentProps } from "./common";
 import { ConnectorModel } from "..";
-import produce from "immer";
+import { produce } from "immer";
 
 const SelectConnectorContent = ({
     connector,
@@ -27,12 +27,12 @@ const SelectConnectorContent = ({
     }
 
     return (
-        <div className="one-form-control one-w-full">
-            <label className="one-label" style={{ paddingBottom: 0, paddingTop: 0 }}>
-                <span className="one-label-text one-text-xs">{connector.name}</span>
+        <div className="one:form-control one:w-full">
+            <label className="one:label" style={{ paddingBottom: 0, paddingTop: 0 }}>
+                <span className="one:label-text one:text-xs">{connector.name}</span>
             </label>
             <select
-                className="one-preflight  one-input one-input-bordered one-input-primary one-input-xs one-w-full focus:one-outline-0 one-text-base-content"
+                className="one:preflight  one:input one:input-bordered one:input-primary one:input-xs one:w-full focus:one:outline-0 one:text-base-content"
                 onChange={(event) => setSelectedValue(event.target.selectedIndex)}
                 value={connector.data.values[connector.data.selected_index]}
             >

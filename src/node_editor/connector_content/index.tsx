@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-props-no-spreading */
-import React from "react";
+import { JSX } from "react";
 
 import { ConnectorContentProps } from "./common";
 import DefaultConnectorContent from "./default";

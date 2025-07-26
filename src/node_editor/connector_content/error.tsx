@@ -1,3 +1,5 @@
+import { JSX } from "react";
+
 export type ErrorConnectorContentProps = {
     message: string;
 };

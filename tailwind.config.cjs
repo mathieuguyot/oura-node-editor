@@ -4,7 +4,6 @@ module.exports = {
     theme: {
         extend: {}
     },
-    prefix: "one-",
     plugins: [require("daisyui")],
     corePlugins: {
         preflight: false
@@ -15,6 +14,6 @@ module.exports = {
             "light",
             "dark",
             "nord",
-          ]
+        ]
     }
 };

@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import { JSX, MouseEvent, useContext } from "react";
 import CSS from "csstype";
 
 import { ThemeContext } from "../theme";
@@ -10,7 +10,7 @@ type PinProps = {
     pinPxRadius: number;
     pinColor?: string;
 
-    onMouseDown: (event: React.MouseEvent) => void;
+    onMouseDown: (event: MouseEvent) => void;
 };
 
 const Pin = (props: PinProps): JSX.Element => {
@@ -29,7 +29,7 @@ const Pin = (props: PinProps): JSX.Element => {
             height: `${pinPxRadius * 2}px`,
             left: `${leftPinPosition}px`,
             top: `calc(50% - ${pinPxRadius}px)`,
-            border: "1.5px solid oklch(var(--p))",
+            border: "1.5px solid var(--color-primary)",
             boxSizing: "border-box"
         },
         ...theme?.node?.basePin,

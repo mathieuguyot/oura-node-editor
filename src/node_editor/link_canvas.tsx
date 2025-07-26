@@ -1,4 +1,4 @@
-import { CSSProperties } from "react";
+import { JSX, CSSProperties } from "react";
 import _ from "lodash";
 
 import { LinkCollection, LinkPositionModel, SelectionItem } from "./model";

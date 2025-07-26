@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import produce from "immer";
+import { produce } from "immer";
 
 import ErrorConnectorContent from "./error";
 import { ConnectorContentProps } from "./common";
@@ -30,9 +30,9 @@ export default function RangeConnectorContent({
         return <ErrorConnectorContent message={message} />;
     }
     return (
-        <div className="one-form-control one-w-full">
-            <label className="one-label" style={{ paddingBottom: 0, paddingTop: 0 }}>
-                <span className="one-label-text one-text-xs">{connector.name}</span>
+        <div className="one:form-control one:w-full">
+            <label className="one:label" style={{ paddingBottom: 0, paddingTop: 0 }}>
+                <span className="one:label-text one:text-xs">{connector.name}</span>
             </label>
             <input
                 type="range"
@@ -40,7 +40,7 @@ export default function RangeConnectorContent({
                 max={connector.data.max}
                 value={connector.data.value}
                 onChange={onChange}
-                className="one-preflight  one-range one-range-primary one-range-xs one-text-base-content"
+                className="one:preflight  one:range one:range-primary one:range-xs one:text-base-content"
                 style={{ border: "0px" }}
             />
         </div>

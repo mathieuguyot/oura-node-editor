@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import produce from "immer";
+import { produce } from "immer";
 
 import ErrorConnectorContent from "./error";
 import { ConnectorContentProps } from "./common";
@@ -20,7 +20,7 @@ export default function CheckBox(props: ConnectorContentProps) {
 
     return (
         <div
-            className="one-label one-preflight node-background"
+            className="one:label one:preflight node-background"
             style={{ justifyContent: "flex-start" }}
         >
             <input
@@ -29,9 +29,9 @@ export default function CheckBox(props: ConnectorContentProps) {
                 onChange={onChange}
                 type="checkbox"
                 disabled={props.connector.data.disabled}
-                className="one-preflight  one-checkbox one-checkbox-xs one-checkbox-primary focus:one-outline-0 one-text-base-content"
+                className="one:preflight  one:checkbox one:checkbox-xs one:checkbox-primary focus:one:outline-0 one:text-base-content"
             />
-            <div className="one-preflight" style={{ paddingLeft: 3 }}>
+            <div className="one:preflight" style={{ paddingLeft: 3 }}>
                 {props.connector.name}
             </div>
         </div>

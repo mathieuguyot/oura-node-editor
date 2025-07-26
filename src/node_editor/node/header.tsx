@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import { JSX, useContext } from "react";
 import { NodeModel } from "..";
 import { ThemeContext } from "../theme";
 
@@ -11,7 +11,7 @@ export default function Header({ node }: HeaderProps): JSX.Element {
 
     return (
         <div
-            className="node-background node-header one-bg-primary one-font-bold one-text-primary-content"
+            className="node-background node-header one:bg-primary one:font-bold one:text-primary-content"
             style={{ ...theme.node?.header, ...node.theme?.header }}
         >
             {node.name}

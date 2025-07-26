@@ -1,5 +1,5 @@
-import React from "react";
-import produce from "immer";
+import { JSX, useState, useCallback } from "react";
+import { produce } from "immer";
 
 import { MenuItemProps } from "./common";
 import MenuItemList from "./menu_item_list";
@@ -12,9 +12,9 @@ export type BasicContextualMenuProps = {
 export const BasicContextualMenu = (props: BasicContextualMenuProps): JSX.Element => {
     const { menuTitle, items } = props;
 
-    const [searchText, setSearchText] = React.useState<string>("");
+    const [searchText, setSearchText] = useState<string>("");
 
-    const onChange = React.useCallback((event: React.FormEvent<HTMLInputElement>) => {
+    const onChange = useCallback((event: React.FormEvent<HTMLInputElement>) => {
         setSearchText(event.currentTarget.value);
     }, []);
 
@@ -33,9 +33,9 @@ export const BasicContextualMenu = (props: BasicContextualMenuProps): JSX.Elemen
 
     return (
         <div style={{ display: "flex", flexDirection: "column", overflow: "auto" }}>
-            <div className="one-font-bold">{menuTitle}</div>
+            <div className="one:font-bold">{menuTitle}</div>
             <input
-                className="one-input one-w-full one-max-w-xs one-input-xs focus:one-outline-0"
+                className="one:input one:w-full one:max-w-xs one:input-xs focus:one:outline-0"
                 style={{ borderRadius: 0 }}
                 value={searchText}
                 onChange={onChange}

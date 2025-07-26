@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import produce from "immer";
+import { produce } from "immer";
 
 import ErrorConnectorContent from "./error";
 import { ConnectorContentProps } from "./common";
@@ -29,12 +29,12 @@ export default function NumberConnectorContent({
         return <ErrorConnectorContent message={message} />;
     }
     return (
-        <div className="one-form-control one-w-full">   
+        <div className="one:form-control one:w-full">   
             <label className="label" style={{ paddingBottom: 0, paddingTop: 0 }}>
-                <span className="one-label-text one-text-xs">{connector.name}</span>
+                <span className="one:label-text one:text-xs">{connector.name}</span>
             </label>
             <input
-                className="one-preflight  one-input one-input-bordered one-input-primary one-input-xs focus:one-outline-0 one-text-base-content"
+                className="one:preflight  one:input one:input-bordered one:input-primary one:input-xs focus:one:outline-0 one:text-base-content"
                 disabled={"disabled" in connector.data ? connector.data.disabled : false}
                 value={connector.data.value}
                 onChange={onChange}

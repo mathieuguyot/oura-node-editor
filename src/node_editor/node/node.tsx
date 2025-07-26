@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-no-bind */
-import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { JSX, useCallback, useContext, useEffect, useRef, useState } from "react";
 import CSS from "csstype";
 
 import {
@@ -18,7 +18,7 @@ import Footer from "./footer";
 import { ThemeContext } from "../theme";
 import { ConnectorContentProps } from "../connector_content";
 import { PinLayout } from "..";
-import produce from "immer";
+import { produce } from "immer";
 import { useDrag } from "../utils/drag";
 
 export type NodeProps = {
@@ -162,7 +162,7 @@ export function Node(props: NodeProps) {
         >
             <Header node={node} />
             {/* Node body (list of connectors) */}
-            <div className="one-bg-base-300" style={{ ...theme?.node?.body, ...node?.theme?.body }}>
+            <div className="one:bg-base-300" style={{ ...theme?.node?.body, ...node?.theme?.body }}>
                 {Object.keys(node.connectors).map((key) => (
                     <Connector
                         nodeId={nodeId}

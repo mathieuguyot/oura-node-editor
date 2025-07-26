@@ -46,7 +46,7 @@ export default function BezierLink({
             id={`link_${linkId}`}
             d={path}
             style={style}
-            className={isLinkSelected ? "one-stroke-primary-focus" : "one-stroke-primary"}
+            className={isLinkSelected ? "one:stroke-primary-focus" : "one:stroke-primary"}
             onClick={(e) => {
                 if (onSelectLink && linkId) onSelectLink(linkId, e.shiftKey);
             }}
